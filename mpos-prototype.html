@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Razorpay mPOS Prototype</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .device {
+    width: 360px;
+    height: 640px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 24px;
+    box-shadow: 0 0 80px rgba(0,0,0,0.6);
+    background: #fff;
+  }
+  .screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 360px;
+    height: 640px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+    z-index: 1;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 10;
+  }
+  .screen img {
+    width: 360px;
+    height: 640px;
+    display: block;
+    object-fit: cover;
+    object-position: top;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+  /* For taller screens like more_methods, emi_plan, emi_card_expanded */
+  .screen.scrollable {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .screen.scrollable img {
+    height: auto;
+    min-height: 640px;
+  }
+  /* Hotspot: transparent clickable area */
+  .hotspot {
+    position: absolute;
+    cursor: pointer;
+    /* background: rgba(255,0,0,0.15); /* uncomment to debug */
+    z-index: 20;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hotspot:active {
+    background: rgba(0,0,0,0.05);
+    border-radius: 12px;
+  }
+  /* Overlay for bottom sheets */
+  .overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 360px; height: 640px;
+    background: rgba(0,0,0,0.45);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .overlay img {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 360px;
+    height: 640px;
+    object-fit: cover;
+    object-position: bottom;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    transform: translateY(40%);
+    transition: transform 0.35s ease;
+  }
+  .overlay.show img {
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="device" id="device">
+
+  <!-- ========== SPLASH SEQUENCE ========== -->
+  <div class="screen active" id="splash1">
+    <img src="mpos-assets/splash1.png" alt="Splash 1">
+  </div>
+  <div class="screen" id="splash2">
+    <img src="mpos-assets/splash2.png" alt="Splash 2">
+  </div>
+  <div class="screen" id="splash3">
+    <img src="mpos-assets/splash3.png" alt="Splash 3">
+  </div>
+  <div class="screen" id="splash4">
+    <img src="mpos-assets/splash4.png" alt="Splash 4">
+  </div>
+  <div class="screen" id="splash5">
+    <img src="mpos-assets/splash5.png" alt="Splash 5">
+  </div>
+
+  <!-- ========== MENU ========== -->
+  <div class="screen" id="menu">
+    <img src="mpos-assets/menu.png" alt="Menu">
+    <!-- Collect Payment -->
+    <div class="hotspot" style="top:100px;left:20px;width:320px;height:120px;" onclick="go('home_empty')"></div>
+    <!-- Transactions -->
+    <div class="hotspot" style="top:238px;left:20px;width:155px;height:100px;"></div>
+    <!-- Catalog -->
+    <div class="hotspot" style="top:238px;left:185px;width:155px;height:100px;"></div>
+    <!-- Settings -->
+    <div class="hotspot" style="top:355px;left:20px;width:155px;height:100px;"></div>
+    <!-- Help Center -->
+    <div class="hotspot" style="top:355px;left:185px;width:155px;height:100px;"></div>
+    <!-- Refund -->
+    <div class="hotspot" style="top:470px;left:20px;width:320px;height:50px;"></div>
+    <!-- Request Paper Roll -->
+    <div class="hotspot" style="top:530px;left:20px;width:320px;height:50px;"></div>
+  </div>
+
+  <!-- ========== AMOUNT ENTRY (EMPTY) ========== -->
+  <div class="screen" id="home_empty">
+    <img src="mpos-assets/home_empty.png" alt="Amount Entry Empty">
+    <!-- Hamburger / back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('menu')"></div>
+    <!-- Numpad keys -->
+    <div class="hotspot" style="top:218px;left:12px;width:108px;height:68px;" onclick="pressKey('1')"></div>
+    <div class="hotspot" style="top:218px;left:126px;width:108px;height:68px;" onclick="pressKey('2')"></div>
+    <div class="hotspot" style="top:218px;left:240px;width:108px;height:68px;" onclick="pressKey('3')"></div>
+    <div class="hotspot" style="top:296px;left:12px;width:108px;height:68px;" onclick="pressKey('4')"></div>
+    <div class="hotspot" style="top:296px;left:126px;width:108px;height:68px;" onclick="pressKey('5')"></div>
+    <div class="hotspot" style="top:296px;left:240px;width:108px;height:68px;" onclick="pressKey('6')"></div>
+    <div class="hotspot" style="top:374px;left:12px;width:108px;height:68px;" onclick="pressKey('7')"></div>
+    <div class="hotspot" style="top:374px;left:126px;width:108px;height:68px;" onclick="pressKey('8')"></div>
+    <div class="hotspot" style="top:374px;left:240px;width:108px;height:68px;" onclick="pressKey('9')"></div>
+    <div class="hotspot" style="top:452px;left:12px;width:108px;height:68px;" onclick="pressKey('.')"></div>
+    <div class="hotspot" style="top:452px;left:126px;width:108px;height:68px;" onclick="pressKey('0')"></div>
+    <div class="hotspot" style="top:452px;left:240px;width:108px;height:68px;" onclick="pressKey('back')"></div>
+    <!-- UPI button -->
+    <div class="hotspot" style="top:578px;left:20px;width:130px;height:46px;" onclick="startUPI()"></div>
+    <!-- Card button -->
+    <div class="hotspot" style="top:578px;left:156px;width:130px;height:46px;" onclick="startCard()"></div>
+    <!-- More button -->
+    <div class="hotspot" style="top:578px;left:296px;width:48px;height:46px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== AMOUNT ENTRY (FILLED) ========== -->
+  <div class="screen" id="home_filled">
+    <img src="mpos-assets/home_filled.png" alt="Amount Entry Filled">
+    <!-- Hamburger / back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('menu')"></div>
+    <!-- UPI button -->
+    <div class="hotspot" style="top:578px;left:20px;width:130px;height:46px;" onclick="startUPI()"></div>
+    <!-- Card button -->
+    <div class="hotspot" style="top:578px;left:156px;width:130px;height:46px;" onclick="startCard()"></div>
+    <!-- More button -->
+    <div class="hotspot" style="top:578px;left:296px;width:48px;height:46px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== MORE PAYMENT METHODS ========== -->
+  <div class="screen scrollable" id="more_methods">
+    <img src="mpos-assets/more_methods.png" alt="More Methods" style="height:735px;">
+    <!-- Close (X) -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- UPI -->
+    <div class="hotspot" style="top:110px;left:20px;width:155px;height:120px;" onclick="startUPI()"></div>
+    <!-- Card -->
+    <div class="hotspot" style="top:110px;left:185px;width:155px;height:120px;" onclick="startCard()"></div>
+    <!-- Paylink -->
+    <div class="hotspot" style="top:248px;left:20px;width:155px;height:120px;" onclick="go('paylink_enter_num')"></div>
+    <!-- EMI -->
+    <div class="hotspot" style="top:248px;left:185px;width:155px;height:120px;" onclick="go('emi_plan')"></div>
+    <!-- Wallet -->
+    <div class="hotspot" style="top:390px;left:20px;width:320px;height:55px;"></div>
+    <!-- Cash -->
+    <div class="hotspot" style="top:452px;left:20px;width:320px;height:55px;"></div>
+    <!-- Cheque -->
+    <div class="hotspot" style="top:520px;left:20px;width:320px;height:55px;"></div>
+  </div>
+
+  <!-- ========== QR LOADING ========== -->
+  <div class="screen" id="qr_loading">
+    <img src="mpos-assets/qr_loading.png" alt="QR Loading">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Tap QR area to advance -->
+    <div class="hotspot" style="top:140px;left:40px;width:280px;height:340px;" onclick="go('qr_ready')"></div>
+    <!-- Pay via Card -->
+    <div class="hotspot" style="top:588px;left:20px;width:160px;height:44px;" onclick="startCard()"></div>
+    <!-- More Methods -->
+    <div class="hotspot" style="top:588px;left:190px;width:150px;height:44px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== QR READY ========== -->
+  <div class="screen" id="qr_ready">
+    <img src="mpos-assets/qr_ready.png" alt="QR Ready">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Tap QR to simulate payment -->
+    <div class="hotspot" style="top:140px;left:40px;width:280px;height:340px;" onclick="triggerSuccess('upi')"></div>
+    <!-- Pay via Card -->
+    <div class="hotspot" style="top:588px;left:20px;width:160px;height:44px;" onclick="startCard()"></div>
+    <!-- More Methods -->
+    <div class="hotspot" style="top:588px;left:190px;width:150px;height:44px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== UPI SUCCESS SPLASH ========== -->
+  <div class="screen" id="upi_success_splash">
+    <img src="mpos-assets/upi_success_splash.png" alt="UPI Success Splash">
+  </div>
+
+  <!-- ========== UPI SUCCESS DETAILS ========== -->
+  <div class="screen" id="upi_success_details">
+    <img src="mpos-assets/upi_success_details.png" alt="UPI Success Details">
+    <!-- View Details -->
+    <div class="hotspot" style="top:410px;left:100px;width:160px;height:30px;" onclick="showOverlay('payment_details_overlay')"></div>
+    <!-- Print Receipt -->
+    <div class="hotspot" style="top:470px;left:20px;width:160px;height:46px;"></div>
+    <!-- Send E-Receipt -->
+    <div class="hotspot" style="top:470px;left:185px;width:160px;height:46px;"></div>
+    <!-- Back to Home -->
+    <div class="hotspot" style="top:535px;left:20px;width:320px;height:52px;" onclick="goHome()"></div>
+  </div>
+
+  <!-- ========== PAYMENT DETAILS OVERLAY ========== -->
+  <div class="overlay" id="payment_details_overlay" onclick="hideOverlay('payment_details_overlay')">
+    <img src="mpos-assets/payment_details.png" alt="Payment Details">
+  </div>
+
+  <!-- ========== CARD TAP ========== -->
+  <div class="screen" id="card_tap">
+    <img src="mpos-assets/card_tap.png" alt="Card Tap">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Tap POS device -->
+    <div class="hotspot" style="top:160px;left:50px;width:260px;height:300px;" onclick="go('card_pin_empty')"></div>
+    <!-- UPI -->
+    <div class="hotspot" style="top:540px;left:30px;width:90px;height:70px;" onclick="startUPI()"></div>
+    <!-- Link -->
+    <div class="hotspot" style="top:540px;left:135px;width:90px;height:70px;" onclick="go('paylink_enter_num')"></div>
+    <!-- Others -->
+    <div class="hotspot" style="top:540px;left:235px;width:90px;height:70px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== CARD PIN EMPTY ========== -->
+  <div class="screen" id="card_pin_empty">
+    <img src="mpos-assets/card_pin_empty.png" alt="Enter PIN Empty">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('card_tap')"></div>
+    <!-- Numpad - tap any key to go to filled -->
+    <div class="hotspot" style="top:230px;left:12px;width:336px;height:310px;" onclick="go('card_pin_filled')"></div>
+    <!-- Confirm Payment (disabled state) -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;"></div>
+  </div>
+
+  <!-- ========== CARD PIN FILLED ========== -->
+  <div class="screen" id="card_pin_filled">
+    <img src="mpos-assets/card_pin_filled.png" alt="Enter PIN Filled">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('card_pin_empty')"></div>
+    <!-- Confirm Payment -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="confirmCardPin()"></div>
+  </div>
+
+  <!-- ========== CARD PIN LOADING ========== -->
+  <div class="screen" id="card_pin_loading">
+    <img src="mpos-assets/card_pin_loading.png" alt="Enter PIN Loading">
+  </div>
+
+  <!-- ========== CARD PROCESSING ========== -->
+  <div class="screen" id="card_processing">
+    <img src="mpos-assets/card_processing.png" alt="Card Processing">
+  </div>
+
+  <!-- ========== CARD SUCCESS SPLASH ========== -->
+  <div class="screen" id="card_success_splash">
+    <img src="mpos-assets/card_success_splash.png" alt="Card Success Splash">
+  </div>
+
+  <!-- ========== CARD SUCCESS DETAILS ========== -->
+  <div class="screen" id="card_success_details">
+    <img src="mpos-assets/card_success_details.png" alt="Card Success Details">
+    <!-- View Details -->
+    <div class="hotspot" style="top:410px;left:100px;width:160px;height:30px;" onclick="showOverlay('payment_details_overlay')"></div>
+    <!-- Print Receipt -->
+    <div class="hotspot" style="top:470px;left:20px;width:160px;height:46px;"></div>
+    <!-- Send E-Receipt -->
+    <div class="hotspot" style="top:470px;left:185px;width:160px;height:46px;"></div>
+    <!-- Back to Home -->
+    <div class="hotspot" style="top:535px;left:20px;width:320px;height:52px;" onclick="goHome()"></div>
+  </div>
+
+  <!-- ========== PAYLINK ENTER NUMBER ========== -->
+  <div class="screen" id="paylink_enter_num">
+    <img src="mpos-assets/paylink_enter_num.png" alt="Paylink Enter Number">
+    <!-- Close -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Send Link -->
+    <div class="hotspot" style="top:298px;left:24px;width:312px;height:52px;" onclick="startPaylink()"></div>
+  </div>
+
+  <!-- ========== PAYLINK - SENDING ========== -->
+  <div class="screen" id="paylink2">
+    <img src="mpos-assets/paylink2.png" alt="Paylink Sending">
+    <!-- Close -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Accept other payments -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== PAYLINK - LINK SENT ========== -->
+  <div class="screen" id="paylink3">
+    <img src="mpos-assets/paylink3.png" alt="Paylink Link Sent">
+    <!-- Close -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Accept other payments -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== PAYLINK - WAITING FOR PAYMENT ========== -->
+  <div class="screen" id="paylink4">
+    <img src="mpos-assets/paylink4.png" alt="Paylink Waiting">
+    <!-- Close -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Tap to simulate payment -->
+    <div class="hotspot" style="top:150px;left:40px;width:280px;height:360px;" onclick="paylinkPaymentDone()"></div>
+    <!-- Accept other payments -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== PAYLINK - PAYMENT CONFIRMED ========== -->
+  <div class="screen" id="paylink5">
+    <img src="mpos-assets/paylink5.png" alt="Paylink Payment Confirmed">
+    <!-- Close -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- Accept other payments -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="go('more_methods')"></div>
+  </div>
+
+  <!-- ========== PAYLINK SUCCESS SPLASH ========== -->
+  <div class="screen" id="paylink_success_splash">
+    <img src="mpos-assets/paylink_success_splash.png" alt="Paylink Success Splash">
+  </div>
+
+  <!-- ========== PAYLINK SUCCESS ========== -->
+  <div class="screen" id="paylink_success">
+    <img src="mpos-assets/paylink_success.png" alt="Paylink Success">
+    <!-- View Details -->
+    <div class="hotspot" style="top:410px;left:100px;width:160px;height:30px;" onclick="showOverlay('payment_details_overlay')"></div>
+    <!-- Print Receipt -->
+    <div class="hotspot" style="top:470px;left:20px;width:160px;height:46px;"></div>
+    <!-- Send E-Receipt -->
+    <div class="hotspot" style="top:470px;left:185px;width:160px;height:46px;"></div>
+    <!-- Back to Home -->
+    <div class="hotspot" style="top:535px;left:20px;width:320px;height:52px;" onclick="goHome()"></div>
+  </div>
+
+  <!-- ========== EMI PLAN SELECTION ========== -->
+  <div class="screen scrollable" id="emi_plan">
+    <img src="mpos-assets/emi_plan.png" alt="EMI Plan" style="height:663px;">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="goBack()"></div>
+    <!-- HDFC Bank -->
+    <div class="hotspot" style="top:190px;left:20px;width:320px;height:90px;" onclick="go('emi_tenure_selected')"></div>
+    <!-- ICICI Bank -->
+    <div class="hotspot" style="top:300px;left:20px;width:320px;height:80px;" onclick="go('emi_tenure_selected')"></div>
+    <!-- Kotak -->
+    <div class="hotspot" style="top:400px;left:20px;width:320px;height:70px;" onclick="go('emi_tenure_selected')"></div>
+    <!-- SBI -->
+    <div class="hotspot" style="top:490px;left:20px;width:320px;height:70px;" onclick="go('emi_tenure_selected')"></div>
+  </div>
+
+  <!-- ========== EMI TENURE SELECTED ========== -->
+  <div class="screen" id="emi_tenure_selected">
+    <img src="mpos-assets/emi_tenure_selected.png" alt="EMI Tenure Selected">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('emi_plan')"></div>
+    <!-- View Breakup -->
+    <div class="hotspot" style="top:600px;left:20px;width:120px;height:30px;" onclick="showOverlay('emi_breakup_overlay')"></div>
+    <!-- Proceed -->
+    <div class="hotspot" style="top:586px;left:180px;width:160px;height:46px;" onclick="go('emi_card_page')"></div>
+  </div>
+
+  <!-- ========== EMI BREAKUP OVERLAY ========== -->
+  <div class="overlay" id="emi_breakup_overlay" onclick="hideOverlay('emi_breakup_overlay')">
+    <img src="mpos-assets/emi_breakup.png" alt="EMI Breakup">
+  </div>
+
+  <!-- ========== EMI CARD PAGE ========== -->
+  <div class="screen" id="emi_card_page">
+    <img src="mpos-assets/emi_card_page.png" alt="EMI Card Page">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('emi_tenure_selected')"></div>
+    <!-- Tap POS device -->
+    <div class="hotspot" style="top:160px;left:50px;width:260px;height:300px;" onclick="go('emi_pin_empty')"></div>
+  </div>
+
+  <!-- ========== EMI PIN EMPTY ========== -->
+  <div class="screen" id="emi_pin_empty">
+    <img src="mpos-assets/emi_pin_empty.png" alt="EMI Enter PIN">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('emi_card_page')"></div>
+    <!-- Numpad -->
+    <div class="hotspot" style="top:230px;left:12px;width:336px;height:310px;" onclick="go('emi_pin_filled')"></div>
+  </div>
+
+  <!-- ========== EMI PIN FILLED ========== -->
+  <div class="screen" id="emi_pin_filled">
+    <img src="mpos-assets/emi_pin_filled.png" alt="EMI PIN Filled">
+    <!-- Back -->
+    <div class="hotspot" style="top:38px;left:10px;width:50px;height:50px;" onclick="go('emi_pin_empty')"></div>
+    <!-- Confirm Payment -->
+    <div class="hotspot" style="top:575px;left:24px;width:312px;height:52px;" onclick="confirmEmiPin()"></div>
+  </div>
+
+  <!-- ========== EMI PIN LOADER ========== -->
+  <div class="screen" id="emi_pin_loader">
+    <img src="mpos-assets/emi_pin_loader.png" alt="EMI PIN Loading">
+  </div>
+
+  <!-- ========== EMI CARD LOADER ========== -->
+  <div class="screen" id="emi_card_loader">
+    <img src="mpos-assets/emi_card_loader.png" alt="EMI Card Loading">
+  </div>
+
+  <!-- ========== EMI SUCCESS SPLASH ========== -->
+  <div class="screen" id="emi_success_splash">
+    <img src="mpos-assets/emi_success_splash.png" alt="EMI Success Splash">
+  </div>
+
+  <!-- ========== EMI SUCCESS ========== -->
+  <div class="screen" id="emi_success">
+    <img src="mpos-assets/emi_success.png" alt="EMI Success">
+    <!-- View Details -->
+    <div class="hotspot" style="top:410px;left:100px;width:160px;height:30px;" onclick="showOverlay('payment_details_overlay')"></div>
+    <!-- Print Receipt -->
+    <div class="hotspot" style="top:470px;left:20px;width:160px;height:46px;"></div>
+    <!-- Send E-Receipt -->
+    <div class="hotspot" style="top:470px;left:185px;width:160px;height:46px;"></div>
+    <!-- Back to Home -->
+    <div class="hotspot" style="top:535px;left:20px;width:320px;height:52px;" onclick="goHome()"></div>
+  </div>
+
+</div>
+
+<script>
+// ====== Navigation State ======
+let history = [];
+let currentScreen = 'splash1';
+let timeouts = [];
+
+function clearAllTimeouts() {
+  timeouts.forEach(t => clearTimeout(t));
+  timeouts = [];
+}
+
+// ====== Core Navigation ======
+function go(screenId) {
+  if (currentScreen === screenId) return;
+  history.push(currentScreen);
+  showScreen(screenId);
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+    currentScreen = screenId;
+  }
+}
+
+function goBack() {
+  clearAllTimeouts();
+  if (history.length > 0) {
+    const prev = history.pop();
+    showScreen(prev);
+  } else {
+    showScreen('menu');
+  }
+}
+
+function goHome() {
+  clearAllTimeouts();
+  history = [];
+  showScreen('menu');
+  currentScreen = 'menu';
+}
+
+// ====== Splash Sequence ======
+function playSplash() {
+  timeouts.push(setTimeout(() => showScreen('splash2'), 400));
+  timeouts.push(setTimeout(() => showScreen('splash3'), 800));
+  timeouts.push(setTimeout(() => showScreen('splash4'), 1400));
+  timeouts.push(setTimeout(() => showScreen('splash5'), 2000));
+  timeouts.push(setTimeout(() => {
+    history = [];
+    showScreen('menu');
+    currentScreen = 'menu';
+  }, 3500));
+}
+playSplash();
+
+// ====== Amount Entry (simple: tap any key to switch to filled) ======
+let amountEntered = false;
+function pressKey(key) {
+  if (key === 'back') {
+    amountEntered = false;
+    // stay on empty
+  } else {
+    amountEntered = true;
+    history.push('home_empty');
+    showScreen('home_filled');
+  }
+}
+
+// ====== UPI Flow ======
+function startUPI() {
+  history.push(currentScreen);
+  showScreen('qr_loading');
+  // Auto advance to qr_ready after 2s
+  timeouts.push(setTimeout(() => {
+    if (currentScreen === 'qr_loading') {
+      showScreen('qr_ready');
+    }
+  }, 2000));
+}
+
+// ====== Card Flow ======
+function startCard() {
+  history.push(currentScreen);
+  showScreen('card_tap');
+}
+
+function confirmCardPin() {
+  showScreen('card_pin_loading');
+  timeouts.push(setTimeout(() => showScreen('card_processing'), 1500));
+  timeouts.push(setTimeout(() => triggerSuccess('card'), 4000));
+}
+
+// ====== Payment Success ======
+function triggerSuccess(flow) {
+  clearAllTimeouts();
+  let splashId, detailsId;
+  if (flow === 'upi') {
+    splashId = 'upi_success_splash';
+    detailsId = 'upi_success_details';
+  } else if (flow === 'card') {
+    splashId = 'card_success_splash';
+    detailsId = 'card_success_details';
+  } else if (flow === 'paylink') {
+    splashId = 'paylink_success_splash';
+    detailsId = 'paylink_success';
+  } else if (flow === 'emi') {
+    splashId = 'emi_success_splash';
+    detailsId = 'emi_success';
+  }
+  history = ['menu'];
+  showScreen(splashId);
+  timeouts.push(setTimeout(() => {
+    showScreen(detailsId);
+  }, 2500));
+}
+
+// ====== Paylink Flow ======
+function startPaylink() {
+  showScreen('paylink2');
+  timeouts.push(setTimeout(() => {
+    if (currentScreen === 'paylink2') showScreen('paylink3');
+  }, 1800));
+  timeouts.push(setTimeout(() => {
+    if (currentScreen === 'paylink3') showScreen('paylink4');
+  }, 3500));
+}
+
+function paylinkPaymentDone() {
+  showScreen('paylink5');
+  timeouts.push(setTimeout(() => triggerSuccess('paylink'), 2000));
+}
+
+// ====== EMI Flow ======
+function confirmEmiPin() {
+  showScreen('emi_pin_loader');
+  timeouts.push(setTimeout(() => showScreen('emi_card_loader'), 1500));
+  timeouts.push(setTimeout(() => triggerSuccess('emi'), 4000));
+}
+
+// ====== Overlays ======
+function showOverlay(id) {
+  document.getElementById(id).classList.add('show');
+}
+
+function hideOverlay(id) {
+  document.getElementById(id).classList.remove('show');
+}
+</script>
+</body>
+</html>
