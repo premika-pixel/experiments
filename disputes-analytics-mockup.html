@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Disputes analytics — concept</title>
+<!--
+  Disputes analytics — concept mockup, styled to match the Razorpay Analytics language
+  (Optimizer Dashboard + Pixel "Store health" / "Conversion funnel"). Chart-first, minimal text.
+  Colors = real @razorpay/blade@12.101.3 global tokens. Dependency-free inline SVG. Dummy data.
+  Full rationale lives in disputes-analytics-research.md (kept separate, deliberately).
+-->
+<style>
+  :root{
+    --azure-50:hsl(217 100% 98%); --azure-100:hsl(218 100% 92%); --azure-200:hsl(218 100% 83%);
+    --azure-300:hsl(217 100% 73%); --azure-400:hsl(218 100% 63%); --azure-500:hsl(218 89% 51%); --azure-600:hsl(218 87% 43%);
+    --emerald-500:hsl(153 100% 30%); --emerald-600:hsl(150 100% 28%);
+    --crimson-500:hsl(5 73% 53%); --crimson-600:hsl(4 85% 44%);
+    --cider-600:hsl(25 100% 44%); --orchid-500:hsl(270 67% 60%);
+    --gray-25:hsl(210 24% 98%); --gray-50:hsl(210 20% 97%); --gray-100:hsl(210 16% 94%);
+    --gray-150:hsl(210 16% 91%); --gray-200:hsl(210 16% 88%); --gray-300:hsl(210 14% 80%);
+    --ink:hsl(211 25% 16%); --ink-2:hsl(210 14% 30%); --sub:hsl(210 12% 46%); --faint:hsl(210 12% 62%);
+    --surface:#fff; --bg:hsl(210 20% 98%); --line:var(--gray-200);
+    --r-sm:4px; --r-md:6px; --r-lg:8px; --r-max:9999px;
+    --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+    -webkit-font-smoothing:antialiased;font-size:13px;line-height:1.4;}
+
+  /* ---- dashboard chrome ---- */
+  .topbar{height:56px;background:hsl(220 15% 7%);display:flex;align-items:center;gap:28px;padding:0 20px;color:#fff;}
+  .topbar .logo{display:flex;align-items:center;gap:7px;font-weight:800;font-size:15px;letter-spacing:-.02em;}
+  .topbar .logo .logo-mark{width:20px;height:20px;}
+  .topbar .navi{font-size:13px;color:hsl(210 14% 78%);display:flex;align-items:center;gap:4px;}
+  .topbar .navi > span{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:var(--r-md);cursor:pointer;white-space:nowrap;}
+  .topbar .navi > span:hover{color:#fff;}
+  .topbar .navi .nav-ic{width:15px;height:15px;color:currentColor;flex:0 0 auto;}
+  .topbar .navi .on{color:hsl(218 100% 73%);font-weight:600;background:hsl(218 89% 51% / .14);}
+  .topbar .navi .ext{font-size:10px;color:hsl(210 14% 55%);margin-left:-2px;}
+  .topbar .navi .cx{font-size:10px;color:hsl(210 14% 55%);}
+  .topbar .search{margin-left:auto;background:hsl(220 12% 14%);color:hsl(210 14% 60%);border-radius:var(--r-md);
+    font-size:12.5px;padding:8px 12px;width:340px;display:inline-flex;align-items:center;gap:8px;}
+  .topbar .search .srch-ic{width:14px;height:14px;color:hsl(210 14% 55%);flex:0 0 auto;}
+  .topbar .actions{display:flex;align-items:center;gap:14px;}
+  .topbar .actions .act{width:18px;height:18px;color:hsl(210 14% 75%);cursor:pointer;}
+  .topbar .actions .act:hover{color:#fff;}
+  .topbar .actions .avatar{width:28px;height:28px;border-radius:var(--r-max);background:hsl(210 12% 52%);color:#fff;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;letter-spacing:.02em;}
+  .shell{display:flex;min-height:calc(100vh - 56px);}
+  .rail{width:240px;flex:0 0 auto;background:hsl(210 20% 97%);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:calc(100vh - 56px);}
+  .rail .rail-scroll{flex:1;overflow-y:auto;padding:14px 10px 10px;}
+  .rail .grp{font-size:10.5px;color:var(--sub);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:18px 10px 6px;}
+  .rail a{display:flex;align-items:center;gap:11px;font-size:13px;color:var(--ink-2);text-decoration:none;
+    padding:8px 10px;border-radius:var(--r-md);margin-bottom:1px;}
+  .rail a:hover{background:hsl(210 16% 93%);}
+  .rail a.on{background:hsl(210 16% 89%);color:var(--ink);font-weight:700;}
+  .rail .ric{width:16px;height:16px;color:var(--ink-2);flex:0 0 auto;}
+  .rail a.on .ric{color:var(--ink);}
+  .rail a.more{color:var(--sub);font-weight:600;gap:6px;padding-left:10px;}
+  .rail a.more .cx{font-size:10px;color:var(--faint);margin-left:-2px;}
+  .rail-footer{margin-top:auto;border-top:1px solid var(--line);padding:10px 12px 14px;background:hsl(210 20% 97%);}
+  .rail-footer .row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 4px;color:var(--ink-2);font-size:13px;font-weight:600;text-decoration:none;}
+  .rail-footer .row .left{display:inline-flex;align-items:center;gap:11px;}
+  .rail-footer .row .ric{width:16px;height:16px;color:var(--ink-2);}
+  .rail-footer .settings{font-weight:600;}
+  .rail-footer .settings .ric{width:18px;height:18px;}
+  .rail-footer .switch{position:relative;width:28px;height:16px;border-radius:var(--r-max);background:var(--gray-200);flex:0 0 auto;cursor:pointer;}
+  .rail-footer .switch .knob{position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:var(--r-max);background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+  .main{flex:1;min-width:0;padding:22px 26px 70px;max-width:1120px;}
+
+  /* ---- header ---- */
+  .pg-head{display:flex;flex-direction:column;gap:14px;}
+  .pg-head .pg-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .pg-head h1{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0;color:var(--ink);}
+  .pg-head .upd{font-size:12.5px;color:var(--faint);display:inline-flex;align-items:center;gap:5px;}
+  .pg-head .upd .upd-ic{width:13px;height:13px;color:var(--faint);}
+  .pg-head .doc{margin-left:auto;font-size:12.5px;color:var(--azure-600);font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:3px;}
+  .pg-head .doc:hover{text-decoration:underline;}
+  .pg-head .date-pick{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);
+    padding:8px 10px 8px 12px;font-size:13px;color:var(--ink);font-weight:500;display:inline-flex;align-items:center;gap:9px;white-space:nowrap;cursor:pointer;
+    box-shadow:0 1px 0 rgba(15,23,42,.02);min-width:188px;}
+  .pg-head .date-pick:hover{border-color:var(--gray-300);}
+  .pg-head .date-pick .dp-ic{width:15px;height:15px;color:var(--sub);flex:0 0 auto;}
+  .pg-head .date-pick .v{font-weight:600;color:var(--ink);flex:1;}
+  .pg-head .date-pick .cx{width:14px;height:14px;color:var(--sub);flex:0 0 auto;}
+
+  /* density tabs (underline) */
+  .tabs{display:flex;gap:20px;border-bottom:1px solid var(--line);margin:16px 0 20px;}
+  .tabs button{border:0;background:0;font-family:var(--font);font-size:13px;color:var(--sub);font-weight:600;
+    padding:0 0 10px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tabs button:hover{color:var(--ink);}
+  .tabs button.on{color:var(--ink);border-bottom-color:var(--ink);}
+
+  /* filter row */
+  .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:16px 0 18px;}
+  .fil{border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);padding:7px 11px;font-size:12.5px;
+    color:var(--ink-2);font-weight:500;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}
+  .fil .k{color:var(--sub);} .fil .v{font-weight:600;color:var(--ink);} .fil .cx{color:var(--faint);font-size:10px;}
+  .fil.reset{border:0;background:0;color:var(--azure-600);font-weight:600;cursor:pointer;}
+
+  /* generic card */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);}
+  .card-h{display:flex;align-items:center;gap:8px;padding:14px 16px 0;}
+  .card-h .t{font-size:13px;font-weight:600;border-bottom:1px dotted var(--gray-300);padding-bottom:1px;}
+  .card-h .dl{margin-left:auto;color:var(--faint);font-size:14px;cursor:pointer;}
+  .lab-dot{font-size:12px;color:var(--ink-2);font-weight:600;border-bottom:1px dotted var(--gray-300);padding-bottom:1px;}
+
+  /* delta */
+  .delta{font-size:11.5px;font-weight:600;white-space:nowrap;}
+  .delta.up{color:var(--emerald-600);} .delta.down{color:var(--crimson-600);} .delta.flat{color:var(--faint);}
+  .subtext{font-size:11.5px;color:var(--faint);margin-top:3px;}
+
+  /* key metrics grouped card */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);overflow:hidden;}
+  .kpi{padding:15px 16px;border-right:1px solid var(--line);}
+  .kpi:last-child{border-right:0;}
+  .kpi .top{display:flex;align-items:center;gap:8px;}
+  .kpi .val{font-size:23px;font-weight:700;letter-spacing:-.02em;margin-top:9px;line-height:1;}
+  .kpi .val .cur{font-size:14px;color:var(--sub);font-weight:600;margin-right:1px;}
+
+  .sec-title{font-size:13px;font-weight:700;color:var(--ink);margin:26px 0 12px;}
+  .sec-title .cmp{font-weight:500;color:var(--faint);}
+
+  /* layout helpers */
+  .row{display:grid;gap:14px;}
+  .row.two{grid-template-columns:1.35fr 1fr;}
+
+  /* line chart card */
+  .chart-card .body{padding:14px 16px 16px;}
+  .chart-top{display:flex;align-items:flex-start;gap:12px;}
+  .chart-top .big{font-size:22px;font-weight:700;letter-spacing:-.02em;}
+  .seg{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;}
+  .seg button{border:0;background:var(--surface);font-family:var(--font);font-size:11.5px;font-weight:600;color:var(--sub);
+    padding:5px 11px;cursor:pointer;border-right:1px solid var(--line);}
+  .seg button:last-child{border-right:0;}
+  .seg button.on{background:var(--azure-50);color:var(--azure-600);}
+  .legend{display:flex;gap:18px;justify-content:center;font-size:11.5px;color:var(--sub);margin-top:8px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .lg-cur{width:18px;height:3px;border-radius:2px;background:var(--azure-500);}
+  .lg-cmp{width:18px;height:0;border-top:2px dashed var(--azure-300);}
+
+  /* horizontal reason bars */
+  .hb-row{display:grid;grid-template-columns:128px 1fr 44px 56px;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--gray-100);}
+  .hb-row:last-child{border-bottom:0;}
+  .hb-name{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .hb-track{background:var(--gray-100);border-radius:var(--r-max);height:8px;overflow:hidden;}
+  .hb-fill{height:100%;border-radius:var(--r-max);}
+  .hb-c{font-size:12px;color:var(--sub);text-align:right;font-variant-numeric:tabular-nums;}
+  .hb-w{font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;}
+  .hb-w.good{color:var(--emerald-600);} .hb-w.mid{color:var(--cider-600);} .hb-w.bad{color:var(--crimson-600);}
+
+  /* breakdown list */
+  .bd-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--gray-100);}
+  .bd-row:last-child{border-bottom:0;}
+  .bd-name{font-size:12.5px;display:flex;align-items:center;gap:8px;}
+  .bd-sw{width:9px;height:9px;border-radius:2px;}
+  .bd-val{font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;min-width:64px;}
+
+  /* funnel */
+  .fn-row{display:grid;grid-template-columns:130px 1fr 96px;align-items:center;gap:14px;margin-bottom:14px;}
+  .fn-name{font-size:12.5px;font-weight:600;text-align:right;color:var(--ink-2);border-bottom:1px dotted var(--gray-300);padding-bottom:1px;justify-self:end;}
+  .fn-bars{display:flex;flex-direction:column;gap:4px;}
+  .fn-bar{height:18px;border-radius:var(--r-sm);display:flex;align-items:center;padding-left:9px;font-size:11.5px;font-weight:600;color:#fff;min-width:30px;}
+  .fn-bar.cur{background:var(--azure-500);}
+  .fn-bar.cmp{background:var(--azure-200);color:var(--ink-2);}
+  .fn-right{text-align:right;}
+  .fn-pct{font-size:14px;font-weight:700;}
+  .fn-d{font-size:11px;font-weight:600;margin-left:6px;}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;}
+  thead th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);font-weight:700;text-align:left;
+    padding:0 10px 9px;border-bottom:1px solid var(--line);}
+  thead th.r,tbody td.r{text-align:right;}
+  tbody td{font-size:12.5px;padding:11px 10px;border-bottom:1px solid var(--gray-100);}
+  tbody tr:last-child td{border-bottom:0;}
+  .pill-ph{font-size:11px;font-weight:600;color:var(--ink-2);background:var(--gray-100);border-radius:var(--r-sm);padding:2px 7px;}
+  .export{margin-left:auto;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-md);
+    font-size:12px;font-weight:600;color:var(--ink-2);padding:6px 12px;display:inline-flex;gap:6px;align-items:center;cursor:pointer;}
+
+  /* empty / sparse */
+  .note-thin{font-size:12px;color:var(--faint);margin:10px 2px 0;}
+
+  /* Blade-style EmptyState (modeled on Blade DSL EmptyState — size: large) */
+  .bld-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:24px;width:440px;max-width:100%;
+    margin:48px auto 60px;}
+  .bld-empty .be-asset{width:120px;height:120px;flex:0 0 auto;}
+  .bld-empty .be-asset img{width:100%;height:100%;object-fit:contain;display:block;}
+  .bld-empty .be-text{display:flex;flex-direction:column;gap:4px;align-items:center;width:100%;}
+  .bld-empty .be-title{font-size:20px;font-weight:600;line-height:26px;color:#292f32;letter-spacing:0;margin:0;}
+  .bld-empty .be-desc{font-size:14px;font-weight:400;line-height:20px;color:#616d75;letter-spacing:-.013em;margin:0;}
+  .bld-empty .be-actions{display:flex;flex-direction:column;gap:20px;align-items:center;width:100%;}
+  .bld-empty .be-btn-row{display:flex;gap:12px;}
+  .bld-btn{font-family:var(--font);font-size:14px;font-weight:600;line-height:20px;border-radius:var(--r-md);
+    padding:8px 16px;cursor:pointer;border:1px solid transparent;display:inline-flex;align-items:center;gap:6px;
+    transition:background .12s ease,border-color .12s ease;}
+  .bld-btn.primary{background:hsl(218 89% 51%);color:#fff;box-shadow:inset 0 -1.5px 0 hsl(218 87% 43%);}
+  .bld-btn.primary:hover{background:hsl(218 87% 43%);}
+  .bld-btn.secondary{background:#fff;color:var(--ink);border-color:var(--gray-300);}
+  .bld-btn.secondary:hover{background:var(--gray-50);border-color:var(--gray-300);}
+  .bld-empty .be-footer{display:inline-flex;align-items:center;gap:4px;justify-content:center;
+    font-size:12px;font-weight:400;line-height:17px;color:#616d75;letter-spacing:-.013em;}
+  .bld-empty .be-footer .be-info{width:12px;height:12px;color:#616d75;flex:0 0 auto;}
+  .bld-empty .be-footer .be-link{color:hsl(218 89% 51%);font-weight:600;text-decoration:none;}
+  .bld-empty .be-footer .be-link:hover{text-decoration:underline;}
+
+  .hidden{display:none !important;}
+  .mt{margin-top:14px;}
+
+  /* ---- Blade-aligned chart treatment ---- */
+  .bld-axis-tx{font-size:10.5px;fill:var(--sub);font-family:var(--font);}
+  .bld-grid-line{stroke:var(--gray-100);stroke-width:1;}
+  .bld-grid-vline{stroke:var(--gray-100);stroke-width:1;stroke-dasharray:2 4;opacity:.7;}
+  .trend-pt .hover-dot{opacity:0;transition:opacity .12s ease;}
+  .trend-pt:hover .hover-dot{opacity:1;}
+  .trend-pt:hover .hover-vline{opacity:1;}
+  .trend-pt .hover-vline{opacity:0;stroke:var(--gray-300);stroke-width:1;stroke-dasharray:3 3;transition:opacity .12s ease;}
+  .trend-pt{cursor:pointer;}
+  /* Blade-style bar rounding (subtle, only on right end of horizontal bars) */
+  .hb-fill{border-radius:2px 6px 6px 2px;}
+  .hb-track{background:var(--gray-50);}
+  .hb-row{transition:background .12s ease;border-radius:var(--r-md);padding-left:8px;padding-right:8px;margin-left:-8px;margin-right:-8px;}
+  .hb-row:hover{background:var(--gray-50);}
+  .bd-row{transition:background .12s ease;border-radius:var(--r-md);padding-left:8px;padding-right:8px;margin-left:-8px;margin-right:-8px;}
+  .bd-row:hover{background:var(--gray-50);}
+  .fn-bar{transition:filter .12s ease;}
+  .fn-row:hover .fn-bar{filter:brightness(1.05);}
+</style>
+</head>
+<body>
+
+  <!-- icon sprite (dependency-free, dashboard chrome only) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="ic-logo" viewBox="0 0 24 24"><path fill="#3395FF" d="M22.436 0L9.949 12.806 8.448 24l4.143-4.243L20.94 0z"/><path fill="#fff" d="M14.529 8.063L4.499 24h6.082l7.054-13.124z"/></symbol>
+      <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></symbol>
+      <symbol id="ic-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></symbol>
+      <symbol id="ic-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+      <symbol id="ic-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></symbol>
+      <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+      <symbol id="ic-activity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+      <symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l1.5 2H4.5z"/><path d="M10 20a2 2 0 004 0"/></symbol>
+      <symbol id="ic-tx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h14m0 0l-4-4m4 4l-4 4M21 15H7m0 0l4 4m-4-4l4-4"/></symbol>
+      <symbol id="ic-check2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13l4 4 9-10"/><path d="M9 17l4 4 9-10"/></symbol>
+      <symbol id="ic-circle-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></symbol>
+      <symbol id="ic-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h6"/></symbol>
+      <symbol id="ic-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 005.66 0l3-3a4 4 0 10-5.66-5.66L11 7"/><path d="M14 10a4 4 0 00-5.66 0l-3 3a4 4 0 105.66 5.66L13 17"/></symbol>
+      <symbol id="ic-page" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6M9 15h6"/></symbol>
+      <symbol id="ic-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 006 0V12a9 9 0 10-3.5 7.1"/></symbol>
+      <symbol id="ic-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5"/><path d="M3 19c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="8" r="2.5"/><path d="M15 14c4 0 6 2 6 5"/></symbol>
+      <symbol id="ic-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="8" cy="8" r="1.5"/></symbol>
+      <symbol id="ic-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7L3 12l5 5M16 7l5 5-5 5M14 4l-4 16"/></symbol>
+      <symbol id="ic-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+      <symbol id="ic-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6L4 19a2 2 0 001.7 3h12.6a2 2 0 001.7-3l-6-10V3"/></symbol>
+      <symbol id="ic-flower" viewBox="0 0 24 24"><circle cx="12" cy="6" r="3" fill="#E53935"/><circle cx="6.5" cy="14" r="3" fill="#E53935"/><circle cx="17.5" cy="14" r="3" fill="#E53935"/><circle cx="12" cy="19" r="3" fill="#E53935"/><circle cx="12" cy="13" r="2.6" fill="#FBC02D"/><circle cx="12" cy="13" r="1.2" fill="#1B1F23"/></symbol>
+      <symbol id="ic-arrow-ur" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+      <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+      <symbol id="ic-chevron-d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8.01V8M12 11v6"/></symbol>
+      <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- top product bar -->
+  <div class="topbar">
+    <span class="logo"><svg class="logo-mark"><use href="#ic-logo"/></svg>Razorpay</span>
+    <span class="navi">
+      <span><svg class="nav-ic"><use href="#ic-home"/></svg>Razorpay Home</span>
+      <span class="on"><svg class="nav-ic"><use href="#ic-folder"/></svg>Payments</span>
+      <span><svg class="nav-ic"><use href="#ic-x"/></svg>Banking+<span class="ext">↗</span></span>
+      <span><svg class="nav-ic"><use href="#ic-person"/></svg>Payroll<span class="ext">↗</span></span>
+      <span>More<span class="cx">▾</span></span>
+    </span>
+    <span class="search"><svg class="srch-ic"><use href="#ic-search"/></svg>Search payment products, settings, and more</span>
+    <span class="actions">
+      <svg class="act"><use href="#ic-activity"/></svg>
+      <svg class="act"><use href="#ic-bell"/></svg>
+      <span class="avatar">AB</span>
+    </span>
+  </div>
+
+  <div class="shell">
+    <!-- left rail -->
+    <aside class="rail">
+      <div class="rail-scroll">
+        <a href="#"><svg class="ric"><use href="#ic-home"/></svg>Home</a>
+        <a href="#" class="on"><svg class="ric"><use href="#ic-tx"/></svg>Transactions</a>
+        <a href="#"><svg class="ric"><use href="#ic-check2"/></svg>Settlements</a>
+        <a href="#"><svg class="ric"><use href="#ic-circle-check"/></svg>Reconciliation</a>
+        <a href="#"><svg class="ric"><use href="#ic-doc"/></svg>Reports</a>
+
+        <div class="grp">Payment Products</div>
+        <a href="#"><svg class="ric"><use href="#ic-link"/></svg>Payment Links</a>
+        <a href="#"><svg class="ric"><use href="#ic-page"/></svg>Payment Pages</a>
+        <a href="#"><svg class="ric"><use href="#ic-at"/></svg>Razorpay.me Link</a>
+        <a href="#" class="more">+11 More<span class="cx">▾</span></a>
+
+        <div class="grp">Banking Products</div>
+        <a href="#"><svg class="ric"><use href="#ic-x"/></svg>X Banking</a>
+
+        <div class="grp">Customer Products</div>
+        <a href="#"><svg class="ric"><use href="#ic-people"/></svg>Customers</a>
+        <a href="#"><svg class="ric"><use href="#ic-tag"/></svg>Offers</a>
+        <a href="#"><svg class="ric"><use href="#ic-code"/></svg>API Keys and Plugins</a>
+        <a href="#"><svg class="ric"><use href="#ic-code"/></svg>Developers</a>
+        <a href="#"><svg class="ric"><use href="#ic-grid"/></svg>Apps &amp; Deals</a>
+      </div>
+
+      <div class="rail-footer">
+        <div class="row">
+          <span class="left"><svg class="ric"><use href="#ic-flask"/></svg>Test Mode</span>
+          <span class="switch" aria-pressed="false"><span class="knob"></span></span>
+        </div>
+        <a href="#" class="row settings">
+          <span class="left"><svg class="ric"><use href="#ic-flower"/></svg>Account &amp; Settings</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- content -->
+    <main class="main">
+      <div class="pg-head">
+        <div class="pg-row">
+          <h1>Disputes analytics</h1>
+          <span class="upd">Last updated 12 mins ago<svg class="upd-ic"><use href="#ic-refresh"/></svg></span>
+          <a class="doc" href="#">Documentation ↗</a>
+        </div>
+        <div class="pg-row">
+          <span class="date-pick" role="button" aria-label="Date range"><svg class="dp-ic"><use href="#ic-calendar"/></svg><span class="v">Last 30 days</span><svg class="cx"><use href="#ic-chevron-d"/></svg></span>
+        </div>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button data-state="zero">No disputes</button>
+        <button data-state="few">First dispute</button>
+        <button data-state="established" class="on">Established</button>
+        <button data-state="high">High volume</button>
+      </div>
+
+      <!-- EMPTY STATE (Blade EmptyState — size: large) -->
+      <div class="hidden" id="emptyState">
+        <div class="bld-empty">
+          <div class="be-asset" aria-hidden="true">
+            <svg viewBox="0 0 120 120" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="be-screen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="hsl(217 100% 98%)"/>
+                  <stop offset="1" stop-color="hsl(218 100% 92%)"/>
+                </linearGradient>
+                <linearGradient id="be-bezel" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="hsl(218 100% 92%)"/>
+                  <stop offset="1" stop-color="hsl(218 100% 83%)"/>
+                </linearGradient>
+              </defs>
+              <!-- monitor base -->
+              <ellipse cx="60" cy="106" rx="22" ry="3" fill="hsl(218 100% 92%)" opacity=".7"/>
+              <rect x="54" y="86" width="12" height="14" rx="2" fill="hsl(218 100% 83%)"/>
+              <rect x="42" y="98" width="36" height="5" rx="2" fill="hsl(218 100% 73%)"/>
+              <!-- monitor body with subtle 3D tilt -->
+              <g transform="translate(60 50) skewX(-6) translate(-60 -50)">
+                <rect x="20" y="14" width="80" height="60" rx="6" fill="url(#be-bezel)" stroke="hsl(218 100% 73%)" stroke-width="1.2"/>
+                <rect x="25" y="19" width="70" height="50" rx="4" fill="url(#be-screen)"/>
+                <!-- subtle grid lines on screen -->
+                <line x1="25" y1="32" x2="95" y2="32" stroke="hsl(218 100% 92%)" stroke-width="1"/>
+                <line x1="25" y1="44" x2="95" y2="44" stroke="hsl(218 100% 92%)" stroke-width="1"/>
+                <line x1="25" y1="56" x2="95" y2="56" stroke="hsl(218 100% 92%)" stroke-width="1"/>
+              </g>
+              <!-- magnifying glass with X -->
+              <g transform="translate(50 38)">
+                <circle cx="20" cy="20" r="17" fill="#fff" stroke="hsl(218 89% 51%)" stroke-width="2.5"/>
+                <circle cx="20" cy="20" r="17" fill="hsl(218 100% 92%)" opacity=".4"/>
+                <path d="M14 14l12 12M26 14L14 26" stroke="hsl(218 89% 51%)" stroke-width="2.2" stroke-linecap="round"/>
+                <line x1="32" y1="32" x2="40" y2="40" stroke="hsl(218 89% 51%)" stroke-width="3.4" stroke-linecap="round"/>
+              </g>
+            </svg>
+          </div>
+          <div class="be-text">
+            <h3 class="be-title" id="emptyTitle">No disputes in this period</h3>
+            <p class="be-desc" id="emptyDesc">Try adjusting the date range to see disputes from a different period.</p>
+          </div>
+          <div class="be-actions">
+            <div class="be-btn-row">
+              <button class="bld-btn primary" type="button">Adjust date range</button>
+              <button class="bld-btn secondary" type="button">View documentation</button>
+            </div>
+            <div class="be-footer">
+              <svg class="be-info"><use href="#ic-info"/></svg>
+              <span>Need help understanding disputes?</span>
+              <a href="#" class="be-link">Learn more</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div id="analytics">
+        <!-- key metrics -->
+        <div class="kpis" id="kpis"></div>
+        <div class="note-thin hidden" id="sparseNote">Not enough data for trends and breakdowns yet — they unlock as you receive more disputes.</div>
+
+        <!-- trend -->
+        <div id="trendWrap">
+          <div class="sec-title">Disputes over time <span class="cmp">· vs previous period</span></div>
+          <div class="card chart-card">
+            <div class="body">
+              <div class="chart-top">
+                <div>
+                  <div class="lab-dot">Disputes raised</div>
+                  <div class="big mt" style="margin-top:6px" id="trendBig"></div>
+                  <div class="subtext" id="trendSub"></div>
+                </div>
+                <div class="seg"><button>Daily</button><button class="on">Weekly</button><button>Monthly</button></div>
+              </div>
+              <div id="trendChart" class="mt"></div>
+              <div class="legend"><span><i class="lg-cur"></i> This period</span><span><i class="lg-cmp"></i> Previous period</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- reasons -->
+        <div id="reasonWrap">
+          <div class="sec-title">Dispute reasons</div>
+          <div class="row two">
+            <div class="card">
+              <div class="card-h"><span class="t">Win rate by reason</span><span class="dl">⤓</span></div>
+              <div style="padding:8px 16px 14px" id="winByReason"></div>
+            </div>
+            <div class="card">
+              <div class="card-h"><span class="t">Reason breakdown</span><span class="dl">⤓</span></div>
+              <div style="padding:8px 16px 14px" id="reasonBreakdown"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- funnel -->
+        <div id="funnelWrap">
+          <div class="sec-title">Dispute stage funnel <span class="cmp">· how far disputes escalate</span></div>
+          <div class="card">
+            <div style="padding:18px 18px 8px" id="funnel"></div>
+            <div class="legend" style="padding-bottom:14px"><span><i class="lg-cur" style="background:var(--azure-500)"></i> This period</span><span><i class="lg-cur" style="background:var(--azure-200)"></i> Previous period</span></div>
+          </div>
+        </div>
+
+        <!-- top reasons table (high volume) -->
+        <div id="tableWrap" class="hidden">
+          <div class="sec-title" style="display:flex;align-items:center">Top dispute reasons<span class="export">⤓ Export</span></div>
+          <div class="card" style="padding:14px 8px 6px">
+            <table id="topTable"></table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script>
+const REASON_COLORS = {Fraudulent:'var(--crimson-600)', Service:'var(--azure-500)', 'Processing Errors':'var(--cider-600)', Authorization:'var(--orchid-500)'};
+const fmt = n => n.toLocaleString('en-IN');
+
+// Blade-aligned chart helpers (Recharts uses monotone interpolation by default)
+function smoothPath(pts){
+  if(pts.length<2) return '';
+  let d=`M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||pts[i+1];
+    const cp1x=p1[0]+(p2[0]-p0[0])/6, cp1y=p1[1]+(p2[1]-p0[1])/6;
+    const cp2x=p2[0]-(p3[0]-p1[0])/6, cp2y=p2[1]-(p3[1]-p1[1])/6;
+    d+=` C${cp1x.toFixed(1)} ${cp1y.toFixed(1)},${cp2x.toFixed(1)} ${cp2y.toFixed(1)},${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+function niceCeil(v){
+  if(v<=1) return 2;
+  const pow=Math.pow(10,Math.floor(Math.log10(v)));
+  const n=v/pow;
+  return (n<=1?1:n<=2?2:n<=5?5:10)*pow;
+}
+
+const DATA = {
+  zero:{disputes:0},
+  few:{
+    disputes:1, amount:8000, won:0, lost:0, contestRate:0,
+    trendBig:'1', trendSub:'first dispute received',
+    trend:[{c:0,p:0},{c:0,p:0},{c:0,p:0},{c:0,p:0},{c:0,p:0},{c:1,p:0}],
+    reasons:[{name:'Service',count:1,win:0,share:100,d:''}],
+    funnel:[{name:'Chargeback',c:1,p:0,pct:100,d:'',dd:'flat'},{name:'Pre-arbitration',c:0,p:0,pct:0,d:'',dd:'flat'},{name:'Arbitration',c:0,p:0,pct:0,d:'',dd:'flat'}],
+  },
+  established:{
+    disputes:24, amount:192000, winRate:82, contestRate:71,
+    d:{disputes:'-12%', amount:'+4%', win:'+6 pts', contest:'+9 pts'},
+    dDir:{disputes:'up', amount:'down', win:'up', contest:'up'},
+    sub:{disputes:'from 27 to 24', amount:'from ₹1.85L to ₹1.92L', win:'from 76% to 82%', contest:'from 62% to 71%'},
+    trendBig:'24', trendSub:'down 12% from 27',
+    trend:[{c:6,p:7},{c:5,p:6},{c:4,p:5},{c:3,p:4},{c:4,p:3},{c:2,p:2}],
+    reasons:[{name:'Service',count:12,win:90,share:50,d:'+3%'},{name:'Fraudulent',count:6,win:38,share:25,d:'+12%'},{name:'Processing Errors',count:4,win:75,share:17,d:'-4%'},{name:'Authorization',count:2,win:100,share:8,d:'-1%'}],
+    funnel:[{name:'Chargeback',c:20,p:23,pct:100,d:'-13%',dd:'up'},{name:'Pre-arbitration',c:3,p:5,pct:15,d:'-40%',dd:'up'},{name:'Arbitration',c:1,p:2,pct:5,d:'-50%',dd:'up'}],
+  },
+  high:{
+    disputes:312, amount:4860000, winRate:79, contestRate:84,
+    d:{disputes:'-8%', amount:'-3%', win:'+2 pts', contest:'+5 pts'},
+    dDir:{disputes:'up', amount:'down', win:'up', contest:'up'},
+    sub:{disputes:'from 339 to 312', amount:'from ₹50.1L to ₹48.6L', win:'from 77% to 79%', contest:'from 79% to 84%'},
+    trendBig:'312', trendSub:'down 8% from 339',
+    trend:[{c:64,p:70},{c:58,p:66},{c:61,p:60},{c:49,p:58},{c:42,p:50},{c:38,p:45}],
+    reasons:[{name:'Service',count:148,win:88,share:47,d:'+2%'},{name:'Fraudulent',count:96,win:41,share:31,d:'+9%'},{name:'Processing Errors',count:44,win:79,share:14,d:'-5%'},{name:'Authorization',count:24,win:92,share:8,d:'-2%'}],
+    funnel:[{name:'Chargeback',c:268,p:292,pct:100,d:'-8%',dd:'up'},{name:'Pre-arbitration',c:34,p:38,pct:13,d:'-11%',dd:'up'},{name:'Arbitration',c:10,p:9,pct:4,d:'+11%',dd:'down'}],
+    table:[
+      {r:'Service',ph:'Chargeback',win:88,c:148,share:'47%'},
+      {r:'Fraudulent',ph:'Chargeback',win:41,c:96,share:'31%'},
+      {r:'Processing Errors',ph:'Pre-arbitration',win:79,c:44,share:'14%'},
+      {r:'Authorization',ph:'Chargeback',win:92,c:24,share:'8%'},
+    ],
+  }
+};
+
+const wrClass = w => w>=75?'good':w>=50?'mid':'bad';
+const dCls = d => d==='up'?'up':d==='down'?'down':'flat';
+const arrow = d => d==='up'?'↑':d==='down'?'↓':'–';
+
+function renderKpis(d){
+  const cards = [
+    {lab:'Total disputes', val:fmt(d.disputes), key:'disputes'},
+    {lab:'Disputed volume', val:'<span class="cur">₹</span>'+fmt(d.amount||0), key:'amount'},
+    {lab:'Win rate', val:(d.winRate!=null?d.winRate+'%':'—'), key:'win'},
+    {lab:'Contest rate', val:(d.contestRate!=null?d.contestRate+'%':'—'), key:'contest'},
+  ];
+  document.getElementById('kpis').innerHTML = cards.map(c=>{
+    const hasD = d.d && d.d[c.key];
+    const dir = d.dDir? d.dDir[c.key]:'flat';
+    const delta = hasD?`<span class="delta ${dCls(dir)}">${arrow(dir)} ${d.d[c.key]}</span>`:'';
+    const sub = d.sub && d.sub[c.key] ? `<div class="subtext">${d.sub[c.key]}</div>` : (hasD?'':'<div class="subtext">no prior period</div>');
+    return `<div class="kpi"><div class="top"><span class="lab-dot">${c.lab}</span>${delta}</div><div class="val">${c.val}</div>${sub}</div>`;
+  }).join('');
+}
+
+function renderTrend(d){
+  document.getElementById('trendBig').textContent = d.trendBig;
+  document.getElementById('trendSub').textContent = d.trendSub;
+  const t = d.trend;
+  const W=860, H=240, padL=42, padR=20, padT=14, padB=30;
+  const rawMax = Math.max(1, ...t.flatMap(x=>[x.c,x.p]));
+  const max = niceCeil(rawMax);
+  const X = i => padL + i*((W-padL-padR)/(t.length-1));
+  const Y = v => H-padB - (v/max)*(H-padT-padB);
+  const ptsC = t.map((x,i)=>[X(i), Y(x.c)]);
+  const ptsP = t.map((x,i)=>[X(i), Y(x.p)]);
+
+  // Y-axis horizontal grid + tick labels (Blade-style: light gray solid lines, small gray labels)
+  const yTickSteps = [0, .25, .5, .75, 1];
+  const yAxis = yTickSteps.map(f=>{
+    const v = Math.round(max*f);
+    const y = Y(v);
+    return `<line x1="${padL}" x2="${W-padR}" y1="${y}" y2="${y}" class="bld-grid-line"/>
+            <text x="${padL-8}" y="${y+3.5}" text-anchor="end" class="bld-axis-tx">${v}</text>`;
+  }).join('');
+
+  // Vertical grid lines (subtle dashed, one per data point)
+  const vGrid = t.map((_,i)=>
+    `<line x1="${X(i)}" x2="${X(i)}" y1="${padT}" y2="${H-padB}" class="bld-grid-vline"/>`
+  ).join('');
+
+  // X-axis labels
+  const xLabs = ['Wk1','Wk2','Wk3','Wk4','Wk5','Wk6'];
+  const xAxis = xLabs.map((l,i)=>
+    `<text x="${X(i)}" y="${H-10}" text-anchor="middle" class="bld-axis-tx">${l}</text>`
+  ).join('');
+
+  // Hover targets: invisible large circles per data point, with vertical hover line + active dot + native tooltip
+  const hover = t.map((x,i)=>`
+    <g class="trend-pt">
+      <line x1="${X(i)}" x2="${X(i)}" y1="${padT}" y2="${H-padB}" class="hover-vline"/>
+      <circle cx="${X(i)}" cy="${Y(x.p)}" r="3.5" fill="#fff" stroke="var(--azure-300)" stroke-width="2" class="hover-dot"/>
+      <circle cx="${X(i)}" cy="${Y(x.c)}" r="4.5" fill="#fff" stroke="var(--azure-500)" stroke-width="2.5" class="hover-dot"/>
+      <circle cx="${X(i)}" cy="${(Y(x.c)+Y(x.p))/2}" r="18" fill="transparent" pointer-events="all">
+        <title>${xLabs[i]}\nThis period: ${x.c}\nPrevious period: ${x.p}</title>
+      </circle>
+    </g>
+  `).join('');
+
+  document.getElementById('trendChart').innerHTML = `
+    <svg width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:240px;display:block">
+      ${yAxis}
+      ${vGrid}
+      <path d="${smoothPath(ptsP)}" fill="none" stroke="var(--azure-300)" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${smoothPath(ptsC)}" fill="none" stroke="var(--azure-500)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${xAxis}
+      ${hover}
+    </svg>`;
+}
+
+function renderWinByReason(d){
+  document.getElementById('winByReason').innerHTML = d.reasons.map(r=>`
+    <div class="hb-row" title="${r.name} — ${r.win}% won across ${r.count} dispute${r.count===1?'':'s'}">
+      <span class="hb-name"><span class="bd-sw" style="background:${REASON_COLORS[r.name]}"></span>${r.name}</span>
+      <span class="hb-track"><span class="hb-fill" style="width:${r.win}%;background:${REASON_COLORS[r.name]}"></span></span>
+      <span class="hb-c">${r.count}</span>
+      <span class="hb-w ${wrClass(r.win)}">${r.win}%</span>
+    </div>`).join('');
+}
+
+function renderReasonBreakdown(d){
+  document.getElementById('reasonBreakdown').innerHTML = d.reasons.map(r=>{
+    let deltaHtml;
+    if(r.d){
+      const good = r.d.startsWith('-'); // fewer disputes of a reason is good
+      deltaHtml = `<span class="delta ${good?'up':'down'}" style="min-width:46px;text-align:right">${good?'↓':'↑'} ${r.d.replace('-','').replace('+','')}</span>`;
+    } else {
+      deltaHtml = `<span class="delta flat" style="min-width:46px;text-align:right">new</span>`;
+    }
+    return `<div class="bd-row">
+      <span class="bd-name"><span class="bd-sw" style="background:${REASON_COLORS[r.name]}"></span>${r.name}</span>
+      <span class="bd-val">${r.count} · ${r.share}%</span>
+      ${deltaHtml}
+    </div>`;
+  }).join('');
+}
+
+function renderFunnel(d){
+  const max=Math.max(1,d.funnel[0].c);
+  document.getElementById('funnel').innerHTML = d.funnel.map(f=>{
+    const deltaHtml = f.d ? `<span class="delta ${dCls(f.dd)} fn-d">${arrow(f.dd)} ${f.d.replace('-','').replace('+','')}</span>` : '';
+    return `
+    <div class="fn-row" title="${f.name}\nThis period: ${f.c}\nPrevious period: ${f.p}\nShare of disputes: ${f.pct}%">
+      <span class="fn-name">${f.name}</span>
+      <span class="fn-bars">
+        <span class="fn-bar cur" style="width:${Math.max(6,f.c/max*100)}%">${f.c}</span>
+        <span class="fn-bar cmp" style="width:${Math.max(6,f.p/max*100)}%">${f.p}</span>
+      </span>
+      <span class="fn-right"><span class="fn-pct">${f.pct}%</span>${deltaHtml}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(d){
+  if(!d.table) return;
+  document.getElementById('topTable').innerHTML = `
+    <thead><tr><th>Reason</th><th>Top phase</th><th class="r">Win rate</th><th class="r">Count</th><th class="r">Share</th></tr></thead>
+    <tbody>${d.table.map(t=>`<tr>
+      <td><span class="bd-name"><span class="bd-sw" style="background:${REASON_COLORS[t.r]}"></span>${t.r}</span></td>
+      <td><span class="pill-ph">${t.ph}</span></td>
+      <td class="r"><span class="hb-w ${wrClass(t.win)}">${t.win}%</span></td>
+      <td class="r">${t.c}</td><td class="r">${t.share}</td></tr>`).join('')}</tbody>`;
+}
+
+const show=(id,on)=>document.getElementById(id).classList.toggle('hidden',!on);
+
+function render(state){
+  const d=DATA[state];
+  const showCharts = state==='few'||state==='established'||state==='high';
+
+  show('emptyState', state==='zero');
+  show('analytics', state!=='zero');
+  show('kpis', state!=='zero');
+  show('sparseNote', false);
+  show('trendWrap', showCharts);
+  show('reasonWrap', showCharts);
+  show('funnelWrap', showCharts);
+  show('tableWrap', state==='high');
+
+  if(state!=='zero') renderKpis(d);
+  if(showCharts){ renderTrend(d); renderWinByReason(d); renderReasonBreakdown(d); renderFunnel(d); }
+  if(state==='high') renderTable(d);
+}
+
+document.querySelectorAll('#tabs button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#tabs button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); render(b.dataset.state);
+  });
+});
+render('established');
+</script>
+</body>
+</html>
