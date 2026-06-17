@@ -242,7 +242,7 @@
 
   .summary-strip {
     background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
-    display: grid; grid-template-columns: repeat(4, 1fr);
+    display: grid; grid-template-columns: repeat(3, 1fr);
     margin: 16px 0 28px;
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -539,13 +539,8 @@
           <div class="value">₹1 – ₹50</div>
           <div class="unit">too small to be real purchases</div>
         </div>
-        <div class="summary-cell primary">
-          <div class="label">Success rate ⓘ</div>
-          <div class="value">0%</div>
-          <div class="unit">no money moved</div>
-        </div>
         <div class="summary-cell">
-          <div class="label">Avg interval ⓘ</div>
+          <div class="label">Avg interval between transactions during attack window ⓘ</div>
           <div class="value">~2 min</div>
           <div class="unit">automated source</div>
         </div>
@@ -553,14 +548,8 @@
 
       <div class="section-title">Blocked payments</div>
 
-      <!-- Sub-tabs: attack category (parallels Failed's All / Card / UPI / Netbanking) -->
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <div class="sub-tabs">
-          <div class="sub-tab active" onclick="filterAttack(this,'all')">All</div>
-          <div class="sub-tab" onclick="filterAttack(this,'card-testing')">Card testing</div>
-          <div class="sub-tab" onclick="filterAttack(this,'velocity')">High velocity</div>
-          <div class="sub-tab" onclick="filterAttack(this,'pattern')">Suspicious patterns</div>
-        </div>
+      <!-- Search bar (no attack-type tabs — single unified list of all blocked attempts) -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
         <div class="search-table">🔍 Search · in Payment ID ⇅</div>
       </div>
 
@@ -699,13 +688,6 @@
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }
-  function filterAttack(tab, key) {
-    document.querySelectorAll('#view-drill .sub-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    document.querySelectorAll('#blocked-table tbody tr').forEach(row => {
-      row.style.display = (key === 'all' || row.dataset.attack === key) ? '' : 'none';
-    });
   }
 </script>
 
