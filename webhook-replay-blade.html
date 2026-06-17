@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webhooks · Razorpay Dashboard — Replay Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* ── Blade Spacing tokens (spacing.0–11) ── */
+      --spacing-0: 0px;   --spacing-1: 2px;   --spacing-2: 4px;
+      --spacing-3: 8px;   --spacing-4: 12px;  --spacing-5: 16px;
+      --spacing-6: 20px;  --spacing-7: 24px;  --spacing-8: 32px;
+      --spacing-9: 40px;  --spacing-10: 48px; --spacing-11: 56px;
+
+      /* ── Blade Surface ── */
+      --surface-bg-primary: #FFFFFF;
+      --surface-bg-gray-subtle: #F7F8FA;
+      --surface-bg-gray-moderate: #F1F3F6;
+      --surface-bg-gray-intense: #E6E9EF;
+      --surface-text-primary: #1B2A4E;
+      --surface-text-secondary: #4B5572;
+      --surface-text-tertiary: #768198;
+      --surface-text-placeholder: #A4ACBD;
+      --surface-border-normal: #D7DCE5;
+      --surface-border-subtle: #EBEDF2;
+
+      /* ── Blade Action — Razorpay interactive blue ── */
+      --action-primary-default: #2B6CF6;
+      --action-primary-hover: #1F59DC;
+      --action-primary-subtle: #EAF1FE;
+      --action-primary-focus-ring: rgba(43, 108, 246, 0.18);
+      --action-secondary-default: #FFFFFF;
+      --action-secondary-border: #C8CFDC;
+      --action-secondary-text: #364154;
+      --action-secondary-hover: #F1F3F6;
+
+      /* ── Blade Feedback ── */
+      --feedback-positive-default: #11A75C;
+      --feedback-positive-bg: #ECFDF3;
+      --feedback-positive-border: #A6F0C6;
+      --feedback-positive-text: #08653B;
+      --feedback-negative-default: #E5484D;
+      --feedback-negative-bg: #FEF1F1;
+      --feedback-negative-border: #F9C9C9;
+      --feedback-negative-text: #9F1F1F;
+      --feedback-notice-default: #E68619;
+      --feedback-notice-bg: #FFF6E9;
+      --feedback-notice-border: #FBDCA4;
+      --feedback-notice-text: #8A4D08;
+      --feedback-information-default: #2B6CF6;
+      --feedback-information-bg: #EAF1FE;
+      --feedback-information-border: #BBD2FB;
+      --feedback-information-text: #1B4D9B;
+
+      /* ── Blade Radius ── */
+      --radius-sm: 4px;   --radius-md: 8px;
+      --radius-lg: 12px;  --radius-round: 9999px;
+
+      /* ── Blade Elevation ── */
+      --elevation-low: 0 1px 2px rgba(27,42,78,0.06), 0 1px 3px rgba(27,42,78,0.05);
+      --elevation-mid: 0 8px 24px rgba(27,42,78,0.12), 0 2px 6px rgba(27,42,78,0.06);
+      --elevation-high: 0 16px 48px rgba(27,42,78,0.22);
+
+      /* ── Blade Typography ── */
+      --font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+      --text-xs: 11px;  --text-sm: 12px;  --text-body: 14px;
+      --text-md: 15px;  --text-lg: 18px;  --text-xl: 22px;  --text-2xl: 26px;
+      --fw-regular: 400; --fw-medium: 500; --fw-semibold: 700; --fw-bold: 900;
+
+      --color-white: #FFFFFF;
+
+      /* ── Top nav (dark) ── */
+      --topnav-bg: #02050D;
+      --topnav-text: rgba(255,255,255,0.72);
+      --topnav-text-active: #FFFFFF;
+      --topnav-border: rgba(255,255,255,0.08);
+      --topnav-search-bg: rgba(255,255,255,0.08);
+
+      --overlay-bg: rgba(16,21,33,0.45);
+      --spinner-track: rgba(255,255,255,0.35);
+
+      --sidebar-width: 244px;
+      --topnav-height: 52px;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font-family);
+      background: var(--surface-bg-gray-subtle);
+      color: var(--surface-text-primary);
+      font-size: var(--text-body);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ════════════ TOP NAV (dark) ════════════ */
+    .topnav {
+      height: var(--topnav-height);
+      background: var(--topnav-bg);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-6);
+      gap: var(--spacing-7);
+      flex-shrink: 0;
+      z-index: 30;
+    }
+    .topnav-logo { display: flex; align-items: center; gap: var(--spacing-3); flex-shrink: 0; padding-right: var(--spacing-4); }
+    .topnav-logo .rzp-mark { display: block; }
+    .topnav-logo .wordmark { color: #fff; font-weight: var(--fw-bold); font-size: var(--text-md); letter-spacing: -0.01em; }
+    .topnav-menu { display: flex; align-items: center; gap: var(--spacing-1); }
+    .topnav-item {
+      display: flex; align-items: center; gap: var(--spacing-3);
+      padding: 7px var(--spacing-4); border-radius: var(--radius-md);
+      color: var(--topnav-text); font-size: var(--text-body); font-weight: var(--fw-medium);
+      cursor: pointer; white-space: nowrap;
+      transition: background .12s, color .12s;
+    }
+    .topnav-item svg { opacity: 0.85; }
+    .topnav-item:hover { color: var(--topnav-text-active); background: rgba(255,255,255,0.06); }
+    .topnav-item.active { color: var(--topnav-text-active); font-weight: var(--fw-semibold); background: rgba(255,255,255,0.12); }
+    .topnav-item.active svg { opacity: 1; }
+    .topnav-item .ext { font-size: var(--text-xs); opacity: 0.6; }
+    .topnav-right { margin-left: auto; display: flex; align-items: center; gap: var(--spacing-5); }
+    .topnav-search {
+      display: flex; align-items: center; gap: var(--spacing-3);
+      background: var(--topnav-search-bg); border-radius: var(--radius-md);
+      padding: var(--spacing-3) var(--spacing-4); width: 320px;
+      color: rgba(255,255,255,0.55); font-size: var(--text-sm);
+    }
+    .topnav-icon-btn {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.7); cursor: pointer;
+    }
+    .topnav-icon-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .topnav-avatar {
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
+      background: linear-gradient(135deg,#7C3AED,#2B6CF6); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: var(--fw-bold); cursor: pointer;
+    }
+
+    /* ════════════ SHELL (sidebar + main) ════════════ */
+    .shell { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── Sidebar (white) ── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--surface-bg-primary);
+      border-right: 1px solid var(--surface-border-subtle);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; height: 100%; overflow-y: auto;
+      padding-bottom: var(--spacing-3);
+    }
+    .sidebar::-webkit-scrollbar { width: 6px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--surface-border-normal); border-radius: var(--radius-round); }
+    .sidebar-section-label {
+      font-size: 10px; font-weight: var(--fw-semibold);
+      color: var(--surface-text-tertiary); letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: var(--spacing-6) var(--spacing-6) var(--spacing-3);
+    }
+    .sidebar-item {
+      display: flex; align-items: center; gap: var(--spacing-4);
+      padding: var(--spacing-3) var(--spacing-6);
+      color: var(--surface-text-primary); font-size: var(--text-body);
+      font-weight: var(--fw-regular); cursor: pointer; text-decoration: none;
+      transition: background .12s, color .12s;
+    }
+    .sidebar-item:hover { background: var(--surface-bg-gray-subtle); }
+    .sidebar-item.active {
+      background: var(--surface-bg-gray-moderate);
+      color: var(--surface-text-primary); font-weight: var(--fw-semibold);
+    }
+    .sidebar-item .icon { width: 18px; height: 18px; flex-shrink: 0; color: var(--surface-text-tertiary); }
+    .sidebar-item.active .icon { color: var(--surface-text-primary); }
+    .sidebar-divider { height: 1px; background: var(--surface-border-subtle); margin: var(--spacing-3) var(--spacing-6); }
+    .sidebar-footer { margin-top: auto; }
+
+    /* ── Main column ── */
+    .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .subbar {
+      height: 46px; background: var(--surface-bg-primary);
+      border-bottom: 1px solid var(--surface-border-subtle);
+      display: flex; align-items: center; padding: 0 var(--spacing-8);
+      gap: var(--spacing-3); flex-shrink: 0;
+      font-size: var(--text-body); color: var(--surface-text-tertiary);
+    }
+    .subbar .crumb { cursor: pointer; }
+    .subbar .crumb:hover { color: var(--surface-text-secondary); }
+    .subbar .current { color: var(--surface-text-primary); font-weight: var(--fw-semibold); }
+    .subbar .sep { color: var(--surface-text-placeholder); }
+    .subbar-right { margin-left: auto; }
+
+    .page-content {
+      flex: 1; overflow-y: auto;
+      padding: var(--spacing-8) var(--spacing-8) 96px;
+      max-width: 1180px; width: 100%;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: var(--spacing-7); gap: var(--spacing-5);
+    }
+    .page-title { font-size: var(--text-xl); font-weight: var(--fw-semibold); letter-spacing: -0.01em; }
+    .page-subtitle { font-size: var(--text-body); color: var(--surface-text-secondary); margin-top: var(--spacing-2); max-width: 620px; line-height: 1.5; }
+    .page-actions { display: flex; align-items: center; gap: var(--spacing-4); flex-shrink: 0; }
+
+    /* ════════════ Blade primitives ════════════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-3);
+      padding: 0 var(--spacing-6); height: 36px; border-radius: var(--radius-md);
+      font-size: var(--text-body); font-weight: var(--fw-semibold); cursor: pointer;
+      border: 1px solid transparent; transition: background .12s, box-shadow .12s, border-color .12s;
+      white-space: nowrap; font-family: inherit;
+    }
+    .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
+    .btn-primary { background: var(--action-primary-default); color: #fff; }
+    .btn-primary:hover { background: var(--action-primary-hover); }
+    .btn-primary:disabled { background: var(--surface-bg-gray-intense); color: var(--surface-text-tertiary); cursor: not-allowed; }
+    .btn-secondary { background: var(--action-secondary-default); color: var(--action-secondary-text); border-color: var(--action-secondary-border); }
+    .btn-secondary:hover { background: var(--action-secondary-hover); }
+    .btn-sm { height: 30px; padding: 0 var(--spacing-5); font-size: var(--text-sm); }
+    .btn-lg { height: 42px; padding: 0 var(--spacing-7); }
+    .btn-link {
+      background: none; border: none; color: var(--action-primary-default);
+      font-size: var(--text-body); font-weight: var(--fw-semibold); cursor: pointer;
+      padding: 0; display: inline-flex; align-items: center; gap: var(--spacing-2); font-family: inherit;
+    }
+    .btn-link:hover { color: var(--action-primary-hover); text-decoration: underline; }
+
+    /* Link (Blade Link) */
+    .link {
+      color: var(--action-primary-default); font-weight: var(--fw-semibold);
+      text-decoration: none; cursor: pointer; display: inline-flex; align-items: center; gap: var(--spacing-2);
+    }
+    .link:hover { text-decoration: underline; }
+
+    /* ── Tabs ── */
+    .tabs-list {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-5);
+      border-bottom: 1px solid var(--surface-border-subtle); margin-bottom: var(--spacing-7);
+    }
+    .tabs-list-left { display: flex; align-items: center; gap: var(--spacing-2); }
+    .tabs-actions { display: flex; align-items: center; gap: var(--spacing-5); flex-shrink: 0; padding-bottom: var(--spacing-3); }
+    .tab-item {
+      display: inline-flex; align-items: center; gap: var(--spacing-3);
+      padding: var(--spacing-4) var(--spacing-5); font-size: var(--text-body);
+      font-weight: var(--fw-semibold); color: var(--surface-text-secondary);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color .12s, border-color .12s; white-space: nowrap;
+    }
+    .tab-item:hover { color: var(--action-primary-default); }
+    .tab-item.active { color: var(--action-primary-default); border-bottom-color: var(--action-primary-default); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface-bg-primary); border: 1px solid var(--surface-border-subtle);
+      border-radius: var(--radius-lg); box-shadow: var(--elevation-low);
+      margin-bottom: var(--spacing-6); overflow: hidden;
+    }
+    .card-header {
+      padding: var(--spacing-6) var(--spacing-7); border-bottom: 1px solid var(--surface-border-subtle);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-4);
+    }
+    .card-head-left { display: flex; flex-direction: column; gap: var(--spacing-1); }
+    .card-title { font-size: var(--text-md); font-weight: var(--fw-semibold); }
+    .card-subtitle { font-size: var(--text-sm); color: var(--surface-text-secondary); }
+    .card-body { padding: var(--spacing-7); }
+
+    /* ── Alert ── */
+    .alert {
+      display: flex; gap: var(--spacing-4); padding: var(--spacing-5) var(--spacing-6);
+      border-radius: var(--radius-md); border: 1px solid; margin-bottom: var(--spacing-6);
+    }
+    .alert.notice { background: var(--feedback-notice-bg); border-color: var(--feedback-notice-border); }
+    .alert.information { background: var(--feedback-information-bg); border-color: var(--feedback-information-border); }
+    .alert.positive { background: var(--feedback-positive-bg); border-color: var(--feedback-positive-border); }
+    .alert.negative { background: #FCEDEA; border-color: #F7D7D0; }
+    .alert-accent { width: 28px; height: 28px; border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .alert.notice .alert-accent { background: var(--feedback-notice-default); color: #fff; }
+    .alert.information .alert-accent { background: var(--feedback-information-default); color: #fff; }
+    .alert.positive .alert-accent { background: var(--feedback-positive-default); color: #fff; }
+    /* Blade Alert icon — plain triangle, no circular badge */
+    .alert-icon { flex-shrink: 0; margin-top: 1px; color: #D4451E; }
+    .alert-body { flex: 1; min-width: 0; }
+    .alert.notice .alert-title { color: var(--feedback-notice-text); }
+    .alert.information .alert-title { color: var(--feedback-information-text); }
+    .alert.positive .alert-title { color: var(--feedback-positive-text); }
+    .alert.negative .alert-title { color: var(--surface-text-primary); }
+    .alert.negative .alert-desc { color: var(--surface-text-secondary); }
+    .alert-title { font-weight: var(--fw-semibold); font-size: var(--text-md); margin-bottom: var(--spacing-2); }
+    .alert-desc { font-size: var(--text-sm); line-height: 1.55; color: var(--surface-text-secondary); }
+    .alert-desc strong { color: var(--surface-text-primary); }
+    .alert-actions { margin-top: var(--spacing-4); display: flex; gap: var(--spacing-5); align-items: center; }
+    .alert-close { background: none; border: none; cursor: pointer; color: var(--surface-text-tertiary); font-size: 18px; line-height: 1; align-self: flex-start; }
+    .alert-close:hover { color: var(--surface-text-primary); }
+
+    /* ── Badge / Tag ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: var(--spacing-2);
+      padding: 3px var(--spacing-3); border-radius: var(--radius-round);
+      font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; line-height: 1.4;
+    }
+    .badge-positive { background: var(--feedback-positive-bg); color: var(--feedback-positive-text); }
+    .badge-negative { background: var(--feedback-negative-bg); color: var(--feedback-negative-text); }
+    .badge-notice  { background: var(--feedback-notice-bg);  color: var(--feedback-notice-text); }
+    .badge-information { background: var(--action-primary-subtle); color: var(--action-primary-default); }
+    .badge-new { background: var(--action-primary-default); color: #fff; padding: 2px var(--spacing-3); letter-spacing: 0.04em; }
+    .badge-dot { width: 6px; height: 6px; border-radius: var(--radius-round); background: currentColor; }
+
+    /* ── Webhook URL rows ── */
+    .url-row {
+      display: flex; align-items: center; gap: var(--spacing-5);
+      padding: var(--spacing-6) var(--spacing-7); border-bottom: 1px solid var(--surface-border-subtle);
+    }
+    .url-row:last-child { border-bottom: none; }
+    .url-main { flex: 1; min-width: 0; }
+    .url-text { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--surface-text-primary); word-break: break-all; }
+    .url-meta { font-size: var(--text-xs); color: var(--surface-text-tertiary); margin-top: var(--spacing-2); }
+    .url-actions { display: flex; align-items: center; gap: var(--spacing-3); flex-shrink: 0; }
+    .unack-chip {
+      display: inline-flex; align-items: center; gap: var(--spacing-3);
+      background: var(--feedback-notice-bg); border: 1px solid var(--feedback-notice-border);
+      color: var(--feedback-notice-text); border-radius: var(--radius-round);
+      padding: var(--spacing-2) var(--spacing-4); font-size: var(--text-xs); font-weight: var(--fw-semibold);
+      margin-top: var(--spacing-4);
+    }
+
+    /* ── Webhook URLs table (matches live dashboard) ── */
+    .wh-table { width: 100%; border-collapse: collapse; font-size: var(--text-body); }
+    .wh-table th {
+      text-align: left; padding: var(--spacing-5) var(--spacing-7);
+      color: var(--surface-text-tertiary); font-weight: var(--fw-medium);
+      font-size: var(--text-body); border-bottom: 1px solid var(--surface-border-subtle);
+      white-space: nowrap;
+    }
+    .wh-table td {
+      padding: var(--spacing-6) var(--spacing-7); vertical-align: middle;
+      color: var(--surface-text-primary);
+    }
+    .wh-table tbody tr:hover { background: var(--surface-bg-gray-subtle); }
+    .wh-url {
+      font-family: var(--font-mono); font-size: var(--text-body);
+      color: var(--action-primary-default); text-decoration: none;
+      cursor: pointer; word-break: break-all;
+    }
+    .wh-url:hover { text-decoration: underline; }
+    .badge-enabled {
+      display: inline-flex; align-items: center;
+      background: #5BC0DE; color: #fff; border-radius: var(--radius-round);
+      padding: 4px var(--spacing-5); font-size: var(--text-sm); font-weight: var(--fw-semibold);
+    }
+    .wh-events { color: var(--surface-text-primary); white-space: nowrap; }
+    .wh-updated { color: var(--surface-text-primary); white-space: nowrap; }
+    .wh-showing { text-align: center; color: var(--surface-text-primary); font-size: var(--text-body); margin-bottom: var(--spacing-6); }
+
+    /* ── QuickFilter pills (Logs) ── */
+    .qf-row { display: flex; gap: var(--spacing-3); padding: var(--spacing-5) var(--spacing-6); border-bottom: 1px solid var(--surface-border-subtle); flex-wrap: wrap; }
+    .qf-pill {
+      border: none; background: transparent; cursor: pointer; font-family: inherit;
+      padding: var(--spacing-2) var(--spacing-5); border-radius: var(--radius-round);
+      font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--surface-text-secondary);
+      transition: background .12s, color .12s;
+    }
+    .qf-pill:hover { background: var(--surface-bg-gray-subtle); }
+    .qf-pill.active { background: var(--surface-bg-gray-moderate); color: var(--surface-text-primary); }
+    .log-retrigger { background: none; border: none; cursor: pointer; padding: 0; color: var(--action-primary-default); font-family: inherit; font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+    .log-retrigger:hover { text-decoration: underline; }
+
+    /* ── Toggle ── */
+    .toggle { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--surface-bg-gray-intense); border-radius: var(--radius-round); transition: background .2s; }
+    .toggle-slider:before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: var(--radius-round); transition: transform .2s; box-shadow: var(--elevation-low); }
+    .toggle input:checked + .toggle-slider { background: var(--feedback-positive-default); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+
+    /* ── Form ── */
+    .form-row { display: flex; gap: var(--spacing-5); margin-bottom: var(--spacing-5); flex-wrap: wrap; }
+    .form-group { display: flex; flex-direction: column; gap: var(--spacing-3); flex: 1; min-width: 200px; }
+    .form-label { font-size: var(--text-sm); font-weight: var(--fw-semibold); color: var(--surface-text-secondary); }
+    .form-label .req { color: var(--feedback-negative-default); margin-left: var(--spacing-1); }
+    .input {
+      width: 100%; height: 40px; padding: 0 var(--spacing-5);
+      border: 1px solid var(--surface-border-normal); border-radius: var(--radius-md);
+      font-size: var(--text-body); color: var(--surface-text-primary);
+      background: var(--surface-bg-primary); outline: none; font-family: inherit;
+      transition: border-color .12s, box-shadow .12s;
+    }
+    .input:focus { border-color: var(--action-primary-default); box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
+    .input::placeholder { color: var(--surface-text-placeholder); }
+    .input-hint { font-size: var(--text-xs); color: var(--surface-text-tertiary); line-height: 1.5; }
+
+    /* Segmented control (recovery method) */
+    .segmented { display: inline-flex; background: var(--surface-bg-gray-moderate); border-radius: var(--radius-md); padding: var(--spacing-1); gap: var(--spacing-1); }
+    .segmented button {
+      border: none; background: transparent; cursor: pointer; font-family: inherit;
+      padding: var(--spacing-3) var(--spacing-6); border-radius: 6px;
+      font-size: var(--text-body); font-weight: var(--fw-semibold); color: var(--surface-text-secondary);
+      transition: background .12s, color .12s; display: inline-flex; align-items: center; gap: var(--spacing-3);
+    }
+    .segmented button.active { background: var(--surface-bg-primary); color: var(--action-primary-default); box-shadow: var(--elevation-low); }
+
+    /* Radio group */
+    .radio-group { display: flex; gap: var(--spacing-8); margin-top: var(--spacing-4); }
+    .radio { display: inline-flex; align-items: center; gap: var(--spacing-3); cursor: pointer; }
+    .radio-circle {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--surface-border-normal); position: relative;
+      transition: border-color .12s;
+    }
+    .radio:hover .radio-circle { border-color: var(--action-primary-default); }
+    .radio.selected .radio-circle { border-color: var(--action-primary-default); }
+    .radio.selected .radio-circle::after {
+      content: ''; position: absolute; inset: 3px; border-radius: 50%;
+      background: var(--action-primary-default);
+    }
+    .radio-label { font-size: var(--text-body); color: var(--surface-text-primary); }
+
+    /* Checkbox card */
+    .checkbox-card {
+      display: flex; align-items: flex-start; gap: var(--spacing-4);
+      padding: var(--spacing-5); background: var(--surface-bg-gray-subtle);
+      border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md);
+    }
+    .checkbox-input { width: 18px; height: 18px; accent-color: var(--action-primary-default); flex-shrink: 0; margin-top: 1px; cursor: pointer; }
+    .checkbox-title { font-size: var(--text-body); font-weight: var(--fw-semibold); cursor: pointer; }
+    .checkbox-hint { font-size: var(--text-sm); color: var(--surface-text-secondary); margin-top: var(--spacing-2); line-height: 1.5; }
+
+    /* Info strip (idempotency) */
+    .info-strip {
+      display: flex; gap: var(--spacing-3); align-items: flex-start;
+      padding: var(--spacing-4) var(--spacing-5); background: var(--surface-bg-gray-subtle);
+      border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md);
+      font-size: var(--text-sm); color: var(--surface-text-secondary); line-height: 1.5;
+    }
+    .info-strip code { background: var(--surface-bg-gray-intense); padding: 1px var(--spacing-2); border-radius: var(--radius-sm); font-size: var(--text-xs); font-family: var(--font-mono); color: var(--surface-text-primary); }
+
+    /* ── Event selector — Blade hierarchical multi-select ── */
+    .hsel-search { display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-4) var(--spacing-5); border: 1px solid var(--surface-border-normal); border-radius: var(--radius-md); color: var(--surface-text-tertiary); }
+    .hsel-search:focus-within { border-color: var(--action-primary-default); box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
+    .hsel-search input { border: none; outline: none; flex: 1; font-family: inherit; font-size: var(--text-body); color: var(--surface-text-primary); background: transparent; }
+    .hsel-bar { display: flex; align-items: center; justify-content: space-between; margin-top: var(--spacing-4); font-size: var(--text-sm); color: var(--surface-text-secondary); }
+    .hsel-clear { background: none; border: none; cursor: pointer; color: var(--action-primary-default); font-family: inherit; font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+    .hsel-chips { display: flex; flex-wrap: wrap; gap: var(--spacing-3); margin-top: var(--spacing-3); }
+    .hsel-chip { display: inline-flex; align-items: center; gap: var(--spacing-2); background: var(--surface-bg-gray-moderate); border-radius: var(--radius-sm); padding: 3px 4px 3px 10px; font-size: var(--text-sm); color: var(--surface-text-primary); max-width: 220px; }
+    .hsel-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-mono); font-size: var(--text-xs); }
+    .hsel-chip button { background: none; border: none; cursor: pointer; color: var(--surface-text-tertiary); font-size: 15px; line-height: 1; padding: 0 var(--spacing-1); display: flex; }
+    .hsel-chip button:hover { color: var(--surface-text-primary); }
+    .hsel-tree { margin-top: var(--spacing-4); border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md); max-height: 280px; overflow-y: auto; padding: var(--spacing-3) 0; }
+    .hsel-row { display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-3) var(--spacing-5); cursor: pointer; }
+    .hsel-row:hover { background: var(--surface-bg-gray-subtle); }
+    .hsel-row.child { padding-left: 56px; }
+    .hsel-pick { display: flex; align-items: center; gap: var(--spacing-3); cursor: pointer; flex: 1; min-width: 0; }
+    .hsel-caret { background: none; border: none; cursor: pointer; color: var(--surface-text-tertiary); display: flex; align-items: center; justify-content: center; padding: 0; width: 16px; height: 16px; flex-shrink: 0; transition: transform .15s; }
+    .hsel-caret.open { transform: rotate(90deg); }
+    .hsel-caret-spacer { width: 16px; flex-shrink: 0; }
+    .hsel-name { font-size: var(--text-body); color: var(--surface-text-primary); }
+    .hsel-name.parent { font-weight: var(--fw-semibold); }
+    .hsel-row.child .hsel-name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--surface-text-secondary); }
+    /* Blade-style custom checkbox (check + indeterminate minus) */
+    .cb-input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .cb-box { width: 18px; height: 18px; flex-shrink: 0; border: 1.5px solid var(--surface-border-normal); border-radius: 5px; background: #fff; position: relative; transition: background .12s, border-color .12s; }
+    .cb-input:checked + .cb-box, .cb-input:indeterminate + .cb-box { background: var(--action-primary-default); border-color: var(--action-primary-default); }
+    .cb-input:checked + .cb-box::after { content: ''; position: absolute; left: 5.5px; top: 2px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+    .cb-input:indeterminate + .cb-box::after { content: ''; position: absolute; left: 3.5px; right: 3.5px; top: 7.5px; height: 2px; background: #fff; border-radius: 1px; }
+    .cb-input:focus-visible + .cb-box { box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
+    .evt-empty { padding: var(--spacing-5); text-align: center; color: var(--surface-text-tertiary); font-size: var(--text-sm); }
+
+    /* preview filter tags */
+    .preview-tags { display: flex; gap: var(--spacing-3); }
+    .tag-soft { background: var(--feedback-notice-bg); color: var(--feedback-notice-text); border: 1px solid var(--feedback-notice-border); border-radius: var(--radius-round); padding: 2px var(--spacing-4); font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
+
+    /* ── Replay modal (V2 — centered, Blade small modal) ── */
+    .modal.modal-replay { width: 1024px; max-width: 94vw; max-height: 90vh; display: flex; flex-direction: column; text-align: left; }
+    /* Preview table inside the modal — compact padding so all columns fit without horizontal scroll */
+    .modal-replay .wh-table th, .modal-replay .wh-table td { padding: var(--spacing-4) var(--spacing-5); }
+    .modal-replay .wh-table { table-layout: auto; }
+    .modal-head { padding: var(--spacing-6) var(--spacing-7); border-bottom: 1px solid var(--surface-border-subtle); display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-4); }
+    .modal-head-title { font-size: var(--text-lg); font-weight: var(--fw-semibold); }
+    .modal-head-sub { font-size: var(--text-sm); color: var(--surface-text-secondary); margin-top: var(--spacing-2); }
+    .modal-replay-body { flex: 1; overflow-y: auto; padding: var(--spacing-7); }
+    .modal-replay-footer { padding: var(--spacing-5) var(--spacing-7); border-top: 1px solid var(--surface-border-subtle); display: flex; justify-content: flex-end; gap: var(--spacing-4); }
+    .icon-btn { background: none; border: none; cursor: pointer; color: var(--surface-text-tertiary); font-size: 22px; line-height: 1; padding: 0; }
+    .icon-btn:hover { color: var(--surface-text-primary); }
+
+    /* ── Modal (success) ── */
+    .modal-overlay { position: fixed; inset: 0; background: var(--overlay-bg); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: var(--spacing-6); }
+    .modal { background: var(--surface-bg-primary); border-radius: var(--radius-lg); box-shadow: var(--elevation-mid); width: 100%; max-width: 480px; }
+    .modal-body { padding: var(--spacing-8) var(--spacing-7) var(--spacing-7); text-align: center; }
+    .success-ring { width: 56px; height: 56px; border-radius: var(--radius-round); background: var(--feedback-positive-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--spacing-5); }
+    .modal-footer { padding: var(--spacing-5) var(--spacing-7); border-top: 1px solid var(--surface-border-subtle); display: flex; justify-content: center; gap: var(--spacing-4); }
+
+    .spinner { width: 16px; height: 16px; border-radius: var(--radius-round); border: 2px solid var(--spinner-track); border-top-color: #fff; animation: spin .7s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Help & Support floating button ── */
+    .help-btn {
+      position: fixed; bottom: 20px; right: 24px; z-index: 1150;
+      display: inline-flex; align-items: center; gap: var(--spacing-3);
+      background: #1B2A4E; color: #fff; border: none; cursor: pointer;
+      padding: var(--spacing-4) var(--spacing-6); border-radius: var(--radius-round);
+      font-family: inherit; font-size: var(--text-body); font-weight: var(--fw-semibold);
+      box-shadow: var(--elevation-high);
+    }
+    .help-btn:hover { background: #243a6b; }
+
+    /* ── Floating version pill (bottom-right, above Help & Support) ── */
+    .version-pill {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 1200; background: var(--topnav-bg); color: #fff;
+      border-radius: var(--radius-round); box-shadow: var(--elevation-high);
+      display: flex; align-items: center; gap: var(--spacing-4);
+      padding: var(--spacing-3) var(--spacing-4) var(--spacing-3) var(--spacing-6);
+    }
+    .version-pill .vp-label { font-size: var(--text-xs); color: rgba(255,255,255,0.55); font-weight: var(--fw-semibold); letter-spacing: 0.02em; }
+    .vp-seg { display: inline-flex; background: rgba(255,255,255,0.08); border-radius: var(--radius-round); padding: 3px; gap: 3px; }
+    .vp-seg button {
+      border: none; cursor: pointer; font-family: inherit; background: transparent;
+      color: rgba(255,255,255,0.7); padding: var(--spacing-2) var(--spacing-5);
+      border-radius: var(--radius-round); font-size: var(--text-sm); font-weight: var(--fw-semibold);
+      display: inline-flex; align-items: center; gap: var(--spacing-2); transition: background .15s, color .15s;
+    }
+    .vp-seg button.active { background: var(--action-primary-default); color: #fff; }
+
+    .anim-in { animation: fadeUp .22s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .modal-anim { animation: zoomIn .2s ease both; }
+    @keyframes zoomIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+
+    [x-cloak] { display: none !important; }
+    .mt-6 { margin-top: var(--spacing-6); }
+  </style>
+</head>
+<body x-data="webhookApp()" x-cloak>
+
+  <!-- ════════════ TOP NAV ════════════ -->
+  <header class="topnav">
+    <div class="topnav-logo">
+      <svg class="rzp-mark" width="19" height="19" viewBox="0 0 24 24" fill="#3395FF" aria-hidden="true"><path d="M22.436 0l-11.91 7.773-1.174 4.276 6.625-4.297L11.65 24h4.391l6.395-24zM14.26 10.098L3.389 17.166 1.564 24h9.008l3.688-13.902Z"/></svg>
+      <span class="wordmark">Razorpay</span>
+    </div>
+    <nav class="topnav-menu">
+      <div class="topnav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L1 6.5V15h4.5v-4h5v4H15V6.5L8 1z"/></svg>
+        Razorpay Home
+      </div>
+      <div class="topnav-item active">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M1 4h14v8H1zM1 6h14M4 10h3"/></svg>
+        Payments
+      </div>
+      <div class="topnav-item">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6.6"/><path d="M1.4 8h13.2M8 1.4c2.2 2 2.2 11.2 0 13.2M8 1.4c-2.2 2-2.2 11.2 0 13.2"/></svg>
+        International Bank Transfer
+      </div>
+      <div class="topnav-item">More ▾</div>
+    </nav>
+    <div class="topnav-right">
+      <div class="topnav-search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7 1a6 6 0 104.47 10l3.26 3.26a.75.75 0 001.06-1.06L12.53 9.9A6 6 0 007 1zM2.5 7a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0z"/></svg>
+        <span>Search payment products, settings, and more</span>
+      </div>
+      <div class="topnav-icon-btn">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M1 8h3l2-5 3 10 2-5h3"/></svg>
+      </div>
+      <div class="topnav-icon-btn">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4 4 0 00-4 4v2.2L2.6 10.4A1 1 0 003.5 12h9a1 1 0 00.9-1.6L12 7.2V5a4 4 0 00-4-4zM6 13a2 2 0 004 0H6z"/></svg>
+      </div>
+      <div class="topnav-avatar">SF</div>
+    </div>
+  </header>
+
+  <!-- ════════════ SHELL ════════════ -->
+  <div class="shell">
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 10 3l7 5.5V16a1 1 0 0 1-1 1h-3v-5H7v5H4a1 1 0 0 1-1-1z"/></svg> Home
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5h11l-2.5-2.5M17 13.5H6l2.5 2.5"/></svg> Transactions
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2"/></svg> Settlements
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h3.5"/></svg> Reconciliation
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V9M8 16V4M12 16v-5M16 16V7"/></svg> Reports
+      </a>
+
+      <div class="sidebar-section-label">Payment Products</div>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 11.5 11.5 8.5"/><path d="M8 6.5 9.6 5a2.6 2.6 0 0 1 3.7 3.7L11.7 10.3"/><path d="M12 13.5 10.4 15a2.6 2.6 0 0 1-3.7-3.7L8.3 9.7"/></svg> Payment Links
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3" width="11" height="14" rx="1.5"/><path d="M7 6.5h6M7 9.5h6M7 12.5h3.5"/></svg> Payment Pages
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M12.6 10v1.1a1.9 1.9 0 0 0 3.8.2A7 7 0 1 0 12.7 16"/></svg> Razorpay.me Link
+      </a>
+      <a class="sidebar-item" style="color:var(--surface-text-tertiary)">+13 More ▾</a>
+
+      <div class="sidebar-section-label">Banking Products</div>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5l10 10M15 5L5 15"/></svg> X Banking
+      </a>
+
+      <div class="sidebar-section-label">Loyalty Products</div>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="2"/><path d="M13 10h2.5"/><circle cx="13" cy="10" r="0.6" fill="currentColor" stroke="none"/></svg> Wallet
+      </a>
+
+      <div class="sidebar-section-label">Customer Products</div>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="2.6"/><path d="M4.5 16a5.5 5.5 0 0 1 11 0"/></svg> Customers
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3H16v5.5l-7 7-6-6z"/><circle cx="13" cy="6.4" r="1"/></svg> Offers
+      </a>
+      <a class="sidebar-item">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="3"/><path d="M9.2 9.2 16 16M13.5 13.5 15 12M11.3 11.3 13 9.6"/></svg> API Keys and Plugins
+      </a>
+      <a class="sidebar-item active">
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 6 4 10l3.5 4M12.5 6l3.5 4-3.5 4"/></svg> Developers
+      </a>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item" style="justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:var(--spacing-4)">
+            <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v4L4.6 13.2A1.4 1.4 0 0 0 5.8 15.5h8.4a1.4 1.4 0 0 0 1.2-2.3L12 7V3"/><path d="M7 3h6"/></svg>
+            Test Mode
+          </span>
+          <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+        </div>
+        <a class="sidebar-item">
+          <svg class="icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="5.2" r="2.6" fill="#E5484D"/><circle cx="14.4" cy="11.8" r="2.6" fill="#F5A623"/><circle cx="5.6" cy="11.8" r="2.6" fill="#11A75C"/><circle cx="10" cy="10.4" r="2.2" fill="#2B6CF6"/></svg>
+          Account &amp; Settings
+        </a>
+      </div>
+    </nav>
+
+    <!-- ── MAIN ── -->
+    <div class="main-wrap">
+      <div class="page-content">
+
+        <!-- ════════ TABS + actions on one row (tabs left, actions right) ════════ -->
+        <div class="tabs-list">
+          <div class="tabs-list-left">
+            <div class="tab-item" :class="{active: activeTab==='urls'}" @click="activeTab='urls'">Webhooks</div>
+            <template x-if="version === 'v1'">
+              <div class="tab-item" :class="{active: activeTab==='replay'}" @click="activeTab='replay'">
+                Replay Events
+                <span class="badge badge-new">NEW</span>
+                <template x-if="unackCount > 0">
+                  <span class="badge badge-notice" x-text="unackCount + ' missed'"></span>
+                </template>
+              </div>
+            </template>
+            <div class="tab-item" :class="{active: activeTab==='logs'}" @click="activeTab='logs'">Logs</div>
+          </div>
+          <div class="tabs-actions">
+            <a class="link">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h6l3 3v11H4V1zm5 1v3h3"/></svg>
+              Documentation
+            </a>
+            <!-- V2-only: Replay events button -->
+            <template x-if="version === 'v2'">
+              <button class="btn btn-secondary btn-sm" @click="openDrawer()">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 8a6 6 0 1011.2-3H11V3.5h3.5V7H13a4.5 4.5 0 10-.4 4.2l1.2.9A6 6 0 012 8z"/></svg>
+                Replay events
+              </button>
+            </template>
+            <button class="btn btn-primary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5a.75.75 0 01.75.75v5h5a.75.75 0 010 1.5h-5v5a.75.75 0 01-1.5 0v-5h-5a.75.75 0 010-1.5h5v-5A.75.75 0 018 1.5z"/></svg>
+              Add New Webhook
+            </button>
+          </div>
+        </div>
+
+        <!-- Webhooks tab — URL listing (both versions) -->
+        <div class="anim-in" x-show="activeTab==='urls'">
+
+          <!-- Auto-disablement recovery alert -->
+          <div class="alert negative" x-show="showDisableAlert" x-transition>
+            <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"/><path d="M10 8v3.5"/><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"/></svg>
+            <div class="alert-body">
+              <div class="alert-title">Some of your webhook URLs are auto-disabled</div>
+              <div class="alert-desc">
+                A webhook URL was auto-disabled after 24 hours of failed delivery. Re-enable it, then replay the missed events.
+              </div>
+              <div class="alert-actions">
+                <button class="btn btn-secondary btn-sm" @click="version==='v1' ? (activeTab='replay', showDisableAlert=false) : openDrawer()">Replay events</button>
+              </div>
+            </div>
+            <button class="alert-close" @click="showDisableAlert=false">×</button>
+          </div>
+
+          <div class="card" style="margin-bottom:var(--spacing-5)">
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Status</th>
+                  <th>Events</th>
+                  <th>Last Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://magentoshubham.share.zrok.io/magento247/pub/razorpay/payment/webhook</a></td>
+                  <td><span class="badge-enabled">Enabled</span></td>
+                  <td class="wh-events">2 events</td>
+                  <td class="wh-updated">01 Apr 2025, 03:55:29 pm</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="wh-showing">Showing 1 - 1</div>
+        </div>
+
+        <!-- V1 Replay panel — inline form under the "Replay Webhooks" tab -->
+        <template x-if="version === 'v1'">
+          <div class="anim-in" x-show="activeTab==='replay'">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-head-left">
+                  <span class="card-title">Replay missed webhooks</span>
+                  <span class="card-subtitle">Re-send events your endpoint missed during downtime or while the URL was disabled.</span>
+                </div>
+              </div>
+              <div class="card-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; showPreview=false">
+                <!-- Recovery method -->
+                <div class="form-group" style="margin-bottom:var(--spacing-6)">
+                  <label class="form-label">Recovery method <span class="req">*</span></label>
+                  <div class="radio-group">
+                    <label class="radio" :class="{selected: recoveryMode==='date'}" @click="recoveryMode='date'">
+                      <span class="radio-circle"></span>
+                      <span class="radio-label">Date Range</span>
+                    </label>
+                    <label class="radio" :class="{selected: recoveryMode==='paymentid'}" @click="recoveryMode='paymentid'">
+                      <span class="radio-circle"></span>
+                      <span class="radio-label">Payment ID</span>
+                    </label>
+                  </div>
+                  <div class="input-hint" x-text="recoveryMode==='date' ? 'Replay all events from a time window — best after server downtime or URL disablement.' : 'Re-trigger every configured webhook for one specific payment.'"></div>
+                </div>
+
+                <!-- Date range -->
+                <div x-show="recoveryMode==='date'">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">From date <span class="req">*</span></label>
+                      <input class="input" type="date" x-model="dateFrom" max="2026-06-15">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">To date <span class="req">*</span></label>
+                      <input class="input" type="date" x-model="dateTo" max="2026-06-15">
+                    </div>
+                  </div>
+                  <div class="input-hint" style="margin:-4px 0 0">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+                </div>
+
+                <!-- Payment ID -->
+                <div x-show="recoveryMode==='paymentid'">
+                  <div class="form-group" style="margin-bottom:var(--spacing-5)">
+                    <label class="form-label">Payment ID <span class="req">*</span></label>
+                    <input class="input" type="text" x-model="paymentId" placeholder="pay_MXBk2Pxyz1234" style="max-width:380px">
+                    <div class="input-hint">Enter a single payment ID — all configured webhook events for this payment will be re-sent.</div>
+                  </div>
+                </div>
+
+                <!-- Event selector -->
+                <div class="form-group" style="margin-bottom:var(--spacing-6)">
+                  <label class="form-label">Events to replay <span class="req">*</span></label>
+                  <div class="hsel-search">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+                    <input type="text" placeholder="Search" x-model="eventSearch">
+                  </div>
+                  <div class="hsel-bar">
+                    <span x-text="selectedCountLabel()"></span>
+                    <button class="hsel-clear" @click="clearEvents()">Clear All</button>
+                  </div>
+                  <div class="hsel-chips" x-show="selectedEvents.length>0">
+                    <template x-if="isAllSelected()">
+                      <span class="hsel-chip"><span>All events</span><button @click="clearEvents()">×</button></span>
+                    </template>
+                    <template x-if="!isAllSelected()">
+                      <template x-for="ev in selectedEvents" :key="ev">
+                        <span class="hsel-chip"><span x-text="ev"></span><button @click="toggleEvent(ev)">×</button></span>
+                      </template>
+                    </template>
+                  </div>
+                  <div class="hsel-tree">
+                    <label class="hsel-row" x-show="!eventSearch">
+                      <span class="hsel-caret-spacer"></span>
+                      <input class="cb-input" type="checkbox" :checked="isAllSelected()" x-effect="$el.indeterminate = (selectedEvents.length>0 && !isAllSelected())" @change="toggleAllEvents()">
+                      <span class="cb-box"></span>
+                      <span class="hsel-name parent">All events</span>
+                    </label>
+                    <template x-for="g in filteredGroups()" :key="g.name">
+                      <div>
+                        <div class="hsel-row">
+                          <button class="hsel-caret" :class="{open: isExpanded(g.name) || eventSearch}" @click.stop="toggleExpand(g.name)">
+                            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg>
+                          </button>
+                          <label class="hsel-pick">
+                            <input class="cb-input" type="checkbox" :checked="isGroupChecked(g)" x-effect="$el.indeterminate = isGroupIndeterminate(g)" @change="toggleGroup(g)">
+                            <span class="cb-box"></span>
+                            <span class="hsel-name parent" x-text="g.name"></span>
+                          </label>
+                        </div>
+                        <div x-show="isExpanded(g.name) || eventSearch" x-collapse.duration.200ms>
+                          <template x-for="ev in g.events" :key="ev">
+                            <label class="hsel-row child">
+                              <input class="cb-input" type="checkbox" :checked="isEventSelected(ev)" @change="toggleEvent(ev)">
+                              <span class="cb-box"></span>
+                              <span class="hsel-name" x-text="ev"></span>
+                            </label>
+                          </template>
+                        </div>
+                      </div>
+                    </template>
+                    <div class="evt-empty" x-show="filteredGroups().length===0">No events match your search.</div>
+                  </div>
+                </div>
+
+                <!-- Unacknowledged filter (date mode) -->
+                <div class="checkbox-card" x-show="recoveryMode==='date'" style="margin-bottom:var(--spacing-6)">
+                  <input class="checkbox-input" type="checkbox" id="unackOnlyV1" x-model="unackOnly">
+                  <label for="unackOnlyV1">
+                    <div class="checkbox-title">Replay only unacknowledged events</div>
+                    <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
+                  </label>
+                </div>
+
+                <!-- Action -->
+                <div style="display:flex;gap:var(--spacing-4);align-items:center">
+                  <button class="btn btn-primary btn-lg" @click="replayPreviewed()" :disabled="!canPreview()">
+                    <template x-if="replayLoading"><span class="spinner"></span></template>
+                    <template x-if="!replayLoading">
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M3.5 2.2a.6.6 0 00-.9.5v10.6a.6.6 0 00.9.5l8.6-5.3a.6.6 0 000-1L3.5 2.2z"/></svg>
+                    </template>
+                    <span x-text="replayLoading ? 'Replaying…' : 'Replay events'"></span>
+                  </button>
+                  <button class="btn btn-secondary btn-lg" @click="runPreview()" :disabled="!canPreview()">
+                    <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
+                    Preview matching events
+                  </button>
+                  <span class="input-hint" x-show="selectedEvents.length===0">Select at least one event to continue.</span>
+                </div>
+
+                <!-- Matching Events Preview (inline) -->
+                <div class="anim-in" x-show="showPreview" style="margin-top:var(--spacing-7)">
+                  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
+                    <div>
+                      <div class="card-title">Matching Events Preview</div>
+                      <div class="card-subtitle"><span x-text="previewResults().length"></span> events found in selected range</div>
+                    </div>
+                    <div class="preview-tags">
+                      <span class="tag-soft" x-show="recoveryMode==='date' && unackOnly">Unacknowledged only</span>
+                      <span class="tag-soft" x-show="!isAllSelected()" x-text="selectedEvents.length + ' event type' + (selectedEvents.length>1?'s':'') + ' filtered'"></span>
+                    </div>
+                  </div>
+                  <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
+                    <table class="wh-table">
+                      <thead><tr><th>Event Type</th><th>Entity ID</th><th>Attempted At</th><th>Last HTTP Code</th><th>Status</th><th></th></tr></thead>
+                      <tbody>
+                        <template x-for="row in previewResults()" :key="row.id">
+                          <tr>
+                            <td><code x-text="row.type" style="font-family:var(--font-mono);font-size:var(--text-sm)"></code></td>
+                            <td style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.entity"></td>
+                            <td style="color:var(--surface-text-secondary)" x-text="row.time"></td>
+                            <td><span class="badge" :class="row.code>=200 && row.code<300 ? 'badge-positive':'badge-negative'" x-text="row.code"></span></td>
+                            <td><span class="badge" :class="row.acked ? 'badge-positive':'badge-notice'"><span class="badge-dot"></span><span x-text="row.acked ? 'Acknowledged':'Unacknowledged'"></span></span></td>
+                            <td style="text-align:right"><button class="log-retrigger" @click="retryRow(row)">Retry</button></td>
+                          </tr>
+                        </template>
+                        <template x-if="previewResults().length===0">
+                          <tr><td colspan="6" class="evt-empty">No matching events for this scope.</td></tr>
+                        </template>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Logs tab — delivery log (both versions) -->
+        <div class="anim-in" x-show="activeTab==='logs'">
+          <div class="card" style="margin-bottom:var(--spacing-5)">
+            <div class="qf-row">
+              <template x-for="f in logFilters" :key="f.key">
+                <button class="qf-pill" :class="{active: logFilter===f.key}" @click="logFilter=f.key" x-text="f.label"></button>
+              </template>
+            </div>
+            <table class="wh-table">
+              <thead>
+                <tr>
+                  <th>Event Type</th>
+                  <th>Entity ID</th>
+                  <th>Attempted At</th>
+                  <th>HTTP Code</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="log in filteredLogs()" :key="log.id">
+                  <tr>
+                    <td><code x-text="log.type" style="font-family:var(--font-mono);font-size:var(--text-sm)"></code></td>
+                    <td class="wh-events" style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="log.entity"></td>
+                    <td class="wh-updated" style="color:var(--surface-text-secondary)" x-text="log.time"></td>
+                    <td><span class="badge" :class="log.code>=200 && log.code<300 ? 'badge-positive' : 'badge-negative'" x-text="log.code"></span></td>
+                    <td>
+                      <span class="badge" :class="{'badge-positive': log.status==='Delivered','badge-negative': log.status==='Failed','badge-notice': log.status==='Unacknowledged'}">
+                        <span class="badge-dot"></span><span x-text="log.status"></span>
+                      </span>
+                    </td>
+                    <td style="text-align:right">
+                      <template x-if="log.status !== 'Delivered'">
+                        <button class="log-retrigger" @click="version==='v1' ? activeTab='replay' : openDrawer()">Retrigger</button>
+                      </template>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="wh-showing" x-text="'Showing 1 - ' + filteredLogs().length"></div>
+        </div>
+
+      </div><!-- /page-content -->
+    </div><!-- /main-wrap -->
+  </div><!-- /shell -->
+
+  <!-- ════════ V2 DRAWER ════════ -->
+  <template x-if="version === 'v2' && drawerOpen">
+    <div class="modal-overlay" @click.self="drawerOpen=false">
+      <div class="modal modal-replay modal-anim">
+        <div class="modal-head">
+          <div>
+            <div class="modal-head-title">Replay missed webhooks</div>
+            <div class="modal-head-sub">Re-send events your endpoint missed during downtime or disablement.</div>
+          </div>
+          <button class="icon-btn" @click="drawerOpen=false">×</button>
+        </div>
+        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; showPreview=false">
+          <!-- Recovery method -->
+          <div class="form-group" style="margin-bottom:var(--spacing-6)">
+            <label class="form-label">Recovery method <span class="req">*</span></label>
+            <div class="radio-group">
+              <label class="radio" :class="{selected: recoveryMode==='date'}" @click="recoveryMode='date'">
+                <span class="radio-circle"></span>
+                <span class="radio-label">Date Range</span>
+              </label>
+              <label class="radio" :class="{selected: recoveryMode==='paymentid'}" @click="recoveryMode='paymentid'">
+                <span class="radio-circle"></span>
+                <span class="radio-label">Payment ID</span>
+              </label>
+            </div>
+            <div class="input-hint" x-text="recoveryMode==='date' ? 'Replay all events from a time window — best after server downtime or URL disablement.' : 'Re-trigger every configured webhook for one specific payment.'"></div>
+          </div>
+
+          <!-- Date range -->
+          <div x-show="recoveryMode==='date'">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">From date <span class="req">*</span></label>
+                <input class="input" type="date" x-model="dateFrom" max="2026-06-15">
+              </div>
+              <div class="form-group">
+                <label class="form-label">To date <span class="req">*</span></label>
+                <input class="input" type="date" x-model="dateTo" max="2026-06-15">
+              </div>
+            </div>
+            <div class="input-hint" style="margin:-4px 0 0">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+          </div>
+
+          <!-- Payment ID -->
+          <div x-show="recoveryMode==='paymentid'">
+            <div class="form-group" style="margin-bottom:var(--spacing-5)">
+              <label class="form-label">Payment ID <span class="req">*</span></label>
+              <input class="input" type="text" x-model="paymentId" placeholder="pay_MXBk2Pxyz1234">
+              <div class="input-hint">Enter a single payment ID — all configured webhook events for this payment will be re-sent.</div>
+            </div>
+          </div>
+
+          <!-- Event selector -->
+          <div class="form-group" style="margin-bottom:var(--spacing-6)">
+            <label class="form-label">Events to replay <span class="req">*</span></label>
+            <div class="hsel-search">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+              <input type="text" placeholder="Search" x-model="eventSearch">
+            </div>
+            <div class="hsel-bar">
+              <span x-text="selectedCountLabel()"></span>
+              <button class="hsel-clear" @click="clearEvents()">Clear All</button>
+            </div>
+            <div class="hsel-chips" x-show="selectedEvents.length>0">
+              <template x-if="isAllSelected()">
+                <span class="hsel-chip"><span>All events</span><button @click="clearEvents()">×</button></span>
+              </template>
+              <template x-if="!isAllSelected()">
+                <template x-for="ev in selectedEvents" :key="ev">
+                  <span class="hsel-chip"><span x-text="ev"></span><button @click="toggleEvent(ev)">×</button></span>
+                </template>
+              </template>
+            </div>
+            <div class="hsel-tree">
+              <label class="hsel-row" x-show="!eventSearch">
+                <span class="hsel-caret-spacer"></span>
+                <input class="cb-input" type="checkbox" :checked="isAllSelected()" x-effect="$el.indeterminate = (selectedEvents.length>0 && !isAllSelected())" @change="toggleAllEvents()">
+                <span class="cb-box"></span>
+                <span class="hsel-name parent">All events</span>
+              </label>
+              <template x-for="g in filteredGroups()" :key="g.name">
+                <div>
+                  <div class="hsel-row">
+                    <button class="hsel-caret" :class="{open: isExpanded(g.name) || eventSearch}" @click.stop="toggleExpand(g.name)">
+                      <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg>
+                    </button>
+                    <label class="hsel-pick">
+                      <input class="cb-input" type="checkbox" :checked="isGroupChecked(g)" x-effect="$el.indeterminate = isGroupIndeterminate(g)" @change="toggleGroup(g)">
+                      <span class="cb-box"></span>
+                      <span class="hsel-name parent" x-text="g.name"></span>
+                    </label>
+                  </div>
+                  <div x-show="isExpanded(g.name) || eventSearch" x-collapse.duration.200ms>
+                    <template x-for="ev in g.events" :key="ev">
+                      <label class="hsel-row child">
+                        <input class="cb-input" type="checkbox" :checked="isEventSelected(ev)" @change="toggleEvent(ev)">
+                        <span class="cb-box"></span>
+                        <span class="hsel-name" x-text="ev"></span>
+                      </label>
+                    </template>
+                  </div>
+                </div>
+              </template>
+              <div class="evt-empty" x-show="filteredGroups().length===0">No events match your search.</div>
+            </div>
+          </div>
+
+          <!-- Unacknowledged filter (date mode) -->
+          <div class="checkbox-card" x-show="recoveryMode==='date'" style="margin-bottom:var(--spacing-6)">
+            <input class="checkbox-input" type="checkbox" id="unackOnlyV2" x-model="unackOnly">
+            <label for="unackOnlyV2">
+              <div class="checkbox-title">Replay only unacknowledged events</div>
+              <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
+            </label>
+          </div>
+
+          <!-- Preview matching events (under event selection) -->
+          <button class="btn btn-secondary" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
+            Preview matching events
+          </button>
+
+          <!-- Matching Events Preview (inline) -->
+          <div class="anim-in" x-show="showPreview" style="margin-top:var(--spacing-7)">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
+              <div>
+                <div class="card-title">Matching Events Preview</div>
+                <div class="card-subtitle"><span x-text="previewResults().length"></span> events found in selected range</div>
+              </div>
+              <div class="preview-tags">
+                <span class="tag-soft" x-show="recoveryMode==='date' && unackOnly">Unacknowledged only</span>
+                <span class="tag-soft" x-show="!isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
+              </div>
+            </div>
+            <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
+              <table class="wh-table">
+                <thead><tr><th>Event Type</th><th>Entity ID</th><th>Attempted At</th><th>Code</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                  <template x-for="row in previewResults()" :key="row.id">
+                    <tr>
+                      <td><code x-text="row.type" style="font-family:var(--font-mono);font-size:var(--text-sm)"></code></td>
+                      <td style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.entity"></td>
+                      <td style="color:var(--surface-text-secondary)" x-text="row.time"></td>
+                      <td><span class="badge" :class="row.code>=200 && row.code<300 ? 'badge-positive':'badge-negative'" x-text="row.code"></span></td>
+                      <td><span class="badge" :class="row.acked ? 'badge-positive':'badge-notice'"><span class="badge-dot"></span><span x-text="row.acked ? 'Acknowledged':'Unacknowledged'"></span></span></td>
+                      <td style="text-align:right"><button class="log-retrigger" @click="retryRow(row)">Retry</button></td>
+                    </tr>
+                  </template>
+                  <template x-if="previewResults().length===0">
+                    <tr><td colspan="6" class="evt-empty">No matching events for this scope.</td></tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="modal-replay-footer">
+          <button class="btn btn-secondary" @click="drawerOpen=false">Cancel</button>
+          <button class="btn btn-primary" @click="replayPreviewed()" :disabled="!canPreview()">
+            <template x-if="replayLoading"><span class="spinner"></span></template>
+            <span x-text="replayLoading ? 'Replaying…' : 'Replay events'"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ════════ SUCCESS MODAL ════════ -->
+  <template x-if="showSuccess">
+    <div class="modal-overlay" @click.self="showSuccess=false">
+      <div class="modal anim-in">
+        <div class="modal-body">
+          <div class="success-ring">
+            <svg width="28" height="28" viewBox="0 0 16 16" fill="var(--feedback-positive-default)"><path d="M13.5 3.5L6 11 2.5 7.5l-1.1 1L6 13.2 14.6 4.6z"/></svg>
+          </div>
+          <div style="font-size:var(--text-lg);font-weight:var(--fw-semibold);margin-bottom:var(--spacing-3)" x-text="successTitle"></div>
+          <div style="font-size:var(--text-body);color:var(--surface-text-secondary);line-height:1.55" x-text="successBody"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" @click="showSuccess=false">Done</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ════════ FLOATING VERSION PILL ════════ -->
+  <div class="version-pill">
+    <div class="vp-seg">
+      <button :class="{active: version==='v1'}" @click="setVersion('v1')">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h14v2H1zM1 7h6v6H1z"/></svg> V1 · Tab
+      </button>
+      <button :class="{active: version==='v2'}" @click="setVersion('v2')">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="3"/></svg> V2 · Button
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function webhookApp() {
+      return {
+        version: 'v1',          // 'v1' (tab) | 'v2' (button)
+        activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
+        drawerOpen: false,
+        showDisableAlert: true,
+        unackCount: 5,
+
+        // Logs tab
+        logFilter: 'all',
+        logFilters: [
+          { key: 'all',     label: 'All' },
+          { key: 'delivered', label: 'Delivered' },
+          { key: 'failed',  label: 'Failed' },
+          { key: 'unack',   label: 'Unacknowledged' },
+        ],
+        logs: [
+          { id: 1, type: 'payment.captured',   entity: 'pay_SzXTRt3ZTSg', time: '09 Jun 2026, 06:20:55 pm', code: 200, status: 'Delivered' },
+          { id: 2, type: 'order.paid',         entity: 'order_SzXIzLcg8Q', time: '09 Jun 2026, 06:11:01 pm', code: 401, status: 'Failed' },
+          { id: 3, type: 'payment.failed',     entity: 'pay_SzXGikikhSf',  time: '09 Jun 2026, 06:08:53 pm', code: 401, status: 'Unacknowledged' },
+          { id: 4, type: 'refund.processed',   entity: 'rfnd_Sz7YSFsRRx',  time: '09 Jun 2026, 02:14:30 pm', code: 200, status: 'Delivered' },
+          { id: 5, type: 'payment.authorized', entity: 'pay_Sz4kP1xQ9z',   time: '08 Jun 2026, 11:42:09 am', code: 500, status: 'Unacknowledged' },
+        ],
+        filteredLogs() {
+          if (this.logFilter === 'all') return this.logs;
+          const map = { delivered: 'Delivered', failed: 'Failed', unack: 'Unacknowledged' };
+          return this.logs.filter(l => l.status === map[this.logFilter]);
+        },
+
+        // replay form state
+        recoveryMode: 'date',   // 'date' | 'paymentid'
+        dateFrom: '2026-06-07',
+        dateTo: '2026-06-09',
+        unackOnly: true,
+        paymentId: '',
+        replayLoading: false,
+
+        // event selector
+        eventSearch: '',
+        showPreview: false,
+        eventGroups: [
+          { name: 'Payment Events',      events: ['payment.authorized','payment.pending','payment.failed','payment.captured','payment.dispute.created','payment.dispute.won','payment.dispute.lost'] },
+          { name: 'Order Events',        events: ['order.paid'] },
+          { name: 'Refund Events',       events: ['refund.created','refund.processed','refund.failed'] },
+          { name: 'Subscription Events', events: ['subscription.authenticated','subscription.charged','subscription.pending','subscription.halted'] },
+        ],
+        selectedEvents: [],     // populated to "all" on init
+        expandedGroups: [],     // group names currently expanded
+        isExpanded(name) { return this.expandedGroups.includes(name); },
+        toggleExpand(name) {
+          if (this.isExpanded(name)) this.expandedGroups = this.expandedGroups.filter(n => n !== name);
+          else this.expandedGroups.push(name);
+        },
+        allEventNames() { return this.eventGroups.flatMap(g => g.events); },
+        isEventSelected(n) { return this.selectedEvents.includes(n); },
+        toggleEvent(n) {
+          if (this.isEventSelected(n)) this.selectedEvents = this.selectedEvents.filter(e => e !== n);
+          else this.selectedEvents.push(n);
+          this.showPreview = false;
+        },
+        isGroupChecked(g) { return g.events.every(e => this.isEventSelected(e)); },
+        isGroupIndeterminate(g) { const s = g.events.filter(e => this.isEventSelected(e)).length; return s > 0 && s < g.events.length; },
+        toggleGroup(g) {
+          if (this.isGroupChecked(g)) this.selectedEvents = this.selectedEvents.filter(e => !g.events.includes(e));
+          else g.events.forEach(e => { if (!this.isEventSelected(e)) this.selectedEvents.push(e); });
+          this.showPreview = false;
+        },
+        isAllSelected() { return this.selectedEvents.length === this.allEventNames().length; },
+        toggleAllEvents() {
+          this.selectedEvents = this.isAllSelected() ? [] : [...this.allEventNames()];
+          this.showPreview = false;
+        },
+        clearEvents() { this.selectedEvents = []; this.showPreview = false; },
+        selectedCountLabel() {
+          if (this.isAllSelected()) return 'All events selected';
+          if (this.selectedEvents.length === 0) return 'No event selected';
+          return this.selectedEvents.length + ' event' + (this.selectedEvents.length > 1 ? 's' : '') + ' selected';
+        },
+        filteredGroups() {
+          const q = this.eventSearch.trim().toLowerCase();
+          if (!q) return this.eventGroups;
+          return this.eventGroups
+            .map(g => ({ name: g.name, events: g.events.filter(e => e.includes(q)) }))
+            .filter(g => g.events.length > 0 || g.name.toLowerCase().includes(q));
+        },
+
+        // preview sample data (filtered by scope + selection)
+        allPreviewEvents: [
+          { id: 1, type: 'order.paid',           entity: 'order_NK7x2P1234', time: 'Jun 7, 02:16 AM', code: 401, acked: false },
+          { id: 2, type: 'payment.captured',     entity: 'pay_NK7xABCD56',   time: 'Jun 7, 02:17 AM', code: 401, acked: false },
+          { id: 3, type: 'payment.authorized',   entity: 'pay_NK7xEFGH78',   time: 'Jun 8, 10:22 AM', code: 401, acked: false },
+          { id: 4, type: 'refund.processed',     entity: 'rfnd_NK7xIJKL90',  time: 'Jun 8, 11:04 AM', code: 200, acked: true  },
+          { id: 5, type: 'order.paid',           entity: 'order_NK7xMNOP12', time: 'Jun 9, 09:11 AM', code: 401, acked: false },
+          { id: 6, type: 'subscription.charged', entity: 'sub_NK7xQRST34',   time: 'Jun 8, 08:00 AM', code: 401, acked: false },
+        ],
+        previewResults() {
+          let evs = [...this.allPreviewEvents];
+          if (this.recoveryMode === 'date' && this.unackOnly) evs = evs.filter(e => !e.acked);
+          if (!this.isAllSelected()) evs = evs.filter(e => this.selectedEvents.includes(e.type));
+          return evs;
+        },
+        canPreview() {
+          if (this.selectedEvents.length === 0) return false;
+          if (this.recoveryMode === 'date') return !!this.dateFrom && !!this.dateTo;
+          return this.paymentId.trim().length > 0;
+        },
+        runPreview() { if (this.canPreview()) this.showPreview = true; },
+
+        // success state
+        showSuccess: false,
+        successTitle: '',
+        successBody: '',
+
+        init() {
+          this.selectedEvents = [...this.allEventNames()];
+          this.expandedGroups = this.eventGroups.map(g => g.name);
+        },
+
+        setVersion(v) {
+          this.version = v;
+          this.drawerOpen = false;
+          this.activeTab = 'urls';
+          this.showPreview = false;
+        },
+
+        openDrawer() { this.drawerOpen = true; this.showPreview = false; },
+
+        // Routes the "Replay missed" button per version: V1 → tab, V2 → drawer
+        replayEntry() {
+          if (this.version === 'v1') { this.activeTab = 'replay'; }
+          else { this.openDrawer(); }
+        },
+
+        // Replay all previewed events
+        replayPreviewed() {
+          this.replayLoading = true;
+          const n = this.previewResults().length;
+          setTimeout(() => {
+            this.replayLoading = false;
+            this.drawerOpen = false;
+            this.showPreview = false;
+            this.successTitle = n + ' event' + (n > 1 ? 's' : '') + ' re-queued successfully';
+            this.successBody = 'Razorpay is re-delivering the matching events to your active webhook URL. They should arrive within a few seconds.';
+            this.showSuccess = true;
+            this.unackCount = 0;
+            this.showDisableAlert = false;
+          }, 1400);
+        },
+
+        // Retry a single previewed event
+        retryRow(row) {
+          this.successTitle = 'Event re-queued';
+          this.successBody = 'The ' + row.type + ' webhook for ' + row.entity + ' has been re-queued for delivery to your active webhook URLs.';
+          this.showSuccess = true;
+        },
+      };
+    }
+  </script>
+</body>
+</html>
