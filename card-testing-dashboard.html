@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payments — Protected View</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --ink:#0d1321;
+    --ink-soft:#475069;
+    --line:#e7e9f0;
+    --bg:#f6f7fb;
+    --card:#ffffff;
+    --rzp:#3b5cff;
+    --rzp-deep:#1f3bd6;
+    --shield:#0a8f5b;
+    --shield-bg:#e8f7ef;
+    --warn:#b54708;
+    --warn-bg:#fff4e6;
+    --danger:#c2293e;
+    --danger-bg:#fdecee;
+    --neutral-bg:#f1f2f7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 24px 60px}
+
+  /* header */
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+  .crumb{font-size:13px;color:var(--ink-soft);letter-spacing:.01em}
+  .crumb b{color:var(--ink);font-weight:600}
+  .title{font-size:26px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+
+  /* the banner — the core reframe */
+  .shield{
+    background:linear-gradient(180deg,#ffffff, #fbfcff);
+    border:1px solid var(--line);
+    border-left:4px solid var(--shield);
+    border-radius:14px;
+    padding:20px 22px;
+    display:flex;
+    gap:18px;
+    align-items:flex-start;
+    box-shadow:0 1px 2px rgba(13,19,33,.04);
+    margin-bottom:22px;
+  }
+  .shield-ico{
+    flex:0 0 auto;width:44px;height:44px;border-radius:11px;
+    background:var(--shield-bg);display:grid;place-items:center;
+  }
+  .shield-ico svg{width:24px;height:24px}
+  .shield-body{flex:1;min-width:0}
+  .shield-eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--shield);margin-bottom:3px;
+  }
+  .shield h2{font-size:17px;font-weight:700;letter-spacing:-.01em;margin-bottom:5px}
+  .shield p{font-size:14px;color:var(--ink-soft);max-width:62ch}
+  .shield p b{color:var(--ink);font-weight:600}
+  .shield-cta{
+    margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .btn{
+    font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;
+    border-radius:9px;padding:9px 15px;border:1px solid transparent;transition:.15s;
+  }
+  .btn-primary{background:var(--rzp);color:#fff}
+  .btn-primary:hover{background:var(--rzp-deep)}
+  .btn-ghost{background:#fff;border-color:var(--line);color:var(--ink)}
+  .btn-ghost:hover{border-color:#c9cde0}
+
+  /* stat strip */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px}
+  .stat{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:16px 17px;box-shadow:0 1px 2px rgba(13,19,33,.03);
+  }
+  .stat .k{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft)}
+  .stat .v{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:6px;font-feature-settings:"tnum"}
+  .stat .s{font-size:12px;margin-top:3px;color:var(--ink-soft)}
+  .stat.flag .v{color:var(--warn)}
+  .stat.ok .v{color:var(--shield)}
+
+  /* segmented control */
+  .seg{display:flex;gap:4px;background:var(--neutral-bg);padding:4px;border-radius:11px;width:fit-content;margin-bottom:16px}
+  .seg button{
+    font-family:inherit;font-size:13px;font-weight:600;border:none;background:transparent;
+    color:var(--ink-soft);padding:8px 16px;border-radius:8px;cursor:pointer;transition:.15s;
+    display:flex;align-items:center;gap:8px;
+  }
+  .seg button.active{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(13,19,33,.1)}
+  .seg .pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:20px}
+  .seg .pill.red{background:var(--danger-bg);color:var(--danger)}
+  .seg .pill.grey{background:#e6e8f0;color:var(--ink-soft)}
+
+  /* table */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 1px 2px rgba(13,19,33,.04)}
+  .panel-head{padding:15px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  .panel-head h3{font-size:14px;font-weight:600}
+  .panel-head .meta{font-size:12px;color:var(--ink-soft)}
+
+  /* attack cluster card */
+  .cluster{
+    margin:16px 20px;border:1px solid #f0d9bf;background:var(--warn-bg);
+    border-radius:12px;padding:16px 18px;
+  }
+  .cluster-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .cluster-top .dot{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 4px rgba(181,71,8,.14)}
+  .cluster-top h4{font-size:14px;font-weight:700;color:var(--warn)}
+  .cluster-top .time{margin-left:auto;font-size:12px;color:#9a6320;font-family:'IBM Plex Mono',monospace}
+  .cluster-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+  .cluster-grid .cg .cgk{font-size:11px;color:#9a6320;font-weight:600}
+  .cluster-grid .cg .cgv{font-size:16px;font-weight:700;color:#7a4d12;margin-top:2px;font-family:'IBM Plex Mono',monospace}
+  .cluster-note{font-size:13px;color:#7a4d12}
+  .cluster-note b{font-weight:700}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{
+    font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);
+    text-align:left;padding:11px 20px;background:#fbfbfd;border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:13px 20px;border-bottom:1px solid #f1f2f7;font-size:13px;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  .pid{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft)}
+  .cust .nm{font-weight:500}
+  .cust .ct{font-size:12px;color:var(--ink-soft)}
+  .amt{font-feature-settings:"tnum";font-weight:600}
+  .tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-flex;align-items:center;gap:5px}
+  .tag.blocked{background:var(--shield-bg);color:var(--shield)}
+  .tag.failed{background:var(--danger-bg);color:var(--danger)}
+  .tag.ok{background:var(--shield-bg);color:var(--shield)}
+  .src{font-size:11px;font-weight:600;color:var(--warn);background:var(--warn-bg);padding:2px 8px;border-radius:6px}
+
+  .empty{padding:46px 20px;text-align:center}
+  .empty svg{width:38px;height:38px;margin-bottom:10px}
+  .empty h4{font-size:15px;font-weight:600;margin-bottom:4px}
+  .empty p{font-size:13px;color:var(--ink-soft);max-width:46ch;margin:0 auto}
+
+  .view{display:none}
+  .view.active{display:block}
+
+  .foot{margin-top:14px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.7}
+  .foot code{font-family:'IBM Plex Mono',monospace;background:#eef0f7;padding:1px 6px;border-radius:5px;font-size:11px}
+
+  @media(max-width:760px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .cluster-grid{grid-template-columns:repeat(2,1fr)}
+    thead th:nth-child(2),tbody td:nth-child(2){display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <div class="crumb">Transactions / <b>Payments</b></div>
+      <div class="title">Payments</div>
+    </div>
+    <button class="btn btn-ghost">Tue, 16 Jun · Last 24h ▾</button>
+  </div>
+
+  <!-- THE REFRAME: lead with reassurance + control, not a wall of red -->
+  <div class="shield">
+    <div class="shield-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0a8f5b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+    <div class="shield-body">
+      <div class="shield-eyebrow">Card-testing protection · Active</div>
+      <h2>We detected and blocked a card-testing attempt on your account</h2>
+      <p>An automated source tried <b>1,184 small-value payments</b> against your checkout to test stolen card numbers. <b>None succeeded</b>, no money moved, and your account and integration are safe. These attempts have been grouped below so they don't clutter your real payments.</p>
+      <div class="shield-cta">
+        <button class="btn btn-primary" onclick="go('protected')">Review what we blocked</button>
+        <button class="btn btn-ghost">Strengthen protection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- stats -->
+  <div class="stats">
+    <div class="stat ok">
+      <div class="k">Successful payments</div>
+      <div class="v">142</div>
+      <div class="s">₹3,18,400 settled</div>
+    </div>
+    <div class="stat">
+      <div class="k">Genuine failures</div>
+      <div class="v">6</div>
+      <div class="s">Real customers · retryable</div>
+    </div>
+    <div class="stat flag">
+      <div class="k">Card-testing blocked</div>
+      <div class="v">1,184</div>
+      <div class="s">Auto-grouped · 1 source</div>
+    </div>
+    <div class="stat ok">
+      <div class="k">Money at risk</div>
+      <div class="v">₹0</div>
+      <div class="s">Nothing settled to attacker</div>
+    </div>
+  </div>
+
+  <!-- segmented control separates real business from attack noise -->
+  <div class="seg">
+    <button class="active" onclick="go('payments',this)">Your payments <span class="pill grey">148</span></button>
+    <button onclick="go('protected',this)">Blocked by protection <span class="pill red">1,184</span></button>
+  </div>
+
+  <!-- VIEW 1: clean ledger of real business only -->
+  <div id="payments" class="view active">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Your payments</h3>
+        <div class="meta">Real customer activity · card-testing noise filtered out</div>
+      </div>
+      <table>
+        <thead><tr><th>Payment ID</th><th>Method</th><th>Customer</th><th>Time</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="pid">pay_T27aK9mInvOICE</td><td>UPI</td><td class="cust"><div class="nm">Priya Nair</div><div class="ct">priya.nair@outlook.com</div></td><td>6:54am</td><td class="amt">₹2,499.00</td><td><span class="tag ok">✓ Captured</span></td></tr>
+          <tr><td class="pid">pay_T27Zp1mRealCust</td><td>Credit Card</td><td class="cust"><div class="nm">Rohan Mehta</div><div class="ct">rohan.m@gmail.com</div></td><td>6:48am</td><td class="amt">₹899.00</td><td><span class="tag ok">✓ Captured</span></td></tr>
+          <tr><td class="pid">pay_T27Yh4kInsuffFn</td><td>Debit Card</td><td class="cust"><div class="nm">Anita Desai</div><div class="ct">anita.desai@gmail.com</div></td><td>6:41am</td><td class="amt">₹1,250.00</td><td><span class="tag failed">✕ Insufficient funds</span></td></tr>
+          <tr><td class="pid">pay_T27Xb8vNetbank</td><td>Netbanking</td><td class="cust"><div class="nm">Karthik R</div><div class="ct">karthik.r@yahoo.in</div></td><td>6:39am</td><td class="amt">₹4,100.00</td><td><span class="tag ok">✓ Captured</span></td></tr>
+          <tr><td class="pid">pay_T27Wd2cUPIfail</td><td>UPI</td><td class="cust"><div class="nm">Sneha Iyer</div><div class="ct">sneha.iyer@gmail.com</div></td><td>6:33am</td><td class="amt">₹599.00</td><td><span class="tag failed">✕ Timed out</span></td></tr>
+          <tr><td class="pid">pay_T27Vc6tCredit</td><td>Credit Card</td><td class="cust"><div class="nm">Imran Sheikh</div><div class="ct">imran.s@protonmail.com</div></td><td>6:28am</td><td class="amt">₹3,750.00</td><td><span class="tag ok">✓ Captured</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="foot">
+      This is the view a merchant <b>wants</b> first: their actual business, undiluted.<br>
+      The 1,184 attack attempts are one tab away — present for audit, absent from the daily glance.
+    </div>
+  </div>
+
+  <!-- VIEW 2: the attack, summarized as ONE incident, then expandable -->
+  <div id="protected" class="view">
+    <div class="panel">
+      <div class="panel-head">
+        <h3>Blocked by card-testing protection</h3>
+        <div class="meta">Grouped into 1 incident · expand for individual attempts</div>
+      </div>
+
+      <div class="cluster">
+        <div class="cluster-top">
+          <span class="dot"></span>
+          <h4>Card-testing incident — automated source</h4>
+          <span class="time">05:53 – 06:51 IST</span>
+        </div>
+        <div class="cluster-grid">
+          <div class="cg"><div class="cgk">Attempts blocked</div><div class="cgv">1,184</div></div>
+          <div class="cg"><div class="cgk">Test amount</div><div class="cgv">₹50 / ₹1</div></div>
+          <div class="cg"><div class="cgk">Success rate</div><div class="cgv">0%</div></div>
+          <div class="cg"><div class="cgk">Avg interval</div><div class="cgv">~2 min</div></div>
+        </div>
+        <div class="cluster-note">
+          <b>What this is:</b> someone is using your checkout to test whether stolen prepaid card numbers are live — uniform ₹50 probes, fabricated emails like <code style="font-family:'IBM Plex Mono',monospace">firstnamelastname@gmail.com</code>, and synthetic phone numbers. <b>Your site is not breached;</b> your public payment page is being abused as a free validity checker. We blocked every attempt before authorisation.
+        </div>
+      </div>
+
+      <div class="panel-head" style="border-top:1px solid var(--line)">
+        <h3 style="font-size:13px;color:var(--ink-soft)">Individual attempts (sample)</h3>
+        <div class="meta">Kept for your records & dispute evidence</div>
+      </div>
+      <table>
+        <thead><tr><th>Payment ID</th><th>Method</th><th>Synthetic identity</th><th>Time</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="pid">pay_T27Sj41QjToYV2</td><td>Prepaid Card</td><td class="cust"><div class="nm">rnelson@gmail.com</div><div class="ct"><span class="src">flagged · synthetic</span></div></td><td>6:51am</td><td class="amt">₹50.00</td><td><span class="tag blocked">🛡 Blocked</span></td></tr>
+          <tr><td class="pid">pay_T26zbV4p22RawV</td><td>Prepaid Card</td><td class="cust"><div class="nm">jamesanderson@gmail.com</div><div class="ct"><span class="src">flagged · synthetic</span></div></td><td>6:23am</td><td class="amt">₹50.00</td><td><span class="tag blocked">🛡 Blocked</span></td></tr>
+          <tr><td class="pid">pay_T26xijCyDCLEsU</td><td>Prepaid Card</td><td class="cust"><div class="nm">katrinalee@gmail.com</div><div class="ct"><span class="src">flagged · synthetic</span></div></td><td>6:21am</td><td class="amt">₹50.00</td><td><span class="tag blocked">🛡 Blocked</span></td></tr>
+          <tr><td class="pid">pay_T26h1B0hfHQZB1</td><td>Debit Card</td><td class="cust"><div class="nm">andrew22@gmail.com</div><div class="ct"><span class="src">flagged · ₹1 probe</span></div></td><td>6:06am</td><td class="amt">₹1.00</td><td><span class="tag blocked">🛡 Blocked</span></td></tr>
+          <tr><td class="pid">pay_T26U2QKJsSCHii</td><td>Prepaid Card</td><td class="cust"><div class="nm">henry15@gmail.com</div><div class="ct"><span class="src">flagged · synthetic</span></div></td><td>5:53am</td><td class="amt">₹50.00</td><td><span class="tag blocked">🛡 Blocked</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="foot">
+      Same raw data as the original red-failure wall — <b>reframed from "148 of my payments failed" to "we stopped an attack for you."</b><br>
+      Recommended next steps surface here too: <code>velocity limits</code> · <code>min-amount rule</code> · <code>CAPTCHA on payment page</code>.
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function go(id, el){
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const map={payments:0, protected:1};
+    document.querySelectorAll('.seg button').forEach((b,i)=>b.classList.toggle('active', i===map[id]));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
