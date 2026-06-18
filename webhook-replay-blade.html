@@ -470,6 +470,14 @@
     .hsel-name { font-size: var(--text-body); color: var(--surface-text-primary); }
     .hsel-name.parent { font-weight: var(--fw-semibold); }
     .hsel-row.child .hsel-name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--surface-text-secondary); }
+    .url-select-row { align-items: flex-start; }
+    .url-select-main { display: flex; flex-direction: column; gap: var(--spacing-1); min-width: 0; flex: 1; }
+    .url-select-head { display: flex; align-items: center; gap: var(--spacing-3); min-width: 0; }
+    .url-select-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--action-primary-default); font-family: var(--font-mono); font-size: var(--text-sm); }
+    .url-select-meta { color: var(--surface-text-tertiary); font-size: var(--text-sm); }
+    .hsel-chip-url { max-width: 360px; }
+    .preview-url-cell { max-width: 260px; }
+    .preview-url-text { display: block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--action-primary-default); font-family: var(--font-mono); font-size: var(--text-sm); }
     /* Blade-style custom checkbox (check + indeterminate minus) */
     .cb-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .cb-box { width: 18px; height: 18px; flex-shrink: 0; border: 1.5px solid var(--surface-border-normal); border-radius: 5px; background: #fff; position: relative; transition: background .12s, border-color .12s; }
@@ -679,8 +687,8 @@
               <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h6l3 3v11H4V1zm5 1v3h3"/></svg>
               Documentation
             </a>
-            <!-- V2-only: Replay events button -->
-            <template x-if="version === 'v2'">
+            <!-- V2/V3-only: Replay events button -->
+            <template x-if="version !== 'v1'">
               <button class="btn btn-secondary btn-sm" @click="openDrawer()">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M2 8a6 6 0 1011.2-3H11V3.5h3.5V7H13a4.5 4.5 0 10-.4 4.2l1.2.9A6 6 0 012 8z"/></svg>
                 Replay events
@@ -950,18 +958,18 @@
     </div><!-- /main-wrap -->
   </div><!-- /shell -->
 
-  <!-- ════════ V2 DRAWER ════════ -->
-  <template x-if="version === 'v2' && drawerOpen">
+  <!-- ════════ V2/V3 REPLAY MODAL ════════ -->
+  <template x-if="version !== 'v1' && drawerOpen">
     <div class="modal-overlay" @click.self="drawerOpen=false">
       <div class="modal modal-replay modal-anim">
         <div class="modal-head">
           <div>
-            <div class="modal-head-title">Replay missed webhooks</div>
-            <div class="modal-head-sub">Re-send events your endpoint missed during downtime or disablement.</div>
+            <div class="modal-head-title" x-text="version === 'v3' ? 'Replay events to webhook URLs' : 'Replay missed webhooks'"></div>
+            <div class="modal-head-sub" x-text="version === 'v3' ? 'Choose the webhook URLs that should receive matching replayed events.' : 'Re-send events your endpoint missed during downtime or disablement.'"></div>
           </div>
           <button class="icon-btn" @click="drawerOpen=false">×</button>
         </div>
-        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; showPreview=false">
+        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; selectedUrls.length; showPreview=false">
           <!-- Recovery method -->
           <div class="form-group" style="margin-bottom:var(--spacing-6)">
             <label class="form-label">Recovery method <span class="req">*</span></label>
@@ -1010,8 +1018,8 @@
             </div>
           </div>
 
-          <!-- Event selector -->
-          <div class="form-group" style="margin-bottom:var(--spacing-6)">
+          <!-- Event selector (V2) -->
+          <div class="form-group" x-show="version !== 'v3'" style="margin-bottom:var(--spacing-6)">
             <label class="form-label">Events to replay <span class="req">*</span></label>
             <div class="hsel-search">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
@@ -1065,6 +1073,50 @@
             </div>
           </div>
 
+          <!-- Webhook URL selector (V3) -->
+          <div class="form-group" x-show="version === 'v3'" style="margin-bottom:var(--spacing-6)">
+            <label class="form-label">Webhook URLs to replay <span class="req">*</span></label>
+            <div class="hsel-search">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+              <input type="text" placeholder="Search webhook URL" x-model="urlSearch">
+            </div>
+            <div class="hsel-bar">
+              <span x-text="selectedUrlCountLabel()"></span>
+              <button class="hsel-clear" @click="clearUrls()">Clear All</button>
+            </div>
+            <div class="hsel-chips" x-show="selectedUrls.length>0">
+              <template x-if="isAllUrlsSelected()">
+                <span class="hsel-chip"><span>All webhook URLs</span><button @click="clearUrls()">×</button></span>
+              </template>
+              <template x-if="!isAllUrlsSelected()">
+                <template x-for="urlId in selectedUrls" :key="urlId">
+                  <span class="hsel-chip hsel-chip-url"><span x-text="urlById(urlId)?.url"></span><button @click="toggleUrl(urlId)">×</button></span>
+                </template>
+              </template>
+            </div>
+            <div class="hsel-tree">
+              <label class="hsel-row url-select-row" x-show="!urlSearch">
+                <input class="cb-input" type="checkbox" :checked="isAllUrlsSelected()" x-effect="$el.indeterminate = (selectedUrls.length>0 && !isAllUrlsSelected())" @change="toggleAllUrls()">
+                <span class="cb-box"></span>
+                <span class="hsel-name parent">All webhook URLs</span>
+              </label>
+              <template x-for="url in filteredUrls()" :key="url.id">
+                <label class="hsel-row url-select-row">
+                  <input class="cb-input" type="checkbox" :checked="isUrlSelected(url.id)" @change="toggleUrl(url.id)">
+                  <span class="cb-box"></span>
+                  <span class="url-select-main">
+                    <span class="url-select-head">
+                      <span class="url-select-text" x-text="url.url"></span>
+                      <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
+                    </span>
+                    <span class="url-select-meta" x-text="url.status === 'Enabled' ? 'Ready to receive replayed events' : 'Re-enable this URL before replaying to it'"></span>
+                  </span>
+                </label>
+              </template>
+              <div class="evt-empty" x-show="filteredUrls().length===0">No webhook URLs match your search.</div>
+            </div>
+          </div>
+
           <!-- Preview matching events (under event selection) -->
           <button class="btn btn-secondary" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
@@ -1076,20 +1128,27 @@
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
               <div>
                 <div class="card-title">Matching Events Preview</div>
-                <div class="card-subtitle"><span x-text="previewResults().length"></span> events found in selected range</div>
+                <div class="card-subtitle">
+                  <span x-text="previewResults().length"></span>
+                  <span x-text="version === 'v3' ? 'events matched for selected webhook URLs' : 'events found in selected range'"></span>
+                </div>
               </div>
               <div class="preview-tags">
                 <span class="tag-soft" x-show="recoveryMode==='date' && unackOnly">Unacknowledged only</span>
-                <span class="tag-soft" x-show="!isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
+                <span class="tag-soft" x-show="version !== 'v3' && !isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
+                <span class="tag-soft" x-show="version === 'v3' && !isAllUrlsSelected()" x-text="selectedUrls.length + ' URL' + (selectedUrls.length>1?'s':'')"></span>
               </div>
             </div>
             <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
               <table class="wh-table">
-                <thead><tr><th>Event Type</th><th>Entity ID</th><th>Attempted At</th><th>Code</th><th>Status</th><th></th></tr></thead>
+                <thead><tr><th>Event Type</th><th x-show="version === 'v3'">Webhook URL</th><th>Entity ID</th><th>Attempted At</th><th>Code</th><th>Status</th><th></th></tr></thead>
                 <tbody>
                   <template x-for="row in previewResults()" :key="row.id">
                     <tr>
                       <td><code x-text="row.type" style="font-family:var(--font-mono);font-size:var(--text-sm)"></code></td>
+                      <td x-show="version === 'v3'" class="preview-url-cell">
+                        <span class="preview-url-text" x-text="urlForPreviewRow(row).url"></span>
+                      </td>
                       <td style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.entity"></td>
                       <td style="color:var(--surface-text-secondary)" x-text="row.time"></td>
                       <td><span class="badge" :class="row.code>=200 && row.code<300 ? 'badge-positive':'badge-negative'" x-text="row.code"></span></td>
@@ -1143,13 +1202,16 @@
       <button :class="{active: version==='v2'}" @click="setVersion('v2')">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="3"/></svg> V2 · Button
       </button>
+      <button :class="{active: version==='v3'}" @click="setVersion('v3')">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v3H3zM3 7h10v3H3zM3 11h10v2H3z"/></svg> V3 · URLs
+      </button>
     </div>
   </div>
 
   <script>
     function webhookApp() {
       return {
-        version: 'v1',          // 'v1' (tab) | 'v2' (button)
+        version: 'v1',          // 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector)
         activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
         drawerOpen: false,
         showDisableAlert: true,
@@ -1235,25 +1297,63 @@
 
         // preview sample data (filtered by scope + selection)
         allPreviewEvents: [
-          { id: 1, type: 'order.paid',           entity: 'order_NK7x2P1234', time: 'Jun 7, 02:16 AM', code: 401, acked: false },
-          { id: 2, type: 'payment.captured',     entity: 'pay_NK7xABCD56',   time: 'Jun 7, 02:17 AM', code: 401, acked: false },
-          { id: 3, type: 'payment.authorized',   entity: 'pay_NK7xEFGH78',   time: 'Jun 8, 10:22 AM', code: 401, acked: false },
-          { id: 4, type: 'refund.processed',     entity: 'rfnd_NK7xIJKL90',  time: 'Jun 8, 11:04 AM', code: 200, acked: true  },
-          { id: 5, type: 'order.paid',           entity: 'order_NK7xMNOP12', time: 'Jun 9, 09:11 AM', code: 401, acked: false },
-          { id: 6, type: 'subscription.charged', entity: 'sub_NK7xQRST34',   time: 'Jun 8, 08:00 AM', code: 401, acked: false },
+          { id: 1, type: 'order.paid',           entity: 'order_NK7x2P1234', time: 'Jun 7, 02:16 AM', code: 401, acked: false, urlId: 'u2' },
+          { id: 2, type: 'payment.captured',     entity: 'pay_NK7xABCD56',   time: 'Jun 7, 02:17 AM', code: 401, acked: false, urlId: 'u2' },
+          { id: 3, type: 'payment.authorized',   entity: 'pay_NK7xEFGH78',   time: 'Jun 8, 10:22 AM', code: 401, acked: false, urlId: 'u1' },
+          { id: 4, type: 'refund.processed',     entity: 'rfnd_NK7xIJKL90',  time: 'Jun 8, 11:04 AM', code: 200, acked: true,  urlId: 'u1' },
+          { id: 5, type: 'order.paid',           entity: 'order_NK7xMNOP12', time: 'Jun 9, 09:11 AM', code: 401, acked: false, urlId: 'u3' },
+          { id: 6, type: 'subscription.charged', entity: 'sub_NK7xQRST34',   time: 'Jun 8, 08:00 AM', code: 401, acked: false, urlId: 'u2' },
         ],
         previewResults() {
           let evs = [...this.allPreviewEvents];
           if (this.recoveryMode === 'date' && this.unackOnly) evs = evs.filter(e => !e.acked);
-          if (!this.isAllSelected()) evs = evs.filter(e => this.selectedEvents.includes(e.type));
+          if (this.version === 'v3') evs = evs.filter(e => this.selectedUrls.includes(e.urlId));
+          else if (!this.isAllSelected()) evs = evs.filter(e => this.selectedEvents.includes(e.type));
           return evs;
         },
-        canPreview() {
-          if (this.selectedEvents.length === 0) return false;
+        urlForPreviewRow(row) { return this.urlById(row.urlId) || this.webhookUrls[0]; },
+        scopeValid() {
           if (this.recoveryMode === 'date') return !!this.dateFrom && !!this.dateTo;
           return this.paymentId.trim().length > 0;
         },
+        canPreview() {
+          if (!this.scopeValid()) return false;
+          if (this.version === 'v3') return this.selectedUrls.length > 0;
+          return this.selectedEvents.length > 0;
+        },
         runPreview() { if (this.canPreview()) this.showPreview = true; },
+
+        // ── V3: webhook URL selector ──
+        urlSearch: '',
+        webhookUrls: [
+          { id: 'u1', url: 'https://magentoshubham.share.zrok.io/magento247/pub/razorpay/payment/webhook', status: 'Enabled' },
+          { id: 'u2', url: 'https://api.yourstore.com/webhooks/razorpay', status: 'Disabled' },
+          { id: 'u3', url: 'https://api.yourstore.com/webhooks/rz-backup', status: 'Enabled' },
+        ],
+        selectedUrls: [],   // populated to "all" on init
+        urlById(id) { return this.webhookUrls.find(u => u.id === id); },
+        isUrlSelected(id) { return this.selectedUrls.includes(id); },
+        toggleUrl(id) {
+          if (this.isUrlSelected(id)) this.selectedUrls = this.selectedUrls.filter(x => x !== id);
+          else this.selectedUrls.push(id);
+          this.showPreview = false;
+        },
+        isAllUrlsSelected() { return this.selectedUrls.length === this.webhookUrls.length; },
+        toggleAllUrls() {
+          this.selectedUrls = this.isAllUrlsSelected() ? [] : this.webhookUrls.map(u => u.id);
+          this.showPreview = false;
+        },
+        clearUrls() { this.selectedUrls = []; this.showPreview = false; },
+        selectedUrlCountLabel() {
+          if (this.isAllUrlsSelected()) return 'All URLs selected';
+          if (this.selectedUrls.length === 0) return 'No URL selected';
+          return this.selectedUrls.length + ' URL' + (this.selectedUrls.length > 1 ? 's' : '') + ' selected';
+        },
+        filteredUrls() {
+          const q = this.urlSearch.trim().toLowerCase();
+          if (!q) return this.webhookUrls;
+          return this.webhookUrls.filter(u => u.url.toLowerCase().includes(q));
+        },
 
         // success state
         showSuccess: false,
@@ -1263,6 +1363,7 @@
         init() {
           this.selectedEvents = [...this.allEventNames()];
           this.expandedGroups = this.eventGroups.map(g => g.name);
+          this.selectedUrls = this.webhookUrls.map(u => u.id);
         },
 
         setVersion(v) {
