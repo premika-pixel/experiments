@@ -773,7 +773,15 @@
                       <input class="input" type="date" x-model="dateTo" max="2026-06-15">
                     </div>
                   </div>
-                  <div class="input-hint" style="margin:-4px 0 0">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+                  <div class="input-hint" style="margin:-4px 0 var(--spacing-5)">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+                  <!-- Unacknowledged filter (date mode) -->
+                  <div class="checkbox-card" style="margin-bottom:0">
+                    <input class="checkbox-input" type="checkbox" id="unackOnlyV1" x-model="unackOnly">
+                    <label for="unackOnlyV1">
+                      <div class="checkbox-title">Replay only unacknowledged events</div>
+                      <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
+                    </label>
+                  </div>
                 </div>
 
                 <!-- Payment ID -->
@@ -838,15 +846,6 @@
                     </template>
                     <div class="evt-empty" x-show="filteredGroups().length===0">No events match your search.</div>
                   </div>
-                </div>
-
-                <!-- Unacknowledged filter (date mode) -->
-                <div class="checkbox-card" x-show="recoveryMode==='date'" style="margin-bottom:var(--spacing-6)">
-                  <input class="checkbox-input" type="checkbox" id="unackOnlyV1" x-model="unackOnly">
-                  <label for="unackOnlyV1">
-                    <div class="checkbox-title">Replay only unacknowledged events</div>
-                    <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
-                  </label>
                 </div>
 
                 <!-- Action -->
@@ -991,7 +990,15 @@
                 <input class="input" type="date" x-model="dateTo" max="2026-06-15">
               </div>
             </div>
-            <div class="input-hint" style="margin:-4px 0 0">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+            <div class="input-hint" style="margin:-4px 0 var(--spacing-5)">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
+            <!-- Unacknowledged filter (date mode) -->
+            <div class="checkbox-card" style="margin-bottom:0">
+              <input class="checkbox-input" type="checkbox" id="unackOnlyV2" x-model="unackOnly">
+              <label for="unackOnlyV2">
+                <div class="checkbox-title">Replay only unacknowledged events</div>
+                <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
+              </label>
+            </div>
           </div>
 
           <!-- Payment ID -->
@@ -1056,15 +1063,6 @@
               </template>
               <div class="evt-empty" x-show="filteredGroups().length===0">No events match your search.</div>
             </div>
-          </div>
-
-          <!-- Unacknowledged filter (date mode) -->
-          <div class="checkbox-card" x-show="recoveryMode==='date'" style="margin-bottom:var(--spacing-6)">
-            <input class="checkbox-input" type="checkbox" id="unackOnlyV2" x-model="unackOnly">
-            <label for="unackOnlyV2">
-              <div class="checkbox-title">Replay only unacknowledged events</div>
-              <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
-            </label>
           </div>
 
           <!-- Preview matching events (under event selection) -->
