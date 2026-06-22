@@ -943,7 +943,7 @@
               <td>rnelson@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T27Sj41QjToYV2</span></td>
               <td>Tue Jun 16, 6:51am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="card-testing">
               <td>₹50.00</td>
@@ -953,7 +953,7 @@
               <td>jamesanderson@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T26zbV4p22RawV</span></td>
               <td>Tue Jun 16, 6:23am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="card-testing">
               <td>₹50.00</td>
@@ -963,7 +963,7 @@
               <td>katrinalee@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T26xijCyDCLEsU</span></td>
               <td>Tue Jun 16, 6:21am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="card-testing">
               <td>₹1.00</td>
@@ -973,7 +973,7 @@
               <td>andrew22@gmail.com<br><span class="small-muted">flagged · ₹1 probe</span></td>
               <td><span class="pid">pay_T26h1B0hfHQZB1</span></td>
               <td>Tue Jun 16, 6:06am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="velocity">
               <td>₹50.00</td>
@@ -983,7 +983,7 @@
               <td>147.50.69.21<br><span class="small-muted">datacenter IP · same source</span></td>
               <td><span class="pid">pay_T26U2QKJsSCHii</span></td>
               <td>Tue Jun 16, 5:53am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="velocity">
               <td>₹50.00</td>
@@ -993,7 +993,7 @@
               <td>185.170.104.53<br><span class="small-muted">datacenter IP · attack cluster</span></td>
               <td><span class="pid">pay_T269Z9Lkkdz4Aa</span></td>
               <td>Tue Jun 16, 5:48am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="pattern">
               <td>₹50.00</td>
@@ -1003,7 +1003,7 @@
               <td>firstnamelastname@gmail.com<br><span class="small-muted">flagged · pattern match</span></td>
               <td><span class="pid">pay_T2602MnPpTrXjB</span></td>
               <td>Tue Jun 16, 5:31am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="pattern">
               <td>₹50.00</td>
@@ -1013,7 +1013,7 @@
               <td>+91 7197 829029<br><span class="small-muted">synthetic identity</span></td>
               <td><span class="pid">pay_T25ymZjvKfgQNL</span></td>
               <td>Tue Jun 16, 5:22am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
             <tr data-attack="card-testing">
               <td>₹50.00</td>
@@ -1023,7 +1023,7 @@
               <td>henry15@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T25vK8nmqVTuoP</span></td>
               <td>Tue Jun 16, 5:14am</td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
           </tbody>
         </table>
@@ -1059,9 +1059,7 @@
   }
 
   function showShieldDetail() {
-    if (document.body.dataset.version === 'v2') {
-      showView('shield-detail');
-    }
+    showView('shield-detail');
   }
 
   function showView(name) {
