@@ -234,7 +234,7 @@
   .badge.green { background: var(--green-100); color: var(--green-700); }
   .badge.red { background: var(--red-bg); color: var(--red); }
   .badge.amber { background: var(--amber-bg); color: var(--amber); }
-  .badge.shield { background: var(--green-50); color: var(--green-700); border: 1px solid #BBF7D0; }
+  .badge.shield { background: var(--red-bg); color: var(--red); }
   .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
   /* ====== Drill-in summary strip (mirrors Failed page) ====== */
@@ -250,6 +250,7 @@
     box-shadow: var(--shadow);
     overflow: hidden;
   }
+  .summary-strip.failed-summary { grid-template-columns: repeat(4, 1fr); }
   .summary-cell {
     padding: 22px 24px; border-right: 1px solid var(--border);
   }
@@ -297,8 +298,12 @@
   .v2-only { display: none; }
   body[data-version="v2"] .v1-only { display: none; }
   body[data-version="v2"] .v2-only { display: inline; }
-  body[data-version="v2"] .all-tab.active { background: transparent; color: var(--ink-3); font-weight: 500; }
-  body[data-version="v2"] .failed-tab { background: var(--bg); color: var(--ink); font-weight: 600; }
+  .failed-filter-label { display: none; }
+  body[data-payment-tab="failed"] .default-filter-label { display: none; }
+  body[data-payment-tab="failed"] .failed-filter-label { display: inline; }
+  body[data-payment-tab="failed"] .payment-row:not([data-payment-state="failed"]) { display: none; }
+  body[data-payment-tab="all"] .table-meta-failed { display: none; }
+  body[data-payment-tab="failed"] .table-meta-all { display: none; }
 
   /* Test mode strip */
   .testmode {
@@ -327,12 +332,69 @@
     color: var(--blue-700); background: var(--blue-bg);
   }
 
+  /* ====== Payment detail page ====== */
+  .detail-layout {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+    gap: 16px; align-items: start;
+  }
+  .detail-stack { display: flex; flex-direction: column; gap: 16px; }
+  .detail-card {
+    background: #fff; border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .payment-hero { padding: 24px; }
+  .payment-heading { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .failed-icon {
+    width: 48px; height: 48px; background: var(--red-bg); color: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; line-height: 1;
+  }
+  .payment-amount { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .detail-muted { color: var(--ink-3); font-size: 13px; }
+  .detail-divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .shield-callout {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: #FAFBFC; padding: 18px; display: grid; gap: 14px;
+  }
+  .callout-row { display: grid; grid-template-columns: 18px 1fr; gap: 12px; color: var(--ink-2); }
+  .callout-row b { color: var(--ink); }
+  .callout-icon { color: var(--ink-3); text-align: center; }
+  .detail-card-title { padding: 16px 20px; font-size: 16px; font-weight: 600; border-bottom: 1px solid var(--border); }
+  .detail-row {
+    display: grid; grid-template-columns: 220px 1fr; gap: 16px;
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: var(--ink-2); }
+  .detail-value { color: var(--ink); }
+  .detail-link { color: var(--blue-700); font-weight: 600; }
+  .timeline-card { padding: 22px 20px; }
+  .timeline-title { font-size: 18px; font-weight: 600; margin-bottom: 18px; }
+  .timeline-item { display: grid; grid-template-columns: 22px 1fr; gap: 12px; position: relative; padding-bottom: 22px; }
+  .timeline-item:not(:last-child)::after {
+    content: ''; position: absolute; left: 10px; top: 22px; bottom: 0; width: 1px; background: var(--border);
+  }
+  .timeline-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; z-index: 1;
+  }
+  .timeline-dot.ok { background: var(--green-100); color: var(--green-700); }
+  .timeline-dot.fail { background: var(--red-bg); color: var(--red); }
+  .timeline-heading { font-weight: 600; margin-bottom: 4px; }
+  .timeline-note { background: var(--red-bg); border-radius: var(--radius-sm); padding: 10px; margin-top: 10px; color: var(--ink-2); }
+  .refund-row { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; }
+  .disabled-button {
+    color: var(--muted); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 16px; font-weight: 600; background: #FAFBFC;
+  }
+
   /* Small util */
   .reason-cell { display: inline-flex; gap: 8px; align-items: center; color: var(--ink-2); }
   .reason-icon { width: 14px; height: 14px; color: var(--ink-3); }
 </style>
 </head>
-<body data-version="v2">
+<body data-version="v2" data-payment-tab="all">
 
 <!-- ====== Top nav ====== -->
 <header class="topnav">
@@ -423,7 +485,7 @@
           <div class="card-value amount">0.00</div>
           <div class="card-sub">0 open · 0 under-review</div>
         </div>
-        <div class="card clickable">
+        <div class="card clickable" onclick="showView('failed')">
           <div class="card-label"><span class="icon icon-fail">⊗</span> Failed ⓘ</div>
           <div class="card-value">21</div>
           <div class="card-sub">76% Customer related · 24% Bank related</div>
@@ -445,27 +507,26 @@
       <!-- Tabs for the payments table -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <div class="sub-tabs">
-          <div class="sub-tab active all-tab">All</div>
+          <div class="sub-tab active all-tab" onclick="setPaymentTab('all')">All</div>
           <div class="sub-tab">Created</div>
           <div class="sub-tab">Captured</div>
           <div class="sub-tab">Refunded</div>
-          <div class="sub-tab failed-tab">Failed</div>
+          <div class="sub-tab failed-tab" onclick="setPaymentTab('failed')">Failed</div>
         </div>
         <div class="search-table">🔍 Search · in Payment ID ⇅</div>
       </div>
 
       <div class="toolbar">
         <div class="filter-chip">Date Range: 10/06/2026 – 17/06/2026 <span class="close">✕</span></div>
-        <div class="filter-chip dashed">
-          <span class="v1-only">Status ▾</span>
-          <span class="v2-only">Status: Protected Payments ▾</span>
-        </div>
         <div class="filter-chip dashed">Payment Method ▾</div>
         <div class="filter-chip dashed">Processed by: All ▾</div>
       </div>
 
       <div class="table-wrap">
-        <div class="table-meta">Showing 1–6 Items</div>
+        <div class="table-meta">
+          <span class="table-meta-all">Showing 1–6 Items</span>
+          <span class="table-meta-failed">Showing 1–3 Failed Items</span>
+        </div>
         <table class="tx">
           <thead>
             <tr>
@@ -474,7 +535,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
+            <tr class="payment-row" data-payment-state="captured">
               <td><span class="pid">pay_T2Wrqljc2yCwc7</span></td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
               <td>616278865548<br><span class="small-muted">UPI</span></td>
@@ -484,7 +545,7 @@
               <td><span class="badge green"><span class="dot"></span> Captured</span></td>
               <td><a class="row-details">Details ›</a></td>
             </tr>
-            <tr>
+            <tr class="payment-row" data-payment-state="failed">
               <td><span class="pid">pay_T2GY3o4jl0HC3D</span></td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
               <td>--<br><span class="small-muted">Netbanking</span></td>
@@ -493,11 +554,11 @@
               <td>₹327.00</td>
               <td>
                 <span class="v1-only"><span class="badge red">✕ Gateway – Technical Error</span></span>
-                <span class="v2-only"><span class="badge shield">🛡 Protected by shield</span></span>
+                <span class="v2-only"><span class="badge shield">✕ Protected by shield</span></span>
               </td>
-              <td><a class="row-details">Details ›</a></td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
             </tr>
-            <tr>
+            <tr class="payment-row" data-payment-state="failed">
               <td><span class="pid">pay_T2JV89tm36kTOu</span></td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
               <td>--<br><span class="small-muted">UPI</span></td>
@@ -507,7 +568,7 @@
               <td><span class="badge red">✕ Customer – Payment Timed Out</span></td>
               <td><a class="row-details">Details ›</a></td>
             </tr>
-            <tr>
+            <tr class="payment-row" data-payment-state="failed">
               <td><span class="pid">pay_T1sCO64P1i1MVr</span></td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
               <td>--<br><span class="small-muted">Netbanking</span></td>
@@ -517,7 +578,7 @@
               <td><span class="badge red">✕ Gateway – Technical Error</span></td>
               <td><a class="row-details">Details ›</a></td>
             </tr>
-            <tr>
+            <tr class="payment-row" data-payment-state="captured">
               <td><span class="pid">pay_T0HiSbNSDSap7J</span></td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
               <td>616278865548<br><span class="small-muted">UPI</span></td>
@@ -527,7 +588,7 @@
               <td><span class="badge green"><span class="dot"></span> Captured</span></td>
               <td><a class="row-details">Details ›</a></td>
             </tr>
-            <tr>
+            <tr class="payment-row" data-payment-state="pending">
               <td><span class="pid">pay_T0GdZGOkz8dlhZ</span></td>
               <td><span class="provider"><span class="provider-logo"></span> delivery_partr</span></td>
               <td>--<br><span class="small-muted">Cash on Delivery</span></td>
@@ -543,7 +604,255 @@
     </section>
 
 
-    <!-- ====================== VIEW 2: BLOCKED PAYMENTS DRILL-IN ====================== -->
+    <!-- ====================== VIEW 2: FAILED PAYMENTS LISTING ====================== -->
+    <section id="view-failed" class="view">
+
+      <div class="drill-header">
+        <a class="go-back" onclick="showView('overview')">‹ Go Back</a>
+        <div class="drill-title">Failed <span class="period">Last 30 days ▾</span></div>
+      </div>
+
+      <div class="summary-strip failed-summary">
+        <div class="summary-cell">
+          <div class="label">Failed ⓘ</div>
+          <div class="value">25</div>
+          <div class="unit">payments</div>
+        </div>
+        <div class="summary-cell">
+          <div class="label">Bank-Related ⓘ</div>
+          <div class="value">5</div>
+          <div class="unit">payments</div>
+        </div>
+        <div class="summary-cell">
+          <div class="label">Customer drop-offs ⓘ</div>
+          <div class="value">20</div>
+          <div class="unit">payments</div>
+        </div>
+        <div class="summary-cell">
+          <div class="label">Business failures or others ⓘ</div>
+          <div class="value">0</div>
+          <div class="unit">payments</div>
+        </div>
+      </div>
+
+      <div class="section-title">Failed payments</div>
+
+      <div class="table-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 12px 10px;">
+          <div class="sub-tabs">
+            <div class="sub-tab active">All</div>
+            <div class="sub-tab">Card</div>
+            <div class="sub-tab">UPI</div>
+            <div class="sub-tab">Netbanking</div>
+          </div>
+          <div class="search-table">🔍 Search · in Payment ID ⇅</div>
+        </div>
+
+        <div class="toolbar" style="margin:0; padding:0 12px 14px;">
+          <div class="filter-chip">Date Range: 12/06/2026 – 19/06/2026 <span class="close">✕</span></div>
+          <div class="filter-chip dashed">Payment Method ▾</div>
+          <div class="filter-chip dashed">Processed by: All ▾</div>
+          <div class="filter-chip dashed">Status ▾</div>
+        </div>
+
+        <div class="table-meta">Showing 1–3 Items</div>
+        <table class="tx">
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Payment provider</th>
+              <th>Status</th>
+              <th>Reason</th>
+              <th>Customer detail</th>
+              <th>Payment ID</th>
+              <th>Bank RRN</th>
+              <th>Created on</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>₹327.00</td>
+              <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
+              <td>
+                <span class="v1-only"><span class="badge red">✕ Gateway – Technical Error</span></span>
+                <span class="v2-only"><span class="badge shield">✕ Protected by shield</span></span>
+              </td>
+              <td><span class="reason-cell">Customer drop-offs</span></td>
+              <td>+91 9324 341848<br><span class="small-muted">bteetas14@gmail.com</span></td>
+              <td><span class="pid">pay_T2GY3o4jl0HC3D</span></td>
+              <td>--<br><span class="small-muted">Netbanking</span></td>
+              <td>Tue Jun 16, 3:44pm</td>
+              <td><a class="row-details" onclick="showShieldDetail()">Details ›</a></td>
+            </tr>
+            <tr>
+              <td>₹2.54</td>
+              <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
+              <td><span class="badge red">✕ Customer – Payment Timed Out</span></td>
+              <td><span class="reason-cell">Customer drop-offs</span></td>
+              <td>+91 9090 909090<br><span class="small-muted">surajdesai.2705@gmail.com</span></td>
+              <td><span class="pid">pay_T2JV89tm36kTOu</span></td>
+              <td>--<br><span class="small-muted">UPI</span></td>
+              <td>Tue Jun 16, 6:37pm</td>
+              <td><a class="row-details">Details ›</a></td>
+            </tr>
+            <tr>
+              <td>₹11.80</td>
+              <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
+              <td><span class="badge red">✕ Gateway – Technical Error</span></td>
+              <td><span class="reason-cell">Bank-Related</span></td>
+              <td>+91 9421 450577<br><span class="small-muted">anitejtripathy@gmail.com</span></td>
+              <td><span class="pid">pay_T1sCO64P1i1MVr</span></td>
+              <td>--<br><span class="small-muted">Netbanking</span></td>
+              <td>Mon Jun 15, 3:55pm</td>
+              <td><a class="row-details">Details ›</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- ====================== VIEW 3: SHIELD-PROTECTED FAILED PAYMENT DETAIL ====================== -->
+    <section id="view-shield-detail" class="view">
+
+      <div class="drill-header">
+        <a class="go-back" onclick="showView('failed')">‹ Go Back</a>
+      </div>
+
+      <div class="detail-layout">
+        <div class="detail-stack">
+          <div class="detail-card payment-hero">
+            <div class="payment-heading">
+              <div class="failed-icon">×</div>
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                  <div class="payment-amount">₹327.00</div>
+                  <span class="badge shield">✕ Payment Failed: Protected by Razorpay Shield</span>
+                </div>
+                <div class="detail-muted">Created on: Tue Jun 16, 3:44pm</div>
+              </div>
+            </div>
+            <div class="detail-divider"></div>
+            <div class="shield-callout">
+              <div class="callout-row">
+                <span class="callout-icon">⚠</span>
+                <div>
+                  <b>This payment was shield-protected</b><br>
+                  Razorpay Shield blocked this payment because it matched a risky card-testing pattern. The payment failed before completion, so no money was captured from the customer.
+                </div>
+              </div>
+              <div class="callout-row">
+                <span class="callout-icon">🛡</span>
+                <div>
+                  <b>Why did this fail?</b><br>
+                  The failure was triggered by Razorpay Shield protection, not by merchant setup or checkout downtime.
+                </div>
+              </div>
+              <div class="callout-row">
+                <span class="callout-icon">↺</span>
+                <div>
+                  <b>What should I do next?</b><br>
+                  No action is needed. Treat this as a blocked protection event and not as a customer conversion failure.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-title">Details</div>
+            <div class="detail-row">
+              <div class="detail-label">Payment ID ⓘ</div>
+              <div class="detail-value"><span class="pid">pay_T2GY3o4jl0HC3D</span> <span class="detail-link">⧉</span></div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Status</div>
+              <div class="detail-value"><span class="badge shield">Protected by shield</span></div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Error</div>
+              <div class="detail-value">BAD_REQUEST_ERROR</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Error Source</div>
+              <div class="detail-value">razorpay_shield</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Error Step</div>
+              <div class="detail-value">risk_screening</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Error Reason</div>
+              <div class="detail-value">shield_protection_blocked</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Shield reason</div>
+              <div class="detail-value">Card testing pattern · high-risk attempt blocked</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Bank RRN ⓘ</div>
+              <div class="detail-value">--</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Order ID ⓘ</div>
+              <div class="detail-value"><span class="detail-link">order_T3s0VLCNDKaxls</span> <span class="detail-link">⧉</span></div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Payment method</div>
+              <div class="detail-value">Netbanking<br><span class="small-muted">Payer Account Type: --</span></div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Customer details</div>
+              <div class="detail-value">+91 9324 341848 <span class="detail-link">⧉</span><br>bteetas14@gmail.com</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Gateway</div>
+              <div class="detail-value">Razorpay</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Total Fee</div>
+              <div class="detail-value">₹0.00<br><span class="small-muted">Razorpay Fee - ₹0.00<br>GST - ₹0.00</span></div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Notes</div>
+              <div class="detail-value"><b>shield_action:</b> blocked<br><b>risk_signal:</b> card_testing_pattern<br><b>protection:</b> Razorpay Shield</div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="refund-row">
+              <div class="section-title" style="margin:0;">Refund</div>
+              <button class="disabled-button" type="button" disabled>Issue refund</button>
+            </div>
+            <div class="detail-row" style="grid-template-columns:1fr;">
+              <div class="detail-value">No refund is needed because this shield-protected payment was blocked before capture.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card timeline-card">
+          <div class="timeline-title">Timeline</div>
+          <div class="timeline-item">
+            <div class="timeline-dot ok">✓</div>
+            <div>
+              <div class="timeline-heading">Payment created</div>
+              <div class="detail-muted">Tue Jun 16, 2026 3:44 PM</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot fail">×</div>
+            <div>
+              <div class="timeline-heading">Payment protected by Shield</div>
+              <div class="timeline-note">Razorpay Shield blocked this payment because it matched a risky card-testing pattern.</div>
+              <div class="detail-muted" style="margin-top:8px;">The payment failed safely. No amount was captured.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ====================== VIEW 4: BLOCKED / PROTECTED PAYMENTS DRILL-IN ====================== -->
     <section id="view-drill" class="view">
 
       <div class="drill-header">
@@ -741,6 +1050,18 @@
 <script>
   function setVersion(version) {
     document.body.dataset.version = version;
+  }
+
+  function setPaymentTab(tab) {
+    document.body.dataset.paymentTab = tab;
+    document.querySelectorAll('.sub-tab').forEach(tabEl => tabEl.classList.remove('active'));
+    document.querySelector(`.${tab}-tab`).classList.add('active');
+  }
+
+  function showShieldDetail() {
+    if (document.body.dataset.version === 'v2') {
+      showView('shield-detail');
+    }
   }
 
   function showView(name) {
