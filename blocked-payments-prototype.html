@@ -128,6 +128,7 @@
     gap: 16px;
     margin-bottom: 24px;
   }
+  body[data-version="v2"] .overview-stats { grid-template-columns: repeat(3, 1fr); }
   .card.collected-card .card-value { font-size: 36px; }
   .card.collected-card .settlement-note { color: var(--ink-3); font-size: 13px; margin-top: 28px; }
   .card.collected-card .settlement-note a { color: var(--blue-700); }
@@ -180,6 +181,7 @@
   .card.blocked-card { background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 75%); border-color: #BBF7D0; }
   .card.blocked-card .card-label { color: var(--green-700); }
   .card.blocked-card .card-value { color: var(--green-700); }
+  body[data-version="v2"] .card.blocked-card { display: none; }
 
   /* ====== Tabbed table ====== */
   .toolbar { display: flex; gap: 8px; align-items: center; margin: 20px 0 14px; flex-wrap: wrap; }
@@ -232,6 +234,7 @@
   .badge.green { background: var(--green-100); color: var(--green-700); }
   .badge.red { background: var(--red-bg); color: var(--red); }
   .badge.amber { background: var(--amber-bg); color: var(--amber); }
+  .badge.shield { background: var(--green-50); color: var(--green-700); border: 1px solid #BBF7D0; }
   .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
   /* ====== Drill-in summary strip (mirrors Failed page) ====== */
@@ -290,6 +293,12 @@
   /* ====== View switching ====== */
   .view { display: none; }
   .view.active { display: block; }
+  .v1-only { display: inline; }
+  .v2-only { display: none; }
+  body[data-version="v2"] .v1-only { display: none; }
+  body[data-version="v2"] .v2-only { display: inline; }
+  body[data-version="v2"] .all-tab.active { background: transparent; color: var(--ink-3); font-weight: 500; }
+  body[data-version="v2"] .failed-tab { background: var(--bg); color: var(--ink); font-weight: 600; }
 
   /* Test mode strip */
   .testmode {
@@ -301,12 +310,29 @@
   .toggle { width: 28px; height: 16px; background: #E2E8F0; border-radius: 999px; position: relative; }
   .toggle::after { content: ''; position: absolute; left: 2px; top: 2px; width: 12px; height: 12px; background: #fff; border-radius: 50%; }
 
+  .version-switch {
+    position: fixed; right: 16px; bottom: 16px; z-index: 20;
+    display: inline-flex; gap: 4px; padding: 4px;
+    background: #fff; border: 1px solid var(--border); border-radius: 999px;
+    box-shadow: var(--shadow);
+  }
+  .version-option {
+    border: 0; background: transparent; color: var(--ink-3);
+    border-radius: 999px; padding: 7px 12px;
+    font: inherit; font-size: 12px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  body[data-version="v1"] .version-option[data-version-target="v1"],
+  body[data-version="v2"] .version-option[data-version-target="v2"] {
+    color: var(--blue-700); background: var(--blue-bg);
+  }
+
   /* Small util */
   .reason-cell { display: inline-flex; gap: 8px; align-items: center; color: var(--ink-2); }
   .reason-icon { width: 14px; height: 14px; color: var(--ink-3); }
 </style>
 </head>
-<body>
+<body data-version="v2">
 
 <!-- ====== Top nav ====== -->
 <header class="topnav">
@@ -385,7 +411,7 @@
         </div>
       </div>
 
-      <!-- Bottom row: 4 stat cards — Refunds / Disputes / Failed / Blocked -->
+      <!-- Bottom row: v1 shows Refunds / Disputes / Failed / Blocked; v2 removes the separate blocked card. -->
       <div class="overview-stats">
         <div class="card clickable">
           <div class="card-label"><span class="icon icon-refund">↺</span> Refunds ⓘ</div>
@@ -419,18 +445,21 @@
       <!-- Tabs for the payments table -->
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
         <div class="sub-tabs">
-          <div class="sub-tab active">All</div>
+          <div class="sub-tab active all-tab">All</div>
           <div class="sub-tab">Created</div>
           <div class="sub-tab">Captured</div>
           <div class="sub-tab">Refunded</div>
-          <div class="sub-tab">Failed</div>
+          <div class="sub-tab failed-tab">Failed</div>
         </div>
         <div class="search-table">🔍 Search · in Payment ID ⇅</div>
       </div>
 
       <div class="toolbar">
         <div class="filter-chip">Date Range: 10/06/2026 – 17/06/2026 <span class="close">✕</span></div>
-        <div class="filter-chip dashed">Status ▾</div>
+        <div class="filter-chip dashed">
+          <span class="v1-only">Status ▾</span>
+          <span class="v2-only">Status: Protected Payments ▾</span>
+        </div>
         <div class="filter-chip dashed">Payment Method ▾</div>
         <div class="filter-chip dashed">Processed by: All ▾</div>
       </div>
@@ -462,7 +491,10 @@
               <td>+91 9324 341848<br><span class="small-muted">bteetas14@gmail.com</span></td>
               <td>Tue Jun 16, 3:44pm</td>
               <td>₹327.00</td>
-              <td><span class="badge red">✕ Gateway – Technical Error</span></td>
+              <td>
+                <span class="v1-only"><span class="badge red">✕ Gateway – Technical Error</span></span>
+                <span class="v2-only"><span class="badge shield">🛡 Protected by shield</span></span>
+              </td>
               <td><a class="row-details">Details ›</a></td>
             </tr>
             <tr>
@@ -516,21 +548,29 @@
 
       <div class="drill-header">
         <a class="go-back" onclick="showView('overview')">‹ Go Back</a>
-        <div class="drill-title">Blocked <span class="period">Last 30 days ▾</span></div>
+        <div class="drill-title">
+          <span class="v1-only">Blocked</span>
+          <span class="v2-only">Protected Payments</span>
+          <span class="period">Last 30 days ▾</span>
+        </div>
       </div>
 
       <!-- Compact protection alert -->
       <div class="protection-alert">
         <span class="alert-icon">🛡</span>
         <span class="alert-text">
-          <b>Card-testing protection active</b> — Razorpay blocked 1,184 attack attempts on your checkout. None succeeded, your business is protected.
+          <span class="v1-only"><b>Card-testing protection active</b> — Razorpay blocked 1,184 attack attempts on your checkout. None succeeded, your business is protected.</span>
+          <span class="v2-only"><b>Card-testing protection active</b> — Razorpay protected your checkout from 1,184 attack attempts. None succeeded, your business is protected.</span>
         </span>
       </div>
 
       <!-- Summary strip — attack-level metrics -->
       <div class="summary-strip">
         <div class="summary-cell">
-          <div class="label">Attempts blocked ⓘ</div>
+          <div class="label">
+            <span class="v1-only">Attempts blocked ⓘ</span>
+            <span class="v2-only">Attempts protected ⓘ</span>
+          </div>
           <div class="value">1,184</div>
           <div class="unit">none succeeded</div>
         </div>
@@ -546,7 +586,10 @@
         </div>
       </div>
 
-      <div class="section-title">Blocked payments</div>
+      <div class="section-title">
+        <span class="v1-only">Blocked payments</span>
+        <span class="v2-only">Protected payments</span>
+      </div>
 
       <!-- Search bar (no attack-type tabs — single unified list of all blocked attempts) -->
       <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
@@ -556,13 +599,19 @@
       <div class="toolbar">
         <div class="filter-chip">Date Range: 10/06/2026 – 17/06/2026 <span class="close">✕</span></div>
         <div class="filter-chip dashed">Payment Method ▾</div>
-        <div class="filter-chip dashed">Block Reason ▾</div>
+        <div class="filter-chip dashed">
+          <span class="v1-only">Block Reason ▾</span>
+          <span class="v2-only">Protection Reason ▾</span>
+        </div>
         <div class="filter-chip dashed">Processed by: All ▾</div>
         <a class="clear-filter">Clear Filter</a>
       </div>
 
       <div class="table-wrap">
-        <div class="table-meta">Showing 1–9 of 1,184 blocked attempts</div>
+        <div class="table-meta">
+          <span class="v1-only">Showing 1–9 of 1,184 blocked attempts</span>
+          <span class="v2-only">Showing 1–9 of 1,184 protected attempts</span>
+        </div>
         <table class="tx" id="blocked-table">
           <thead>
             <tr>
@@ -580,7 +629,7 @@
             <tr data-attack="card-testing">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected by shield</span></span></td>
               <td><span class="reason-cell">🧪 Card testing · ₹50 probe</span></td>
               <td>rnelson@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T27Sj41QjToYV2</span></td>
@@ -590,7 +639,7 @@
             <tr data-attack="card-testing">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🧪 Card testing · ₹50 probe</span></td>
               <td>jamesanderson@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T26zbV4p22RawV</span></td>
@@ -600,7 +649,7 @@
             <tr data-attack="card-testing">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🧪 Card testing · ₹50 probe</span></td>
               <td>katrinalee@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T26xijCyDCLEsU</span></td>
@@ -610,7 +659,7 @@
             <tr data-attack="card-testing">
               <td>₹1.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🧪 Card testing · ₹1 probe</span></td>
               <td>andrew22@gmail.com<br><span class="small-muted">flagged · ₹1 probe</span></td>
               <td><span class="pid">pay_T26h1B0hfHQZB1</span></td>
@@ -620,7 +669,7 @@
             <tr data-attack="velocity">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">⚡ High velocity · 612 attempts/hr</span></td>
               <td>147.50.69.21<br><span class="small-muted">datacenter IP · same source</span></td>
               <td><span class="pid">pay_T26U2QKJsSCHii</span></td>
@@ -630,7 +679,7 @@
             <tr data-attack="velocity">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">⚡ High velocity · same JA4 fingerprint</span></td>
               <td>185.170.104.53<br><span class="small-muted">datacenter IP · attack cluster</span></td>
               <td><span class="pid">pay_T269Z9Lkkdz4Aa</span></td>
@@ -640,7 +689,7 @@
             <tr data-attack="pattern">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🔍 Synthetic identity · fabricated email pattern</span></td>
               <td>firstnamelastname@gmail.com<br><span class="small-muted">flagged · pattern match</span></td>
               <td><span class="pid">pay_T2602MnPpTrXjB</span></td>
@@ -650,7 +699,7 @@
             <tr data-attack="pattern">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🔍 Suspicious phone number · synthetic</span></td>
               <td>+91 7197 829029<br><span class="small-muted">synthetic identity</span></td>
               <td><span class="pid">pay_T25ymZjvKfgQNL</span></td>
@@ -660,7 +709,7 @@
             <tr data-attack="card-testing">
               <td>₹50.00</td>
               <td><span class="provider"><span class="provider-logo"></span> Razorpay</span></td>
-              <td><span class="badge green">🛡 Blocked</span></td>
+              <td><span class="v1-only"><span class="badge green">🛡 Blocked</span></span><span class="v2-only"><span class="badge shield">🛡 Protected</span></span></td>
               <td><span class="reason-cell">🧪 Card testing · ₹50 probe</span></td>
               <td>henry15@gmail.com<br><span class="small-muted">flagged · synthetic</span></td>
               <td><span class="pid">pay_T25vK8nmqVTuoP</span></td>
@@ -673,7 +722,9 @@
 
       <p style="color:var(--ink-3); font-size:12.5px; margin-top:18px; text-align:center;">
         Same underlying records as the original failed-payment list — reframed from
-        <i>"148 of my payments failed"</i> to <i>"we stopped 1,184 attacks for you."</i>
+        <i>"148 of my payments failed"</i> to
+        <span class="v1-only"><i>"we stopped 1,184 attacks for you."</i></span>
+        <span class="v2-only"><i>"Razorpay protected 1,184 risky attempts for you."</i></span>
         These attempts are retained as evidence for disputes and risk audits.
       </p>
     </section>
@@ -682,8 +733,16 @@
 </div>
 
 <div class="testmode"><span>Test Mode</span><span class="toggle"></span></div>
+<div class="version-switch" role="group" aria-label="Prototype version">
+  <button class="version-option" type="button" data-version-target="v1" onclick="setVersion('v1')">v1 (old)</button>
+  <button class="version-option" type="button" data-version-target="v2" onclick="setVersion('v2')">v2 (updated)</button>
+</div>
 
 <script>
+  function setVersion(version) {
+    document.body.dataset.version = version;
+  }
+
   function showView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
