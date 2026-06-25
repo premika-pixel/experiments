@@ -557,7 +557,7 @@
     .tag-soft { background: var(--feedback-notice-bg); color: var(--feedback-notice-text); border: 1px solid var(--feedback-notice-border); border-radius: var(--radius-round); padding: 2px var(--spacing-4); font-size: var(--text-xs); font-weight: var(--fw-semibold); white-space: nowrap; }
 
     /* ── Replay modal (V2 — centered, Blade small modal) ── */
-    .modal.modal-replay { width: 1024px; max-width: 94vw; max-height: 90vh; display: flex; flex-direction: column; text-align: left; }
+    .modal.modal-replay { width: 1024px; max-width: 94vw; height: min(760px, 90vh); max-height: 90vh; display: flex; flex-direction: column; text-align: left; }
     /* Preview table inside the modal — compact padding so all columns fit without horizontal scroll */
     .modal-replay .wh-table th, .modal-replay .wh-table td { padding: var(--spacing-4) var(--spacing-5); }
     .modal-replay .wh-table { table-layout: auto; }
@@ -604,7 +604,6 @@
       font-size: 10px; line-height: 14px; text-transform: uppercase;
       color: rgba(255,255,255,0.48); font-weight: var(--fw-semibold); letter-spacing: 0.08em;
     }
-    .vp-divider { height: 1px; background: rgba(255,255,255,0.12); margin: 2px var(--spacing-2); }
     .vp-seg { display: flex; flex-direction: column; background: rgba(255,255,255,0.08); border-radius: 18px; padding: 4px; gap: 4px; }
     .vp-seg button {
       border: none; cursor: pointer; font-family: inherit; background: transparent;
@@ -1036,12 +1035,13 @@
       <div class="modal modal-replay modal-anim">
         <div class="modal-head">
           <div>
-            <div class="modal-head-title" x-text="version === 'v3' ? 'Replay events to webhook URLs' : (version === 'i2' ? 'Replay events by webhook URL' : 'Replay missed webhooks')"></div>
-            <div class="modal-head-sub" x-text="version === 'v3' ? 'Choose the webhook URLs that should receive matching replayed events.' : (version === 'i2' ? 'Choose URLs, select their events, then replay only the rows you approve.' : 'Re-send events your endpoint missed during downtime or disablement.')"></div>
+            <div class="modal-head-title" x-text="version === 'v3' ? 'Replay events to webhook URLs' : (isUrlEventFlow() ? 'Replay events by webhook URL' : 'Replay missed webhooks')"></div>
+            <div class="modal-head-sub" x-text="version === 'v3' ? 'Choose the webhook URLs that should receive matching replayed events.' : (version === 'i3' ? 'Step through setup first, then review and select matching events before replay.' : (version === 'i2' ? 'Choose URLs, select their events, then replay only the rows you approve.' : 'Re-send events your endpoint missed during downtime or disablement.'))"></div>
           </div>
           <button class="icon-btn" @click="drawerOpen=false">×</button>
         </div>
-        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false">
+        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
+          <div x-show="version !== 'i3' || replayStep === 'setup'">
           <!-- Recovery method -->
           <div class="form-group" style="margin-bottom:var(--spacing-6)">
             <label class="form-label">Recovery method <span class="req">*</span></label>
@@ -1115,7 +1115,7 @@
           </div>
 
           <!-- Event selector (V2) -->
-          <div class="form-group" x-show="version !== 'v3' && version !== 'i2'" style="margin-bottom:var(--spacing-6)">
+          <div class="form-group" x-show="version !== 'v3' && !isUrlEventFlow()" style="margin-bottom:var(--spacing-6)">
             <label class="form-label">Events to replay <span class="req">*</span></label>
             <div class="hsel-search">
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
@@ -1213,8 +1213,8 @@
             </div>
           </div>
 
-          <!-- URL → Event selector (Exploration 2, Iteration 1) -->
-          <div class="form-group events-section" x-show="version === 'i2'" style="margin-bottom:var(--spacing-6)">
+          <!-- URL → Event selector (Exploration 2) -->
+          <div class="form-group events-section" x-show="isUrlEventFlow()" style="margin-bottom:var(--spacing-6)">
             <div class="events-section-head">
               <div>
                 <div class="events-section-title">Events table <span class="req">*</span></div>
@@ -1275,56 +1275,57 @@
           </div>
 
           <!-- Preview matching events (under event selection) -->
-          <button class="btn btn-secondary" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
+          <button class="btn btn-secondary" x-show="version !== 'i3'" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
             Preview matching events
           </button>
+          </div>
 
           <!-- Matching Events Preview (inline) -->
-          <div class="anim-in" x-show="showPreview" style="margin-top:var(--spacing-7)">
+          <div class="anim-in" x-show="showPreview && (version !== 'i3' || replayStep === 'preview')" style="margin-top:var(--spacing-7)">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
               <div>
                 <div class="card-title">Matching Events Preview</div>
                 <div class="card-subtitle">
                   <span x-text="previewResults().length"></span>
-                  <span x-text="version === 'v3' ? 'events matched for selected webhook URLs' : (version === 'i2' ? 'events matched for selected URLs and events' : 'events found in selected range')"></span>
+                  <span x-text="version === 'v3' ? 'events matched for selected webhook URLs' : (isUrlEventFlow() ? 'events matched for selected URLs and events' : 'events found in selected range')"></span>
                 </div>
               </div>
               <div class="preview-tags">
                 <span class="tag-soft" x-show="recoveryMode==='date' && unackOnly">Unacknowledged only</span>
-                <span class="tag-soft" x-show="version !== 'v3' && version !== 'i2' && !isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
+                <span class="tag-soft" x-show="version !== 'v3' && !isUrlEventFlow() && !isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
                 <span class="tag-soft" x-show="version === 'v3' && !isAllUrlsSelected()" x-text="selectedUrls.length + ' URL' + (selectedUrls.length>1?'s':'')"></span>
-                <span class="tag-soft" x-show="version === 'i2'" x-text="selectedPreviewRowIds.length + ' selected'"></span>
+                <span class="tag-soft" x-show="isUrlEventFlow()" x-text="selectedPreviewRowIds.length + ' selected'"></span>
               </div>
             </div>
             <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
               <table class="wh-table">
                 <thead><tr>
-                  <th x-show="version === 'i2'" class="preview-select-cell">
+                  <th x-show="isUrlEventFlow()" class="preview-select-cell">
                     <label style="display:inline-flex;align-items:center;cursor:pointer">
                       <input class="cb-input" type="checkbox" :checked="areAllPreviewRowsSelected()" x-effect="$el.indeterminate = areSomePreviewRowsSelected()" @change="toggleAllPreviewRows()">
                       <span class="cb-box"></span>
                     </label>
                   </th>
                   <th>Event Type</th>
-                  <th x-show="version === 'v3' || version === 'i2'">Webhook URL</th>
-                  <th x-show="version === 'i2'">Payment ID</th>
+                  <th x-show="version === 'v3' || isUrlEventFlow()">Webhook URL</th>
+                  <th x-show="isUrlEventFlow()">Payment ID</th>
                   <th>Entity ID</th><th>Attempted At</th><th>Code</th><th>Status</th><th></th>
                 </tr></thead>
                 <tbody>
                   <template x-for="row in previewResults()" :key="row.id">
                     <tr>
-                      <td x-show="version === 'i2'" class="preview-select-cell">
+                      <td x-show="isUrlEventFlow()" class="preview-select-cell">
                         <label style="display:inline-flex;align-items:center;cursor:pointer">
                           <input class="cb-input" type="checkbox" :checked="isPreviewRowSelected(row)" @change="togglePreviewRow(row)">
                           <span class="cb-box"></span>
                         </label>
                       </td>
                       <td><code x-text="row.type" style="font-family:var(--font-mono);font-size:var(--text-sm)"></code></td>
-                      <td x-show="version === 'v3' || version === 'i2'" class="preview-url-cell">
+                      <td x-show="version === 'v3' || isUrlEventFlow()" class="preview-url-cell">
                         <span class="preview-url-text" x-text="urlForPreviewRow(row).url"></span>
                       </td>
-                      <td x-show="version === 'i2'" style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.payment"></td>
+                      <td x-show="isUrlEventFlow()" style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.payment"></td>
                       <td style="font-family:var(--font-mono);color:var(--surface-text-secondary)" x-text="row.entity"></td>
                       <td style="color:var(--surface-text-secondary)" x-text="row.time"></td>
                       <td><span class="badge" :class="row.code>=200 && row.code<300 ? 'badge-positive':'badge-negative'" x-text="row.code"></span></td>
@@ -1333,7 +1334,7 @@
                     </tr>
                   </template>
                   <template x-if="previewResults().length===0">
-                    <tr><td :colspan="version === 'i2' ? 9 : (version === 'v3' ? 7 : 6)" class="evt-empty">No matching events for this scope.</td></tr>
+                    <tr><td :colspan="isUrlEventFlow() ? 9 : (version === 'v3' ? 7 : 6)" class="evt-empty">No matching events for this scope.</td></tr>
                   </template>
                 </tbody>
               </table>
@@ -1341,10 +1342,10 @@
           </div>
         </div>
         <div class="modal-replay-footer">
-          <button class="btn btn-secondary" @click="drawerOpen=false">Cancel</button>
-          <button class="btn btn-primary" @click="replayPreviewed()" :disabled="!canReplay()">
+          <button class="btn btn-secondary" @click="version === 'i3' && replayStep === 'preview' ? replayStep='setup' : drawerOpen=false" x-text="version === 'i3' && replayStep === 'preview' ? 'Back' : 'Cancel'"></button>
+          <button class="btn btn-primary" @click="version === 'i3' && replayStep === 'setup' ? goToReviewStep() : replayPreviewed()" :disabled="version === 'i3' && replayStep === 'setup' ? !canPreview() : !canReplay()">
             <template x-if="replayLoading"><span class="spinner"></span></template>
-            <span x-text="primaryReplayLabel()"></span>
+            <span x-text="version === 'i3' && replayStep === 'setup' ? 'Next' : primaryReplayLabel()"></span>
           </button>
         </div>
       </div>
@@ -1377,9 +1378,11 @@
         <button :class="{active: version==='i2'}" @click="setVersion('i2')">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="3"/></svg> Iteration 1 - 24.06.26
         </button>
+        <button :class="{active: version==='i3'}" @click="setVersion('i3')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="5" width="12" height="6" rx="3"/></svg> Iteration 2 - 25.06.2026
+        </button>
       </div>
     </div>
-    <div class="vp-divider"></div>
     <div class="vp-group">
       <div class="vp-group-title">Exploration 1 - old</div>
       <div class="vp-seg">
@@ -1399,9 +1402,10 @@
   <script>
     function webhookApp() {
       return {
-        version: 'i2',          // 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2, URL → event selector)
+        version: 'i3',          // 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
         activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
         drawerOpen: false,
+        replayStep: 'setup',
         showDisableAlert: true,
         unackCount: 5,
 
@@ -1503,10 +1507,11 @@
           let evs = [...this.allPreviewEvents];
           if (this.unackOnly) evs = evs.filter(e => !e.acked);
           if (this.version === 'v3') evs = evs.filter(e => this.selectedUrls.includes(e.urlId));
-          else if (this.version === 'i2') evs = evs.filter(e => this.selectedUrlEventKeys.includes(this.urlEventKey(e.urlId, e.type)));
+          else if (this.isUrlEventFlow()) evs = evs.filter(e => this.selectedUrlEventKeys.includes(this.urlEventKey(e.urlId, e.type)));
           else if (!this.isAllSelected()) evs = evs.filter(e => this.selectedEvents.includes(e.type));
           return evs;
         },
+        isUrlEventFlow() { return this.version === 'i2' || this.version === 'i3'; },
         urlForPreviewRow(row) { return this.urlById(row.urlId) || this.webhookUrls[0]; },
         scopeValid() {
           if (this.recoveryMode === 'date') return !!this.dateFrom && !!this.dateTo;
@@ -1515,13 +1520,17 @@
         canPreview() {
           if (!this.scopeValid()) return false;
           if (this.version === 'v3') return this.selectedUrls.length > 0;
-          if (this.version === 'i2') return this.selectedUrlEventKeys.length > 0;
+          if (this.isUrlEventFlow()) return this.selectedUrlEventKeys.length > 0;
           return this.selectedEvents.length > 0;
         },
         runPreview() {
           if (!this.canPreview()) return;
-          if (this.version === 'i2') this.selectedPreviewRowIds = this.previewResults().map(row => row.id);
+          if (this.isUrlEventFlow()) this.selectedPreviewRowIds = this.previewResults().map(row => row.id);
           this.showPreview = true;
+        },
+        goToReviewStep() {
+          this.runPreview();
+          if (this.showPreview) this.replayStep = 'preview';
         },
 
         // ── V3: webhook URL selector ──
@@ -1693,7 +1702,7 @@
         },
         filteredUrlEventGroups() {
           const q = this.urlEventSearch.trim().toLowerCase();
-          const urls = this.version === 'i2' ? this.visibleWebhookUrls() : this.webhookUrls;
+          const urls = this.isUrlEventFlow() ? this.visibleWebhookUrls() : this.webhookUrls;
           if (!q) return urls;
           return urls
             .map(url => {
@@ -1733,12 +1742,12 @@
           return this.previewResults().filter(row => this.selectedPreviewRowIds.includes(row.id));
         },
         canReplay() {
-          if (this.version === 'i2') return this.showPreview && this.selectedPreviewRowIds.length > 0;
+          if (this.isUrlEventFlow()) return this.showPreview && this.selectedPreviewRowIds.length > 0;
           return this.canPreview();
         },
         primaryReplayLabel() {
           if (this.replayLoading) return 'Replaying…';
-          if (this.version !== 'i2') return 'Replay events';
+          if (!this.isUrlEventFlow()) return 'Replay events';
           const n = this.selectedPreviewRowIds.length;
           return 'Replay ' + n + ' event' + (n === 1 ? '' : 's');
         },
@@ -1778,9 +1787,10 @@
           this.activeTab = 'urls';
           this.showPreview = false;
           this.selectedPreviewRowIds = [];
+          this.replayStep = 'setup';
         },
 
-        openDrawer() { this.drawerOpen = true; this.showPreview = false; this.selectedPreviewRowIds = []; },
+        openDrawer() { this.drawerOpen = true; this.showPreview = false; this.selectedPreviewRowIds = []; this.replayStep = 'setup'; },
 
         // Routes the "Replay missed" button per version: V1 → tab, V2 → drawer
         replayEntry() {
@@ -1792,7 +1802,7 @@
         replayPreviewed() {
           if (!this.canReplay()) return;
           this.replayLoading = true;
-          const n = this.version === 'i2' ? this.selectedPreviewRows().length : this.previewResults().length;
+          const n = this.isUrlEventFlow() ? this.selectedPreviewRows().length : this.previewResults().length;
           setTimeout(() => {
             this.replayLoading = false;
             this.drawerOpen = false;
