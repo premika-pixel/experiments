@@ -400,6 +400,14 @@
       background: var(--surface-bg-primary); outline: none; font-family: inherit;
       transition: border-color .12s, box-shadow .12s;
     }
+    select.input {
+      appearance: none; -webkit-appearance: none;
+      padding-right: 48px;
+      background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%231B2A4E' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right var(--spacing-5) center;
+      background-size: 16px 16px;
+    }
     .input:focus { border-color: var(--action-primary-default); box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
     .input::placeholder { color: var(--surface-text-placeholder); }
     .input-hint { font-size: var(--text-xs); color: var(--surface-text-tertiary); line-height: 1.5; }
@@ -477,6 +485,7 @@
     .events-section-title { font-size: var(--text-md); font-weight: var(--fw-semibold); color: var(--surface-text-primary); }
     .events-section-subtitle { font-size: var(--text-sm); color: var(--surface-text-secondary); margin-top: var(--spacing-1); }
     .events-section-search { width: 280px; flex-shrink: 0; padding: var(--spacing-3) var(--spacing-4); }
+    .events-inline-search { width: 340px; padding: var(--spacing-3) var(--spacing-4); }
     .hsel-bar { display: flex; align-items: center; justify-content: space-between; margin-top: var(--spacing-4); font-size: var(--text-sm); color: var(--surface-text-secondary); }
     .hsel-clear { background: none; border: none; cursor: pointer; color: var(--action-primary-default); font-family: inherit; font-size: var(--text-sm); font-weight: var(--fw-semibold); }
     .hsel-chips { display: flex; flex-wrap: wrap; gap: var(--spacing-3); margin-top: var(--spacing-3); }
@@ -502,7 +511,11 @@
     .url-select-meta { color: var(--surface-text-tertiary); font-size: var(--text-sm); }
     .hsel-chip-url { max-width: 360px; }
     .url-event-tree { max-height: 360px; }
-    .url-event-panel { border-top: 1px solid var(--surface-border-subtle); border-bottom: 1px solid var(--surface-border-subtle); background: var(--surface-bg-gray-subtle); padding: var(--spacing-4) var(--spacing-5) var(--spacing-4) 48px; }
+    .url-event-panel {
+      border-top: 1px solid var(--surface-border-subtle); border-bottom: 1px solid var(--surface-border-subtle);
+      background: var(--surface-bg-gray-subtle);
+      padding: var(--spacing-4) var(--spacing-5) var(--spacing-4) calc(var(--spacing-5) + 16px + var(--spacing-3));
+    }
     .url-event-panel + .hsel-row { border-top: none; }
     .url-event-section + .url-event-section { margin-top: var(--spacing-5); }
     .url-event-section-head {
@@ -510,7 +523,7 @@
       margin-bottom: var(--spacing-3); cursor: pointer;
     }
     .url-event-section-title { font-size: var(--text-body); line-height: 20px; color: var(--surface-text-primary); font-weight: var(--fw-semibold); }
-    .url-event-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-3); }
+    .url-event-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-3); padding-left: calc(18px + var(--spacing-3)); }
     .url-event-item {
       display: flex; align-items: center; gap: var(--spacing-3); min-width: 0;
       background: var(--surface-bg-primary); border: 1px solid var(--surface-border-subtle);
@@ -543,6 +556,23 @@
     .file-pill-name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--surface-text-primary); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .file-pill-meta { font-size: var(--text-xs); color: var(--surface-text-tertiary); margin-top: var(--spacing-1); }
     .file-remove { background: none; border: none; cursor: pointer; color: var(--action-primary-default); font-family: inherit; font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+    .query-card {
+      border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md);
+      background: var(--surface-bg-gray-subtle); padding: var(--spacing-5);
+      margin-bottom: var(--spacing-7);
+    }
+    .query-card-title { font-size: var(--text-body); font-weight: var(--fw-semibold); color: var(--surface-text-primary); margin-bottom: var(--spacing-4); }
+    .query-builder { display: flex; flex-direction: column; gap: var(--spacing-4); }
+    .query-row { display: grid; grid-template-columns: 220px 140px minmax(0, 1fr); gap: var(--spacing-4); align-items: center; }
+    .query-value-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-4); }
+    .query-static {
+      display: flex; align-items: center; height: 40px; padding: 0 var(--spacing-5);
+      border: 1px solid var(--surface-border-normal); border-radius: var(--radius-md);
+      background: var(--surface-bg-primary); color: var(--surface-text-primary); font-size: var(--text-body);
+    }
+    .query-upload .file-upload { padding: var(--spacing-4); }
+    .query-upload .file-upload-icon { width: 32px; height: 32px; }
+    .preview-note { margin-bottom: var(--spacing-4); }
     /* Blade-style custom checkbox (check + indeterminate minus) */
     .cb-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .cb-box { width: 18px; height: 18px; flex-shrink: 0; border: 1.5px solid var(--surface-border-normal); border-radius: 5px; background: #fff; position: relative; transition: background .12s, border-color .12s; }
@@ -823,7 +853,7 @@
                   <span class="card-subtitle">Re-send events your endpoint missed during downtime or while the URL was disabled.</span>
                 </div>
               </div>
-              <div class="card-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; showPreview=false">
+              <div class="card-body" x-effect="datePreset; dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; showPreview=false">
                 <!-- Recovery method -->
                 <div class="form-group" style="margin-bottom:var(--spacing-6)">
                   <label class="form-label">Recovery method <span class="req">*</span></label>
@@ -842,23 +872,21 @@
 
                 <!-- Date range -->
                 <div x-show="recoveryMode==='date'">
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label class="form-label">From date <span class="req">*</span></label>
-                      <input class="input" type="date" x-model="dateFrom" max="2026-06-15">
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label">To date <span class="req">*</span></label>
-                      <input class="input" type="date" x-model="dateTo" max="2026-06-15">
-                    </div>
+                  <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-5)">
+                    <label class="form-label">Date range <span class="req">*</span></label>
+                    <select class="input" x-model="datePreset" @change="applyDatePreset()">
+                      <template x-for="option in dateRangeOptions" :key="option.value">
+                        <option :value="option.value" x-text="option.label"></option>
+                      </template>
+                    </select>
+                    <div class="input-hint">Events are retained for 7 days.</div>
                   </div>
-                  <div class="input-hint" style="margin:-4px 0 var(--spacing-5)">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
                   <!-- Unacknowledged filter (date mode) -->
                   <div class="checkbox-card" style="margin-bottom:0">
                     <input class="checkbox-input" type="checkbox" id="unackOnlyV1" x-model="unackOnly">
                     <label for="unackOnlyV1">
                       <div class="checkbox-title">Replay only unacknowledged events</div>
-                      <div class="checkbox-hint">Sends only events your URL never returned a 2XX for — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
+                      <div class="checkbox-hint">Sends only events your URL never acknowledged — avoids duplicate delivery for events you already processed. <strong>Recommended once your endpoint is fixed.</strong></div>
                     </label>
                   </div>
                 </div>
@@ -1035,15 +1063,120 @@
       <div class="modal modal-replay modal-anim">
         <div class="modal-head">
           <div>
-            <div class="modal-head-title" x-text="version === 'v3' ? 'Replay events to webhook URLs' : (isUrlEventFlow() ? 'Replay events by webhook URL' : 'Replay missed webhooks')"></div>
-            <div class="modal-head-sub" x-text="version === 'v3' ? 'Choose the webhook URLs that should receive matching replayed events.' : (version === 'i3' ? 'Step through setup first, then review and select matching events before replay.' : (version === 'i2' ? 'Choose URLs, select their events, then replay only the rows you approve.' : 'Re-send events your endpoint missed during downtime or disablement.'))"></div>
+            <div class="modal-head-title" x-text="isExploration3() ? 'Replay webhook events' : (version === 'v3' ? 'Replay events to webhook URLs' : (isUrlEventFlow() ? 'Replay events by webhook URL' : 'Replay missed webhooks'))"></div>
+            <div class="modal-head-sub" x-show="!isExploration3()" x-text="version === 'v3' ? 'Choose the webhook URLs that should receive matching replayed events.' : (version === 'i3' ? 'Step through setup first, then review and select matching events before replay.' : (version === 'i2' ? 'Choose URLs, select their events, then replay only the rows you approve.' : 'Re-send events your endpoint missed during downtime or disablement.'))"></div>
           </div>
           <button class="icon-btn" @click="drawerOpen=false">×</button>
         </div>
-        <div class="modal-replay-body" x-effect="dateFrom; dateTo; paymentId; unackOnly; recoveryMode; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
+        <div class="modal-replay-body" x-effect="datePreset; dateFrom; dateTo; paymentId; paymentFile; unackOnly; recoveryMode; e3ReplayScope; e3EventStatus; e3DateOperator; e3DateFromPoint; e3DateToPoint; e3SpecificPaymentId; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
           <div x-show="version !== 'i3' || replayStep === 'setup'">
+          <!-- Replay scope (Exploration 3) -->
+          <div class="form-group" x-show="isExploration3()" style="margin-bottom:var(--spacing-7)">
+            <label class="form-label">Events to replay <span class="req">*</span></label>
+            <div class="radio-group">
+              <label class="radio" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
+                <span class="radio-circle"></span>
+                <span class="radio-label">Unacknowledged events</span>
+              </label>
+              <label class="radio" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
+                <span class="radio-circle"></span>
+                <span class="radio-label">All events</span>
+              </label>
+              <label class="radio" :class="{selected: e3ReplayScope==='specific'}" @click="setReplayScope('specific')">
+                <span class="radio-circle"></span>
+                <span class="radio-label">Specific events</span>
+              </label>
+            </div>
+            <div class="input-hint" x-text="e3ReplayScopeHint()"></div>
+          </div>
+
+          <div class="alert notice" x-show="isExploration3() && e3ReplayScope==='all'">
+            <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
+            <div class="alert-body">
+              <div class="alert-title">All events will be triggered</div>
+              <div class="alert-desc">This includes events that were already acknowledged. Review carefully before replaying.</div>
+            </div>
+          </div>
+
+          <div class="query-card" x-show="isExploration3() && e3ReplayScope==='specific'">
+            <div class="query-card-title">Build query</div>
+            <div class="query-builder">
+              <div class="query-row">
+                <select class="input" aria-label="Filter field">
+                  <option>Event type</option>
+                </select>
+                <div class="query-static" aria-label="Filter operator">is</div>
+                <select class="input" x-model="e3EventStatus" aria-label="Event acknowledgement status">
+                  <option value="unack">Unacknowledged</option>
+                  <option value="acked">Acknowledged</option>
+                </select>
+              </div>
+
+              <div class="query-row">
+                <select class="input" aria-label="Filter field">
+                  <option>Date</option>
+                </select>
+                <select class="input" x-model="e3DateOperator" aria-label="Date filter operator">
+                  <option value="is">is</option>
+                  <option value="is_not">is not</option>
+                  <option value="between">is between</option>
+                </select>
+                <div class="query-value-grid">
+                  <select class="input" x-show="e3DateOperator!=='between'" x-model="datePreset" @change="applyDatePreset()" aria-label="Date">
+                    <template x-for="option in dateRangeOptions" :key="option.value">
+                      <option :value="option.value" x-text="option.label"></option>
+                    </template>
+                  </select>
+                  <select class="input" x-show="e3DateOperator==='between'" x-model="e3DateFromPoint" aria-label="From date">
+                    <template x-for="option in datePointOptions" :key="'from-' + option.value">
+                      <option :value="option.value" x-text="option.label"></option>
+                    </template>
+                  </select>
+                  <select class="input" x-show="e3DateOperator==='between'" x-model="e3DateToPoint" aria-label="To date">
+                    <template x-for="option in datePointOptions" :key="'to-' + option.value">
+                      <option :value="option.value" x-text="option.label"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+
+              <div class="query-row">
+                <select class="input" aria-label="Filter field">
+                  <option>Payment ID</option>
+                </select>
+                <select class="input" aria-label="Filter operator">
+                  <option>is</option>
+                </select>
+                <div class="query-upload">
+                  <label class="file-upload" x-show="!paymentFile">
+                  <span class="file-upload-main">
+                    <span class="file-upload-icon">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3"/><path d="M5 6l3-3 3 3"/><path d="M3 12.5h10"/></svg>
+                    </span>
+                    <span>
+                      <span class="file-upload-title">Upload file</span>
+                      <span class="file-upload-help">CSV or Excel. One file only.</span>
+                    </span>
+                  </span>
+                  <span class="btn btn-secondary btn-sm">Choose file</span>
+                  <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
+                  </label>
+                  <template x-if="paymentFile">
+                    <div class="file-pill" style="margin-top:0">
+                      <div style="min-width:0">
+                        <div class="file-pill-name" x-text="paymentFile.name"></div>
+                        <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Ready to preview'"></div>
+                      </div>
+                      <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Recovery method -->
-          <div class="form-group" style="margin-bottom:var(--spacing-6)">
+          <div class="form-group" x-show="!isExploration3()" style="margin-bottom:var(--spacing-6)">
             <label class="form-label">Recovery method <span class="req">*</span></label>
             <div class="radio-group">
               <label class="radio" :class="{selected: recoveryMode==='date'}" @click="recoveryMode='date'">
@@ -1059,22 +1192,20 @@
           </div>
 
           <!-- Date range -->
-          <div x-show="recoveryMode==='date'">
-            <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">From date <span class="req">*</span></label>
-                <input class="input" type="date" x-model="dateFrom" max="2026-06-15">
-              </div>
-              <div class="form-group">
-                <label class="form-label">To date <span class="req">*</span></label>
-                <input class="input" type="date" x-model="dateTo" max="2026-06-15">
-              </div>
+          <div x-show="!isExploration3() && recoveryMode==='date'">
+            <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-5)">
+              <label class="form-label">Date range <span class="req">*</span></label>
+              <select class="input" x-model="datePreset" @change="applyDatePreset()">
+                <template x-for="option in dateRangeOptions" :key="option.value">
+                  <option :value="option.value" x-text="option.label"></option>
+                </template>
+              </select>
+              <div class="input-hint">Events are retained for 7 days.</div>
             </div>
-            <div class="input-hint" style="margin:-4px 0 var(--spacing-5)">Window can span up to 7 days and cannot extend beyond today. Events are retained for 7 days.</div>
           </div>
 
           <!-- Payment ID -->
-          <div x-show="recoveryMode==='paymentid'">
+          <div x-show="!isExploration3() && recoveryMode==='paymentid'">
             <div class="form-group" style="margin-bottom:var(--spacing-7)">
               <label class="form-label">Upload payment IDs <span class="req">*</span></label>
               <label class="file-upload" x-show="!paymentFile">
@@ -1103,14 +1234,14 @@
           </div>
 
           <!-- Unacknowledged filter -->
-          <div class="switch-card" style="margin-bottom:var(--spacing-8)">
+          <div class="switch-card" x-show="!isExploration3()" style="margin-bottom:var(--spacing-8)">
             <label class="switch-control" for="unackOnlyV2" aria-label="Replay only unacknowledged events">
               <input class="switch-input" type="checkbox" id="unackOnlyV2" x-model="unackOnly">
               <span class="switch-track"></span>
             </label>
             <label class="switch-copy" for="unackOnlyV2">
               <div class="switch-title">Replay only unacknowledged events</div>
-              <div class="switch-hint" x-text="unackOnly ? 'Showing only events your URL never returned a 2XX for. Recommended once your endpoint is fixed.' : 'Showing all matching events, including delivered or acknowledged events. Review carefully before replaying.'"></div>
+              <div class="switch-hint" x-text="unackOnly ? 'Showing only events your URL never acknowledged. Recommended once your endpoint is fixed.' : 'Showing all matching events, including delivered or acknowledged events. Review carefully before replaying.'"></div>
             </label>
           </div>
 
@@ -1217,16 +1348,20 @@
           <div class="form-group events-section" x-show="isUrlEventFlow()" style="margin-bottom:var(--spacing-6)">
             <div class="events-section-head">
               <div>
-                <div class="events-section-title">Events table <span class="req">*</span></div>
-                <div class="events-section-subtitle" x-text="unackOnly && recoveryMode==='date' ? 'Showing only unacknowledged URL-event matches.' : 'Showing all matching URL-event combinations.'"></div>
+                <div class="events-section-title" x-text="isExploration3() ? 'Webhook URLs and events' : 'Events table'"></div>
+                <div class="events-section-subtitle" x-text="urlEventSelectorSubtitle()"></div>
               </div>
-              <div class="hsel-search events-section-search">
+              <div class="hsel-search events-section-search" x-show="!isExploration3()">
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
                 <input type="text" placeholder="Search" x-model="urlEventSearch">
               </div>
             </div>
             <div class="hsel-bar">
-              <span x-text="selectedUrlEventCountLabel()"></span>
+              <span x-show="!isExploration3()" x-text="selectedUrlEventCountLabel()"></span>
+              <div class="hsel-search events-inline-search" x-show="isExploration3()">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+                <input type="text" placeholder="Search" x-model="urlEventSearch">
+              </div>
               <button class="hsel-clear" @click="toggleAllUrlEvents()" x-text="selectedVisibleUrlEventCount() === 0 ? 'Select all' : 'Clear all'"></button>
             </div>
             <div class="hsel-tree url-event-tree">
@@ -1286,22 +1421,29 @@
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
               <div>
                 <div class="card-title">Matching Events Preview</div>
-                <div class="card-subtitle">
-                  <span x-text="previewResults().length"></span>
-                  <span x-text="version === 'v3' ? 'events matched for selected webhook URLs' : (isUrlEventFlow() ? 'events matched for selected URLs and events' : 'events found in selected range')"></span>
+                <div class="card-subtitle" x-show="!isExploration3()">
+                  <span>
+                    <span x-text="previewResults().length"></span>
+                    <span x-text="version === 'v3' ? 'events matched for selected webhook URLs' : (isUrlEventFlow() ? 'events matched for selected URLs and events' : 'events found in selected range')"></span>
+                  </span>
                 </div>
               </div>
-              <div class="preview-tags">
-                <span class="tag-soft" x-show="recoveryMode==='date' && unackOnly">Unacknowledged only</span>
+              <div class="preview-tags" x-show="!isExploration3()">
+                <span class="tag-soft" x-show="(recoveryMode==='date' && unackOnly && !isExploration3()) || (isExploration3() && e3ReplayScope==='unack')">Unacknowledged only</span>
                 <span class="tag-soft" x-show="version !== 'v3' && !isUrlEventFlow() && !isAllSelected()" x-text="selectedEvents.length + ' type' + (selectedEvents.length>1?'s':'')"></span>
                 <span class="tag-soft" x-show="version === 'v3' && !isAllUrlsSelected()" x-text="selectedUrls.length + ' URL' + (selectedUrls.length>1?'s':'')"></span>
-                <span class="tag-soft" x-show="isUrlEventFlow()" x-text="selectedPreviewRowIds.length + ' selected'"></span>
+                <span class="tag-soft" x-show="isUrlEventFlow() && !isExploration3()" x-text="selectedPreviewRowIds.length + ' selected'"></span>
+                <span class="tag-soft" x-show="isExploration3()">Sample preview</span>
               </div>
+            </div>
+            <div class="info-strip preview-note" x-show="isExploration3()">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="var(--surface-text-tertiary)" style="flex-shrink:0;margin-top:1px"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM7.25 4.5h1.5v1.5h-1.5zM7.25 7h1.5v4.5h-1.5z"></path></svg>
+              <span>Showing a sample preview. Replay will include all matching events for the selected scope.</span>
             </div>
             <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
               <table class="wh-table">
                 <thead><tr>
-                  <th x-show="isUrlEventFlow()" class="preview-select-cell">
+                  <th x-show="isPreviewSelectable()" class="preview-select-cell">
                     <label style="display:inline-flex;align-items:center;cursor:pointer">
                       <input class="cb-input" type="checkbox" :checked="areAllPreviewRowsSelected()" x-effect="$el.indeterminate = areSomePreviewRowsSelected()" @change="toggleAllPreviewRows()">
                       <span class="cb-box"></span>
@@ -1313,9 +1455,9 @@
                   <th>Entity ID</th><th>Attempted At</th><th>Code</th><th>Status</th><th></th>
                 </tr></thead>
                 <tbody>
-                  <template x-for="row in previewResults()" :key="row.id">
+                  <template x-for="row in previewRows()" :key="row.id">
                     <tr>
-                      <td x-show="isUrlEventFlow()" class="preview-select-cell">
+                      <td x-show="isPreviewSelectable()" class="preview-select-cell">
                         <label style="display:inline-flex;align-items:center;cursor:pointer">
                           <input class="cb-input" type="checkbox" :checked="isPreviewRowSelected(row)" @change="togglePreviewRow(row)">
                           <span class="cb-box"></span>
@@ -1333,8 +1475,8 @@
                       <td style="text-align:right"><button class="log-retrigger" @click="retryRow(row)">Retry</button></td>
                     </tr>
                   </template>
-                  <template x-if="previewResults().length===0">
-                    <tr><td :colspan="isUrlEventFlow() ? 9 : (version === 'v3' ? 7 : 6)" class="evt-empty">No matching events for this scope.</td></tr>
+                  <template x-if="previewRows().length===0">
+                    <tr><td :colspan="previewColspan()" class="evt-empty">No matching events for this scope.</td></tr>
                   </template>
                 </tbody>
               </table>
@@ -1373,6 +1515,14 @@
   <!-- ════════ FLOATING VERSION PILL ════════ -->
   <div class="version-pill">
     <div class="vp-group">
+      <div class="vp-group-title">Exploration 3</div>
+      <div class="vp-seg">
+        <button :class="{active: version==='e3i1'}" @click="setVersion('e3i1')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h12v2H2z"/></svg> Iteration 1 - Ideation
+        </button>
+      </div>
+    </div>
+    <div class="vp-group">
       <div class="vp-group-title">Exploration 2</div>
       <div class="vp-seg">
         <button :class="{active: version==='i2'}" @click="setVersion('i2')">
@@ -1402,7 +1552,7 @@
   <script>
     function webhookApp() {
       return {
-        version: 'i3',          // 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
+        version: 'e3i1',        // 'e3i1' (Exploration 3) | 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
         activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
         drawerOpen: false,
         replayStep: 'setup',
@@ -1432,12 +1582,38 @@
 
         // replay form state
         recoveryMode: 'date',   // 'date' | 'paymentid'
+        datePreset: 'last3',
+        dateRangeOptions: [
+          { value: 'today', label: 'Today' },
+          { value: 'yesterday', label: 'Yesterday' },
+          { value: 'last2', label: 'Last 2 days' },
+          { value: 'last3', label: 'Last 3 days' },
+          { value: 'last4', label: 'Last 4 days' },
+          { value: 'last5', label: 'Last 5 days' },
+          { value: 'last6', label: 'Last 6 days' },
+          { value: 'last7', label: 'Last 7 days' },
+        ],
+        datePointOptions: [
+          { value: '2026-06-09', label: 'Jun 9, 2026' },
+          { value: '2026-06-10', label: 'Jun 10, 2026' },
+          { value: '2026-06-11', label: 'Jun 11, 2026' },
+          { value: '2026-06-12', label: 'Jun 12, 2026' },
+          { value: '2026-06-13', label: 'Jun 13, 2026' },
+          { value: '2026-06-14', label: 'Jun 14, 2026' },
+          { value: '2026-06-15', label: 'Jun 15, 2026' },
+        ],
         dateFrom: '2026-06-07',
         dateTo: '2026-06-09',
         unackOnly: true,
         paymentId: '',
         paymentFile: null,
         replayLoading: false,
+        e3ReplayScope: 'unack',
+        e3EventStatus: 'unack',
+        e3DateOperator: 'is',
+        e3DateFromPoint: '2026-06-09',
+        e3DateToPoint: '2026-06-15',
+        e3SpecificPaymentId: '',
 
         // event selector
         eventSearch: '',
@@ -1502,30 +1678,114 @@
           { id: 8, type: 'payment.failed',       payment: 'pay_NK7xYZAB90', entity: 'pay_NK7xYZAB90',   time: 'Jun 8, 05:40 PM', code: 200, acked: true,  urlId: 'u2' },
           { id: 9, type: 'order.created',        payment: 'pay_NK7x6Cd20S', entity: 'order_NK7xCDEF78', time: 'Jun 9, 08:04 AM', code: 200, acked: true,  urlId: 'u2' },
           { id: 10, type: 'payment.authorized',  payment: 'pay_NK7xGHIJ12', entity: 'pay_NK7xGHIJ12',   time: 'Jun 9, 11:48 AM', code: 200, acked: true,  urlId: 'u3' },
+          { id: 11, type: 'payment.pending',     payment: 'pay_NK7xKLMN34', entity: 'pay_NK7xKLMN34',   time: 'Jun 9, 12:24 PM', code: 401, acked: false, urlId: 'u1' },
+          { id: 12, type: 'order.created',       payment: 'pay_NK7xPQRS78', entity: 'order_NK7xUVWX34', time: 'Jun 9, 12:41 PM', code: 401, acked: false, urlId: 'u3' },
+          { id: 13, type: 'payment.failed',      payment: 'pay_NK7xTUVW90', entity: 'pay_NK7xTUVW90',   time: 'Jun 9, 01:08 PM', code: 500, acked: false, urlId: 'u1' },
+          { id: 14, type: 'order.updated',       payment: 'pay_NK7xYZCD22', entity: 'order_NK7xYZCD22', time: 'Jun 9, 01:33 PM', code: 200, acked: true,  urlId: 'u2' },
         ],
         previewResults() {
           let evs = [...this.allPreviewEvents];
-          if (this.unackOnly) evs = evs.filter(e => !e.acked);
+          if (this.isExploration3()) evs = this.e3FilteredEvents(evs).filter(e => this.selectedUrlEventKeys.includes(this.urlEventKey(e.urlId, e.type)));
+          else if (this.unackOnly) evs = evs.filter(e => !e.acked);
           if (this.version === 'v3') evs = evs.filter(e => this.selectedUrls.includes(e.urlId));
           else if (this.isUrlEventFlow()) evs = evs.filter(e => this.selectedUrlEventKeys.includes(this.urlEventKey(e.urlId, e.type)));
           else if (!this.isAllSelected()) evs = evs.filter(e => this.selectedEvents.includes(e.type));
           return evs;
         },
-        isUrlEventFlow() { return this.version === 'i2' || this.version === 'i3'; },
+        previewRows() {
+          const rows = this.previewResults();
+          return this.isExploration3() ? rows.slice(0, 5) : rows;
+        },
+        previewColspan() {
+          if (this.isExploration3()) return 8;
+          if (this.isUrlEventFlow()) return 9;
+          if (this.version === 'v3') return 7;
+          return 6;
+        },
+        isExploration3() { return this.version === 'e3i1'; },
+        isUrlEventFlow() { return this.version === 'i2' || this.version === 'i3' || this.isExploration3(); },
+        isPreviewSelectable() { return this.isUrlEventFlow() && !this.isExploration3(); },
         urlForPreviewRow(row) { return this.urlById(row.urlId) || this.webhookUrls[0]; },
+        setReplayScope(scope) {
+          this.e3ReplayScope = scope;
+          this.selectedPreviewRowIds = [];
+          this.showPreview = false;
+        },
+        e3ReplayScopeHint() {
+          if (this.e3ReplayScope === 'unack') return 'Replay events your URLs never acknowledged.';
+          if (this.e3ReplayScope === 'all') return 'Replay every matching event, including events already acknowledged.';
+          return 'Use filters to find a specific payment, payment list, status, URL, or event.';
+        },
+        e3TotalMatches() {
+          if (this.e3ReplayScope === 'all') return 100;
+          if (this.e3ReplayScope === 'unack') return 42;
+          if (this.e3SpecificPaymentId || this.paymentFile || this.e3EventStatus !== 'all') return Math.max(this.previewResults().length, 12);
+          return 24;
+        },
+        urlEventSelectorSubtitle() {
+          if (this.isExploration3()) {
+            return 'Select the URL-event combinations to include in this replay.';
+          }
+          return this.unackOnly && this.recoveryMode === 'date' ? 'Showing only unacknowledged URL-event matches.' : 'Showing all matching URL-event combinations.';
+        },
+        e3FilteredEvents(rows) {
+          let evs = [...rows];
+          if (this.e3ReplayScope === 'unack') evs = evs.filter(e => !e.acked);
+          if (this.e3ReplayScope === 'specific') {
+            const payment = this.e3SpecificPaymentId.trim().toLowerCase();
+            if (payment) evs = evs.filter(e => e.payment.toLowerCase().includes(payment));
+            else if (this.paymentFile) {
+              const uploadedIds = this.mockUploadedPaymentIds();
+              evs = evs.filter(e => uploadedIds.includes(e.payment));
+            }
+            if (this.e3EventStatus === 'unack') evs = evs.filter(e => !e.acked);
+            if (this.e3EventStatus === 'acked') evs = evs.filter(e => e.acked);
+            if (this.e3EventStatus === 'failed') evs = evs.filter(e => e.code >= 400);
+          }
+          return evs;
+        },
+        mockUploadedPaymentIds() {
+          return ['pay_NK7xABCD56', 'pay_NK7xEFGH78', 'pay_NK7x4Hs82P', 'pay_NK7x7Lm44T'];
+        },
+        formatDate(date) {
+          const yyyy = date.getFullYear();
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const dd = String(date.getDate()).padStart(2, '0');
+          return `${yyyy}-${mm}-${dd}`;
+        },
+        applyDatePreset() {
+          const demoToday = new Date('2026-06-15T00:00:00');
+          let end = new Date(demoToday);
+          let days = 1;
+
+          if (this.datePreset === 'yesterday') {
+            end.setDate(end.getDate() - 1);
+          } else if (this.datePreset.startsWith('last')) {
+            days = Number(this.datePreset.replace('last', '')) || 1;
+          }
+
+          const start = new Date(end);
+          start.setDate(end.getDate() - (days - 1));
+          this.dateFrom = this.formatDate(start);
+          this.dateTo = this.formatDate(end);
+          this.showPreview = false;
+          this.selectedPreviewRowIds = [];
+          if (this.version === 'i3') this.replayStep = 'setup';
+        },
         scopeValid() {
+          if (this.isExploration3()) return true;
           if (this.recoveryMode === 'date') return !!this.dateFrom && !!this.dateTo;
           return !!this.paymentFile;
         },
         canPreview() {
           if (!this.scopeValid()) return false;
           if (this.version === 'v3') return this.selectedUrls.length > 0;
-          if (this.isUrlEventFlow()) return this.selectedUrlEventKeys.length > 0;
+          if (this.isUrlEventFlow()) return this.selectedVisibleUrlEventCount() > 0;
           return this.selectedEvents.length > 0;
         },
         runPreview() {
           if (!this.canPreview()) return;
-          if (this.isUrlEventFlow()) this.selectedPreviewRowIds = this.previewResults().map(row => row.id);
+          if (this.isUrlEventFlow() && !this.isExploration3()) this.selectedPreviewRowIds = this.previewResults().map(row => row.id);
           this.showPreview = true;
         },
         goToReviewStep() {
@@ -1540,9 +1800,9 @@
             id: 'u1',
             url: 'https://magentoshubham.share.zrok.io/magento247/pub/razorpay/payment/webhook',
             status: 'Enabled',
-            events: ['payment.authorized','payment.captured','refund.processed'],
+            events: ['payment.authorized','payment.pending','payment.failed','payment.captured','refund.processed'],
             eventGroups: [
-              { name: 'Payments', events: ['payment.authorized','payment.captured'] },
+              { name: 'Payments', events: ['payment.authorized','payment.pending','payment.failed','payment.captured'] },
               { name: 'Refunds', events: ['refund.processed'] },
             ],
           },
@@ -1550,10 +1810,10 @@
             id: 'u2',
             url: 'https://api.yourstore.com/webhooks/razorpay',
             status: 'Disabled',
-            events: ['payment.captured','payment.failed','order.created','order.paid','subscription.charged'],
+            events: ['payment.captured','payment.failed','order.created','order.paid','order.updated','subscription.charged'],
             eventGroups: [
               { name: 'Payments', events: ['payment.captured','payment.failed'] },
-              { name: 'Orders', events: ['order.created','order.paid'] },
+              { name: 'Orders', events: ['order.created','order.paid','order.updated'] },
               { name: 'Subscriptions', events: ['subscription.charged'] },
             ],
           },
@@ -1561,10 +1821,10 @@
             id: 'u3',
             url: 'https://api.yourstore.com/webhooks/rz-backup',
             status: 'Enabled',
-            events: ['payment.authorized','order.paid'],
+            events: ['payment.authorized','order.created','order.paid'],
             eventGroups: [
               { name: 'Payments', events: ['payment.authorized'] },
-              { name: 'Orders', events: ['order.paid'] },
+              { name: 'Orders', events: ['order.created','order.paid'] },
             ],
           },
         ],
@@ -1666,6 +1926,7 @@
           else this.clearUrlEvents();
         },
         selectedUrlEventCountLabel() {
+          if (this.isExploration3()) return 'Previewing ' + Math.min(5, this.e3TotalMatches()) + ' out of ' + this.e3TotalMatches() + ' matching events';
           const available = this.availableUrlEventKeys();
           const selected = this.selectedVisibleUrlEventCount();
           if (selected === available.length && available.length > 0) return 'All ' + available.length + ' visible events selected';
@@ -1683,7 +1944,8 @@
         },
         visibleEventNamesForUrl(urlId) {
           let rows = this.allPreviewEvents.filter(row => row.urlId === urlId);
-          if (this.unackOnly) rows = rows.filter(row => !row.acked);
+          if (this.isExploration3()) rows = this.e3FilteredEvents(rows);
+          else if (this.unackOnly) rows = rows.filter(row => !row.acked);
           return [...new Set(rows.map(row => row.type))];
         },
         visibleWebhookUrls() {
@@ -1742,12 +2004,14 @@
           return this.previewResults().filter(row => this.selectedPreviewRowIds.includes(row.id));
         },
         canReplay() {
+          if (this.isExploration3()) return this.canPreview() && this.previewResults().length > 0;
           if (this.isUrlEventFlow()) return this.showPreview && this.selectedPreviewRowIds.length > 0;
           return this.canPreview();
         },
         primaryReplayLabel() {
           if (this.replayLoading) return 'Replaying…';
           if (!this.isUrlEventFlow()) return 'Replay events';
+          if (this.isExploration3()) return 'Replay events';
           const n = this.selectedPreviewRowIds.length;
           return 'Replay ' + n + ' event' + (n === 1 ? '' : 's');
         },
@@ -1774,6 +2038,7 @@
         successBody: '',
 
         init() {
+          this.applyDatePreset();
           this.selectedEvents = [...this.allEventNames()];
           this.expandedGroups = this.eventGroups.map(g => g.name);
           this.selectedUrls = this.webhookUrls.map(u => u.id);
@@ -1802,7 +2067,7 @@
         replayPreviewed() {
           if (!this.canReplay()) return;
           this.replayLoading = true;
-          const n = this.isUrlEventFlow() ? this.selectedPreviewRows().length : this.previewResults().length;
+          const n = this.isExploration3() ? this.e3TotalMatches() : (this.isUrlEventFlow() ? this.selectedPreviewRows().length : this.previewResults().length);
           setTimeout(() => {
             this.replayLoading = false;
             this.drawerOpen = false;
