@@ -593,7 +593,8 @@
     .filter-action-row { margin: calc(-1 * var(--spacing-2)) 0 var(--spacing-3); display: flex; align-items: center; gap: var(--spacing-3); }
     .query-builder { display: flex; flex-direction: column; gap: var(--spacing-4); }
     .query-row { display: grid; grid-template-columns: 220px 140px minmax(0, 1fr); gap: var(--spacing-4); align-items: center; }
-    .query-row-two { grid-template-columns: 220px minmax(0, 1fr); }
+    .query-row-two { grid-template-columns: 150px minmax(0, 1fr); }
+    .query-card-compact { max-width: 560px; }
     .query-label-text { color: var(--surface-text-primary); font-size: var(--text-body); font-weight: var(--fw-semibold); }
     .query-value-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-4); }
     .query-static {
@@ -626,6 +627,20 @@
       border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md); background: var(--surface-bg-gray-subtle);
       padding: var(--spacing-5);
     }
+    .review-summary-card {
+      border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md); background: var(--surface-bg-gray-subtle);
+      overflow: hidden; margin-bottom: var(--spacing-6);
+    }
+    .review-summary-head { padding: var(--spacing-5); border-bottom: 1px solid var(--surface-border-subtle); }
+    .review-summary-title { color: var(--surface-text-primary); font-size: var(--text-md); font-weight: var(--fw-semibold); }
+    .review-summary-subtitle { color: var(--surface-text-secondary); font-size: var(--text-sm); margin-top: var(--spacing-2); line-height: 1.5; }
+    .review-summary-row {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-5);
+      padding: var(--spacing-4) var(--spacing-5); border-bottom: 1px solid var(--surface-border-subtle);
+    }
+    .review-summary-row:last-child { border-bottom: 0; }
+    .review-summary-row .review-label { margin-bottom: 0; }
+    .review-summary-main { text-align: right; min-width: 0; }
     .review-label { font-size: var(--text-xs); color: var(--surface-text-tertiary); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: .04em; margin-bottom: var(--spacing-2); }
     .review-value { color: var(--surface-text-primary); font-size: var(--text-body); font-weight: var(--fw-semibold); line-height: 1.45; }
     .review-meta { color: var(--surface-text-secondary); font-size: var(--text-sm); margin-top: var(--spacing-2); line-height: 1.5; }
@@ -644,8 +659,8 @@
 
     /* ── Replay modal (V2 — centered, Blade small modal) ── */
     .modal.modal-replay { width: 1024px; max-width: 94vw; height: min(760px, 90vh); max-height: 90vh; display: flex; flex-direction: column; text-align: left; }
-    .modal.modal-replay-compact { width: 760px; height: min(720px, 86vh); max-height: 86vh; }
-    .modal-replay-compact .modal-replay-body { flex: 1; }
+    .modal.modal-replay-compact { width: 760px; height: auto; max-height: 86vh; }
+    .modal-replay-compact .modal-replay-body { flex: 0 1 auto; max-height: calc(86vh - 142px); }
     /* Preview table inside the modal — compact padding so all columns fit without horizontal scroll */
     .modal-replay .wh-table th, .modal-replay .wh-table td { padding: var(--spacing-4) var(--spacing-5); }
     .modal-replay .wh-table { table-layout: auto; }
@@ -1130,20 +1145,17 @@
           <div class="stepper" x-show="isExploration3StepFlow()">
             <div class="step-item" :class="{active: e3Step==='scope', done: e3StepIndex() > 0}">
               <span class="step-marker">Step 1/3</span>
-              <span>Choose scope</span>
             </div>
             <div class="step-item" :class="{active: e3Step==='webhooks', done: e3StepIndex() > 1}">
               <span class="step-marker">Step 2/3</span>
-              <span>Select webhooks</span>
             </div>
             <div class="step-item" :class="{active: e3Step==='review'}">
               <span class="step-marker">Step 3/3</span>
-              <span>Review</span>
             </div>
           </div>
 
           <div x-show="isExploration3Iteration3() && e3Step==='scope'">
-            <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-5)">
+            <div class="form-group" style="max-width:360px;margin-bottom:var(--spacing-5)">
               <label class="form-label label-info-wrap">
                 <span>Date range <span class="req">*</span></span>
                 <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
@@ -1239,7 +1251,7 @@
           </div>
 
           <div x-show="isExploration3Iteration4() && e3Step==='scope'">
-            <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-6)">
+            <div class="form-group" style="max-width:360px;margin-bottom:var(--spacing-6)">
               <label class="form-label label-info-wrap">
                 <span>Date range <span class="req">*</span></span>
                 <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
@@ -1253,7 +1265,7 @@
               </select>
             </div>
 
-            <div class="query-card">
+            <div class="query-card query-card-compact">
               <div class="query-builder">
                 <div class="query-row query-row-two">
                   <div class="query-label-text">Events to replay</div>
@@ -1816,33 +1828,38 @@
             </div>
           </div>
           <div x-show="isExploration3StepFlow() && e3Step==='review'" class="anim-in">
-            <div class="review-grid">
-              <div class="review-card">
+            <div class="review-summary-card">
+              <div class="review-summary-head">
+                <div class="review-summary-title">Replay summary</div>
+                <div class="review-summary-subtitle">Razorpay will replay events that match this setup.</div>
+              </div>
+              <div class="review-summary-row">
                 <div class="review-label">Date range</div>
-                <div class="review-value" x-text="e3DatePresetLabel()"></div>
-                <div class="review-meta">Events generated within this window will be considered for replay.</div>
+                <div class="review-summary-main">
+                  <div class="review-value" x-text="e3DatePresetLabel()"></div>
+                  <div class="review-meta">Events generated in this window</div>
+                </div>
               </div>
-              <div class="review-card">
+              <div class="review-summary-row">
                 <div class="review-label">Events to replay</div>
-                <div class="review-value" x-text="e3ReplayScope === 'all' ? 'All events' : 'Unacknowledged events'"></div>
-                <div class="review-meta" x-text="e3PaymentScope === 'payment_ids' && paymentFile ? ('Filtered by ' + paymentFile.name) : 'No payment ID filter applied'"></div>
+                <div class="review-summary-main">
+                  <div class="review-value" x-text="e3ReplayScope === 'all' ? 'All events' : 'Unacknowledged events'"></div>
+                  <div class="review-meta" x-text="e3PaymentScope === 'payment_ids' && paymentFile ? ('Filtered by ' + paymentFile.name) : 'No payment ID filter applied'"></div>
+                </div>
               </div>
-              <div class="review-card">
+              <div class="review-summary-row">
                 <div class="review-label">Webhook URLs</div>
-                <div class="review-value" x-text="selectedUrlCountForReview() + ' webhook URL' + (selectedUrlCountForReview() === 1 ? '' : 's') + ' selected'"></div>
-                <div class="review-meta" x-text="disabledSelectedUrlCount() > 0 ? disabledSelectedUrlCount() + ' selected URL' + (disabledSelectedUrlCount() === 1 ? ' is' : 's are') + ' currently disabled' : 'All selected URLs are enabled'"></div>
+                <div class="review-summary-main">
+                  <div class="review-value" x-text="selectedUrlCountForReview() + ' webhook URL' + (selectedUrlCountForReview() === 1 ? '' : 's')"></div>
+                  <div class="review-meta" x-text="disabledSelectedUrlCount() > 0 ? disabledSelectedUrlCount() + ' selected URL' + (disabledSelectedUrlCount() === 1 ? ' is' : 's are') + ' currently disabled' : 'All selected URLs are enabled'"></div>
+                </div>
               </div>
-              <div class="review-card">
+              <div class="review-summary-row">
                 <div class="review-label">Configured events</div>
-                <div class="review-value" x-text="selectedVisibleUrlEventCount() + ' URL-event combination' + (selectedVisibleUrlEventCount() === 1 ? '' : 's')"></div>
-                <div class="review-meta" x-text="'Replay will include ' + e3TotalMatches() + ' matching event' + (e3TotalMatches() === 1 ? '' : 's') + '.'"></div>
-              </div>
-            </div>
-            <div class="alert information">
-              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M10 9v4"></path><path d="M10 6.5h.01"></path></svg>
-              <div class="alert-body">
-                <div class="alert-title">Review before replaying</div>
-                <div class="alert-desc">Razorpay will replay matching events for the selected date range, event scope, payment filter, and webhook URL-event combinations.</div>
+                <div class="review-summary-main">
+                  <div class="review-value" x-text="selectedVisibleUrlEventCount() + ' URL-event combination' + (selectedVisibleUrlEventCount() === 1 ? '' : 's')"></div>
+                  <div class="review-meta" x-text="e3TotalMatches() + ' matching event' + (e3TotalMatches() === 1 ? '' : 's') + ' will be replayed'"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -2492,7 +2509,7 @@
           if (this.replayLoading) return 'Replaying…';
           if (this.isExploration3StepFlow()) {
             if (this.e3Step === 'scope') return 'Next';
-            if (this.e3Step === 'webhooks') return 'Review replay';
+            if (this.e3Step === 'webhooks') return 'Next';
             return 'Replay events';
           }
           if (this.version === 'i3' && this.replayStep === 'setup') return 'Next';
