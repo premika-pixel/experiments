@@ -239,6 +239,8 @@
       padding: 0; display: inline-flex; align-items: center; gap: var(--spacing-2); font-family: inherit;
     }
     .btn-link:hover { color: var(--action-primary-hover); text-decoration: underline; }
+    .btn-link-muted { color: var(--surface-text-secondary); font-size: var(--text-sm); }
+    .btn-link-muted:hover { color: var(--surface-text-primary); }
 
     /* Link (Blade Link) */
     .link {
@@ -319,6 +321,26 @@
     .badge-information { background: var(--action-primary-subtle); color: var(--action-primary-default); }
     .badge-new { background: var(--action-primary-default); color: #fff; padding: 2px var(--spacing-3); letter-spacing: 0.04em; }
     .badge-dot { width: 6px; height: 6px; border-radius: var(--radius-round); background: currentColor; }
+    .badge-info-wrap { position: relative; display: inline-flex; align-items: center; gap: var(--spacing-2); }
+    .info-icon {
+      width: 16px; height: 16px;
+      color: var(--surface-text-tertiary); display: inline-flex; align-items: center; justify-content: center;
+      cursor: default;
+    }
+    .info-icon svg {
+      width: 16px; height: 16px; display: block;
+    }
+    .info-icon::after {
+      content: attr(data-tooltip); position: absolute; right: 0; top: calc(100% + var(--spacing-2));
+      width: 260px; padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-md);
+      background: var(--surface-text-primary); color: #fff; font-size: var(--text-xs); line-height: 1.45;
+      box-shadow: var(--elevation-mid); opacity: 0; visibility: hidden; transform: translateY(-2px);
+      transition: opacity .12s, transform .12s; z-index: 20; white-space: normal;
+    }
+    .info-icon:hover::after { opacity: 1; visibility: visible; transform: translateY(0); }
+    .label-info-wrap { display: inline-flex; align-items: center; gap: var(--spacing-2); position: relative; }
+    .label-info-wrap .info-icon::after { left: calc(100% + var(--spacing-2)); right: auto; top: 50%; transform: translateY(-50%); }
+    .label-info-wrap .info-icon:hover::after { transform: translateY(-50%); }
 
     /* ── Webhook URL rows ── */
     .url-row {
@@ -480,7 +502,8 @@
     .hsel-search { display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-4) var(--spacing-5); border: 1px solid var(--surface-border-normal); border-radius: var(--radius-md); color: var(--surface-text-tertiary); }
     .hsel-search:focus-within { border-color: var(--action-primary-default); box-shadow: 0 0 0 3px var(--action-primary-focus-ring); }
     .hsel-search input { border: none; outline: none; flex: 1; font-family: inherit; font-size: var(--text-body); color: var(--surface-text-primary); background: transparent; }
-    .events-section { margin-top: var(--spacing-9); padding-top: var(--spacing-7); border-top: 1px solid var(--surface-border-subtle); }
+    .events-section { margin-top: var(--spacing-9); padding-top: var(--spacing-7); }
+    .events-section.events-section-compact { margin-top: var(--spacing-4); padding-top: 0; }
     .events-section-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--spacing-5); margin-bottom: var(--spacing-4); }
     .events-section-title { font-size: var(--text-md); font-weight: var(--fw-semibold); color: var(--surface-text-primary); }
     .events-section-subtitle { font-size: var(--text-sm); color: var(--surface-text-secondary); margin-top: var(--spacing-1); }
@@ -505,6 +528,9 @@
     .hsel-name.parent { font-weight: var(--fw-semibold); }
     .hsel-row.child .hsel-name { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--surface-text-secondary); }
     .url-select-row { align-items: flex-start; }
+    .url-select-row .hsel-pick { align-items: flex-start; }
+    .url-select-row .hsel-caret { margin-top: 4px; }
+    .url-select-row .hsel-pick > .cb-box { margin-top: 2px; }
     .url-select-main { display: flex; flex-direction: column; gap: var(--spacing-1); min-width: 0; flex: 1; }
     .url-select-head { display: flex; align-items: center; gap: var(--spacing-3); min-width: 0; }
     .url-select-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--action-primary-default); font-family: var(--font-mono); font-size: var(--text-sm); }
@@ -562,8 +588,13 @@
       margin-bottom: var(--spacing-7);
     }
     .query-card-title { font-size: var(--text-body); font-weight: var(--fw-semibold); color: var(--surface-text-primary); margin-bottom: var(--spacing-4); }
+    .query-card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--spacing-4); margin-bottom: var(--spacing-4); }
+    .query-card-head .query-card-title { margin-bottom: 0; }
+    .filter-action-row { margin: calc(-1 * var(--spacing-2)) 0 var(--spacing-3); display: flex; align-items: center; gap: var(--spacing-3); }
     .query-builder { display: flex; flex-direction: column; gap: var(--spacing-4); }
     .query-row { display: grid; grid-template-columns: 220px 140px minmax(0, 1fr); gap: var(--spacing-4); align-items: center; }
+    .query-row-two { grid-template-columns: 220px minmax(0, 1fr); }
+    .query-label-text { color: var(--surface-text-primary); font-size: var(--text-body); font-weight: var(--fw-semibold); }
     .query-value-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-4); }
     .query-static {
       display: flex; align-items: center; height: 40px; padding: 0 var(--spacing-5);
@@ -573,6 +604,31 @@
     .query-upload .file-upload { padding: var(--spacing-4); }
     .query-upload .file-upload-icon { width: 32px; height: 32px; }
     .preview-note { margin-bottom: var(--spacing-4); }
+    .stepper {
+      display: flex; align-items: center; gap: var(--spacing-7);
+      margin-bottom: var(--spacing-8);
+    }
+    .step-item {
+      display: flex; align-items: center; gap: var(--spacing-2); padding: 0;
+      border: 0; background: transparent;
+      color: var(--surface-text-secondary); font-size: var(--text-sm); font-weight: var(--fw-semibold);
+    }
+    .step-item.active { color: var(--action-primary-default); }
+    .step-item.done { color: var(--surface-text-secondary); }
+    .step-marker {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 10px; text-transform: uppercase; letter-spacing: .05em; flex-shrink: 0;
+    }
+    .payment-filter-choice { margin-top: calc(-1 * var(--spacing-2)); margin-bottom: var(--spacing-6); }
+    .sample-template-row { margin-top: var(--spacing-3); display: flex; align-items: center; justify-content: flex-end; }
+    .review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-4); margin-bottom: var(--spacing-6); }
+    .review-card {
+      border: 1px solid var(--surface-border-subtle); border-radius: var(--radius-md); background: var(--surface-bg-gray-subtle);
+      padding: var(--spacing-5);
+    }
+    .review-label { font-size: var(--text-xs); color: var(--surface-text-tertiary); font-weight: var(--fw-semibold); text-transform: uppercase; letter-spacing: .04em; margin-bottom: var(--spacing-2); }
+    .review-value { color: var(--surface-text-primary); font-size: var(--text-body); font-weight: var(--fw-semibold); line-height: 1.45; }
+    .review-meta { color: var(--surface-text-secondary); font-size: var(--text-sm); margin-top: var(--spacing-2); line-height: 1.5; }
     /* Blade-style custom checkbox (check + indeterminate minus) */
     .cb-input { position: absolute; opacity: 0; width: 0; height: 0; }
     .cb-box { width: 18px; height: 18px; flex-shrink: 0; border: 1.5px solid var(--surface-border-normal); border-radius: 5px; background: #fff; position: relative; transition: background .12s, border-color .12s; }
@@ -588,6 +644,8 @@
 
     /* ── Replay modal (V2 — centered, Blade small modal) ── */
     .modal.modal-replay { width: 1024px; max-width: 94vw; height: min(760px, 90vh); max-height: 90vh; display: flex; flex-direction: column; text-align: left; }
+    .modal.modal-replay-compact { width: 760px; height: min(720px, 86vh); max-height: 86vh; }
+    .modal-replay-compact .modal-replay-body { flex: 1; }
     /* Preview table inside the modal — compact padding so all columns fit without horizontal scroll */
     .modal-replay .wh-table th, .modal-replay .wh-table td { padding: var(--spacing-4) var(--spacing-5); }
     .modal-replay .wh-table { table-layout: auto; }
@@ -879,7 +937,6 @@
                         <option :value="option.value" x-text="option.label"></option>
                       </template>
                     </select>
-                    <div class="input-hint">Events are retained for 7 days.</div>
                   </div>
                   <!-- Unacknowledged filter (date mode) -->
                   <div class="checkbox-card" style="margin-bottom:0">
@@ -1060,7 +1117,7 @@
   <!-- ════════ V2/V3 REPLAY MODAL ════════ -->
   <template x-if="version !== 'v1' && drawerOpen">
     <div class="modal-overlay" @click.self="drawerOpen=false">
-      <div class="modal modal-replay modal-anim">
+      <div class="modal modal-replay modal-anim" :class="{'modal-replay-compact': isExploration3StepFlow()}">
         <div class="modal-head">
           <div>
             <div class="modal-head-title" x-text="isExploration3() ? 'Replay webhook events' : (version === 'v3' ? 'Replay events to webhook URLs' : (isUrlEventFlow() ? 'Replay events by webhook URL' : 'Replay missed webhooks'))"></div>
@@ -1068,15 +1125,205 @@
           </div>
           <button class="icon-btn" @click="drawerOpen=false">×</button>
         </div>
-        <div class="modal-replay-body" x-effect="datePreset; dateFrom; dateTo; paymentId; paymentFile; unackOnly; recoveryMode; e3ReplayScope; e3EventStatus; e3DateOperator; e3DateFromPoint; e3DateToPoint; e3SpecificPaymentId; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
+        <div class="modal-replay-body" x-effect="datePreset; e3DatePreset; dateFrom; dateTo; paymentId; paymentFile; unackOnly; recoveryMode; e3ReplayScope; e3PaymentScope; e3Step; e3EventStatus; e3DateOperator; e3DateFromPoint; e3DateToPoint; e3SpecificPaymentId; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
           <div x-show="version !== 'i3' || replayStep === 'setup'">
+          <div class="stepper" x-show="isExploration3StepFlow()">
+            <div class="step-item" :class="{active: e3Step==='scope', done: e3StepIndex() > 0}">
+              <span class="step-marker">Step 1/3</span>
+              <span>Choose scope</span>
+            </div>
+            <div class="step-item" :class="{active: e3Step==='webhooks', done: e3StepIndex() > 1}">
+              <span class="step-marker">Step 2/3</span>
+              <span>Select webhooks</span>
+            </div>
+            <div class="step-item" :class="{active: e3Step==='review'}">
+              <span class="step-marker">Step 3/3</span>
+              <span>Review</span>
+            </div>
+          </div>
+
+          <div x-show="isExploration3Iteration3() && e3Step==='scope'">
+            <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-5)">
+              <label class="form-label label-info-wrap">
+                <span>Date range <span class="req">*</span></span>
+                <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                </span>
+              </label>
+              <select class="input" x-model="e3DatePreset" @change="applyE3DatePreset()">
+                <template x-for="option in e3DateRangeOptions" :key="option.value">
+                  <option :value="option.value" x-text="option.label"></option>
+                </template>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:var(--spacing-7)">
+              <label class="form-label">Events to replay <span class="req">*</span></label>
+              <div class="radio-group">
+                <label class="radio" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label">Unacknowledged events</span>
+                </label>
+                <label class="radio" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label">All events</span>
+                </label>
+              </div>
+              <div class="input-hint" x-text="e3ReplayScopeHint()"></div>
+            </div>
+
+            <div class="alert notice" x-show="e3ReplayScope==='all'" style="margin-bottom:var(--spacing-7)">
+              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
+              <div class="alert-body">
+                <div class="alert-title">All matching events will be re-triggered</div>
+                <div class="alert-desc">This includes events that were already acknowledged. Review carefully before replaying.</div>
+              </div>
+            </div>
+
+            <div class="form-group payment-filter-choice">
+              <label class="form-label">Payment scope <span class="req">*</span></label>
+              <div class="radio-group">
+                <label class="radio" :class="{selected: e3PaymentScope==='all'}" @click="setE3PaymentScope('all')">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label" x-text="e3ReplayScope==='all' ? 'All matching events' : 'All unacknowledged events'"></span>
+                </label>
+                <label class="radio" :class="{selected: e3PaymentScope==='payment_ids'}" @click="setE3PaymentScope('payment_ids')">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label">Specific payment IDs</span>
+                </label>
+              </div>
+              <div class="input-hint">Use payment IDs only when you want to narrow replay to a specific set of payments.</div>
+            </div>
+
+            <div class="filter-action-row" x-show="e3PaymentScope==='payment_ids' && !showE3PaymentUpload">
+              <button class="btn btn-secondary" @click="showE3PaymentUpload=true">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3"/><path d="M5 6l3-3 3 3"/><path d="M3 12.5h10"/></svg>
+                Upload payment IDs
+              </button>
+            </div>
+
+            <div class="query-card" x-show="e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms>
+              <div class="query-card-head">
+                <div class="query-card-title">Upload payment IDs</div>
+                <button class="btn-link btn-link-muted" @click="removePaymentFile(); showE3PaymentUpload=false">Remove upload</button>
+              </div>
+              <label class="file-upload" x-show="!paymentFile">
+                <span class="file-upload-main">
+                  <span class="file-upload-icon">
+                    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3"/><path d="M5 6l3-3 3 3"/><path d="M3 12.5h10"/></svg>
+                  </span>
+                  <span>
+                    <span class="file-upload-title">Upload CSV or Excel file</span>
+                    <span class="file-upload-help">One file only. Supported formats: .csv, .xls, .xlsx</span>
+                  </span>
+                </span>
+                <span class="btn btn-secondary btn-sm">Choose file</span>
+                <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
+              </label>
+              <template x-if="paymentFile">
+                <div class="file-pill" style="margin-top:0">
+                  <div style="min-width:0">
+                    <div class="file-pill-name" x-text="paymentFile.name"></div>
+                    <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Filtering replay scope'"></div>
+                  </div>
+                  <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                </div>
+              </template>
+              <div class="sample-template-row">
+                <button class="btn-link" @click="downloadPaymentTemplate()">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.25 2h1.5v6.2l2.2-2.2L12 7l-4 4-4-4 1.05-1 2.2 2.2V2zM3 12.5h10V14H3v-1.5z"></path></svg>
+                  Download sample template
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div x-show="isExploration3Iteration4() && e3Step==='scope'">
+            <div class="form-group" style="max-width:420px;margin-bottom:var(--spacing-6)">
+              <label class="form-label label-info-wrap">
+                <span>Date range <span class="req">*</span></span>
+                <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                </span>
+              </label>
+              <select class="input" x-model="e3DatePreset" @change="applyE3DatePreset()">
+                <template x-for="option in e3DateRangeOptions" :key="option.value">
+                  <option :value="option.value" x-text="option.label"></option>
+                </template>
+              </select>
+            </div>
+
+            <div class="query-card">
+              <div class="query-builder">
+                <div class="query-row query-row-two">
+                  <div class="query-label-text">Events to replay</div>
+                  <select class="input" x-model="e3ReplayScope" @change="setReplayScope(e3ReplayScope)">
+                    <option value="unack">Unacknowledged events</option>
+                    <option value="all">All events</option>
+                  </select>
+                </div>
+                <div class="query-row query-row-two">
+                  <div class="query-label-text">Replay for</div>
+                  <select class="input" x-model="e3PaymentScope" @change="setE3PaymentScope(e3PaymentScope); if (e3PaymentScope==='payment_ids') showE3PaymentUpload=true">
+                    <option value="all">All</option>
+                    <option value="payment_ids">Specific payment IDs</option>
+                  </select>
+                </div>
+                <div class="query-row query-row-two query-upload" x-show="e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms>
+                  <div class="query-label-text">Payment ID</div>
+                  <div>
+                    <label class="file-upload" x-show="!paymentFile">
+                      <span class="file-upload-main">
+                        <span class="file-upload-icon">
+                          <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3"/><path d="M5 6l3-3 3 3"/><path d="M3 12.5h10"/></svg>
+                        </span>
+                        <span>
+                          <span class="file-upload-title">Upload file</span>
+                          <span class="file-upload-help">CSV or Excel. One file only.</span>
+                        </span>
+                      </span>
+                      <span class="btn btn-secondary btn-sm">Choose file</span>
+                      <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
+                    </label>
+                    <template x-if="paymentFile">
+                      <div class="file-pill" style="margin-top:0">
+                        <div style="min-width:0">
+                          <div class="file-pill-name" x-text="paymentFile.name"></div>
+                          <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Filtering replay scope'"></div>
+                        </div>
+                        <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert notice" x-show="e3ReplayScope==='all'" style="margin-bottom:var(--spacing-7)">
+              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
+              <div class="alert-body">
+                <div class="alert-title">All matching events will be re-triggered</div>
+                <div class="alert-desc">This includes events that were already acknowledged. Review carefully before replaying.</div>
+              </div>
+            </div>
+          </div>
+
           <!-- Replay scope (Exploration 3) -->
-          <div class="form-group" x-show="isExploration3()" style="margin-bottom:var(--spacing-7)">
+          <div class="form-group" x-show="isExploration3Iteration2()" style="max-width:420px;margin-bottom:var(--spacing-7)">
+            <label class="form-label">Date range <span class="req">*</span></label>
+            <select class="input" x-model="e3DatePreset" @change="applyE3DatePreset()">
+              <template x-for="option in e3DateRangeOptions" :key="option.value">
+                <option :value="option.value" x-text="option.label"></option>
+              </template>
+            </select>
+          </div>
+
+          <div class="form-group" x-show="isExploration3() && !isExploration3StepFlow()" style="margin-bottom:var(--spacing-7)">
             <label class="form-label">Events to replay <span class="req">*</span></label>
-            <div class="radio-group">
+            <div class="radio-group" x-show="isExploration3Iteration1()">
               <label class="radio" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
                 <span class="radio-circle"></span>
-                <span class="radio-label">Unacknowledged events</span>
+                <span class="radio-label">All unacknowledged events</span>
               </label>
               <label class="radio" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
                 <span class="radio-circle"></span>
@@ -1087,19 +1334,87 @@
                 <span class="radio-label">Specific events</span>
               </label>
             </div>
+            <div class="radio-group" x-show="isExploration3Iteration2()">
+              <label class="radio" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
+                <span class="radio-circle"></span>
+                <span class="radio-label">Unacknowledged events</span>
+              </label>
+              <label class="radio" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
+                <span class="radio-circle"></span>
+                <span class="radio-label">All events</span>
+              </label>
+            </div>
             <div class="input-hint" x-text="e3ReplayScopeHint()"></div>
           </div>
 
-          <div class="alert notice" x-show="isExploration3() && e3ReplayScope==='all'">
+          <div class="alert notice" x-show="isExploration3() && !isExploration3StepFlow() && e3ReplayScope==='all'">
             <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
             <div class="alert-body">
-              <div class="alert-title">All events will be triggered</div>
+              <div class="alert-title" x-text="isExploration3Iteration2() ? 'All matching events will be re-triggered' : 'All events will be triggered'"></div>
               <div class="alert-desc">This includes events that were already acknowledged. Review carefully before replaying.</div>
             </div>
           </div>
 
-          <div class="query-card" x-show="isExploration3() && e3ReplayScope==='specific'">
-            <div class="query-card-title">Build query</div>
+          <div class="filter-action-row" x-show="isExploration3Iteration2() && !showE3Filters">
+            <button class="btn btn-secondary" @click="showE3Filters=true">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"/><path d="M5 8h6"/><path d="M7 12h2"/></svg>
+              <span x-text="hasE3FiltersApplied() ? 'Edit filters' : 'Add filter'"></span>
+            </button>
+          </div>
+
+          <div class="query-card" x-show="isExploration3Iteration2() && showE3Filters" x-collapse.duration.200ms>
+            <div class="query-card-head">
+              <div class="query-card-title">Filters</div>
+              <button class="btn-link btn-link-muted" @click="removeE3Filters()">Remove filters</button>
+            </div>
+            <div class="query-builder">
+              <div class="query-row" x-show="e3ReplayScope==='all'">
+                <select class="input" aria-label="Filter field">
+                  <option>Event status</option>
+                </select>
+                <div class="query-static" aria-label="Filter operator">is</div>
+                <select class="input" x-model="e3EventStatus" aria-label="Event status">
+                  <option value="all">All</option>
+                  <option value="acked">Acknowledged</option>
+                  <option value="unack">Unacknowledged</option>
+                  <option value="failed">Failed</option>
+                </select>
+              </div>
+
+              <div class="query-row">
+                <select class="input" aria-label="Filter field">
+                  <option>Payment IDs</option>
+                </select>
+                <div class="query-static" aria-label="Filter operator">is</div>
+                <div class="query-upload">
+                  <label class="file-upload" x-show="!paymentFile">
+                  <span class="file-upload-main">
+                    <span class="file-upload-icon">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3"/><path d="M5 6l3-3 3 3"/><path d="M3 12.5h10"/></svg>
+                    </span>
+                    <span>
+                      <span class="file-upload-title">Upload payment IDs</span>
+                      <span class="file-upload-help">Optional CSV or Excel filter. One file only.</span>
+                    </span>
+                  </span>
+                  <span class="btn btn-secondary btn-sm">Choose file</span>
+                  <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
+                  </label>
+                  <template x-if="paymentFile">
+                    <div class="file-pill" style="margin-top:0">
+                      <div style="min-width:0">
+                        <div class="file-pill-name" x-text="paymentFile.name"></div>
+                        <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Filtering replay scope'"></div>
+                      </div>
+                      <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="query-card" x-show="isExploration3Iteration1() && e3ReplayScope==='specific'">
             <div class="query-builder">
               <div class="query-row">
                 <select class="input" aria-label="Filter field">
@@ -1200,7 +1515,6 @@
                   <option :value="option.value" x-text="option.label"></option>
                 </template>
               </select>
-              <div class="input-hint">Events are retained for 7 days.</div>
             </div>
           </div>
 
@@ -1334,7 +1648,12 @@
                   <span class="url-select-main">
                     <span class="url-select-head">
                       <span class="url-select-text" x-text="url.url"></span>
-                      <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
+                      <span class="badge-info-wrap">
+                        <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
+                        <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="This webhook URL must be enabled before its events can be re-triggered." aria-label="Disabled URL replay note">
+                          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                        </span>
+                      </span>
                     </span>
                     <span class="url-select-meta" x-text="url.status === 'Enabled' ? 'Ready to receive replayed events' : 'Re-enable this URL before replaying to it'"></span>
                   </span>
@@ -1345,10 +1664,10 @@
           </div>
 
           <!-- URL → Event selector (Exploration 2) -->
-          <div class="form-group events-section" x-show="isUrlEventFlow()" style="margin-bottom:var(--spacing-6)">
+          <div class="form-group events-section" :class="{'events-section-compact': isExploration3Iteration2() || isExploration3StepFlow()}" x-show="isUrlEventFlow() && (!isExploration3StepFlow() || e3Step==='webhooks')" style="margin-bottom:var(--spacing-6)">
             <div class="events-section-head">
               <div>
-                <div class="events-section-title" x-text="isExploration3() ? 'Webhook URLs and events' : 'Events table'"></div>
+                <div class="events-section-title" x-text="isExploration3StepFlow() ? 'Select webhook URLs and events' : (isExploration3() ? 'Webhook URLs and events' : 'Events table')"></div>
                 <div class="events-section-subtitle" x-text="urlEventSelectorSubtitle()"></div>
               </div>
               <div class="hsel-search events-section-search" x-show="!isExploration3()">
@@ -1362,7 +1681,16 @@
                 <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
                 <input type="text" placeholder="Search" x-model="urlEventSearch">
               </div>
-              <button class="hsel-clear" @click="toggleAllUrlEvents()" x-text="selectedVisibleUrlEventCount() === 0 ? 'Select all' : 'Clear all'"></button>
+              <span style="display:flex;align-items:center;gap:var(--spacing-5)">
+                <button class="hsel-clear" @click="selectAllUrlEvents()">Select all</button>
+                <button class="hsel-clear" @click="clearUrlEvents()">Clear all</button>
+              </span>
+            </div>
+            <div class="alert information" x-show="isExploration3StepFlow()" style="margin-bottom:var(--spacing-4)">
+              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M10 9v4"></path><path d="M10 6.5h.01"></path></svg>
+              <div class="alert-body">
+                <div class="alert-desc">This list shows all webhook URLs and events configured for your account. Only selected URL-event combinations will receive the replay.</div>
+              </div>
             </div>
             <div class="hsel-tree url-event-tree">
               <template x-for="url in filteredUrlEventGroups()" :key="url.id">
@@ -1377,7 +1705,12 @@
                       <span class="url-select-main">
                         <span class="url-select-head">
                           <span class="url-select-text" x-text="url.url"></span>
-                          <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
+                          <span class="badge-info-wrap">
+                            <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
+                            <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="This webhook URL must be enabled before its events can be re-triggered." aria-label="Disabled URL replay note">
+                              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                            </span>
+                          </span>
                         </span>
                         <span class="url-select-meta" x-text="selectedUrlEventLabel(url)"></span>
                       </span>
@@ -1410,14 +1743,14 @@
           </div>
 
           <!-- Preview matching events (under event selection) -->
-          <button class="btn btn-secondary" x-show="version !== 'i3'" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
+          <button class="btn btn-secondary" x-show="version !== 'i3' && (!isExploration3StepFlow() || e3Step==='webhooks')" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
             Preview matching events
           </button>
           </div>
 
           <!-- Matching Events Preview (inline) -->
-          <div class="anim-in" x-show="showPreview && (version !== 'i3' || replayStep === 'preview')" style="margin-top:var(--spacing-7)">
+          <div class="anim-in" x-show="showPreview && (version !== 'i3' || replayStep === 'preview') && (!isExploration3StepFlow() || e3Step==='webhooks')" style="margin-top:var(--spacing-7)">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--spacing-4);margin-bottom:var(--spacing-4)">
               <div>
                 <div class="card-title">Matching Events Preview</div>
@@ -1482,12 +1815,43 @@
               </table>
             </div>
           </div>
+          <div x-show="isExploration3StepFlow() && e3Step==='review'" class="anim-in">
+            <div class="review-grid">
+              <div class="review-card">
+                <div class="review-label">Date range</div>
+                <div class="review-value" x-text="e3DatePresetLabel()"></div>
+                <div class="review-meta">Events generated within this window will be considered for replay.</div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Events to replay</div>
+                <div class="review-value" x-text="e3ReplayScope === 'all' ? 'All events' : 'Unacknowledged events'"></div>
+                <div class="review-meta" x-text="e3PaymentScope === 'payment_ids' && paymentFile ? ('Filtered by ' + paymentFile.name) : 'No payment ID filter applied'"></div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Webhook URLs</div>
+                <div class="review-value" x-text="selectedUrlCountForReview() + ' webhook URL' + (selectedUrlCountForReview() === 1 ? '' : 's') + ' selected'"></div>
+                <div class="review-meta" x-text="disabledSelectedUrlCount() > 0 ? disabledSelectedUrlCount() + ' selected URL' + (disabledSelectedUrlCount() === 1 ? ' is' : 's are') + ' currently disabled' : 'All selected URLs are enabled'"></div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Configured events</div>
+                <div class="review-value" x-text="selectedVisibleUrlEventCount() + ' URL-event combination' + (selectedVisibleUrlEventCount() === 1 ? '' : 's')"></div>
+                <div class="review-meta" x-text="'Replay will include ' + e3TotalMatches() + ' matching event' + (e3TotalMatches() === 1 ? '' : 's') + '.'"></div>
+              </div>
+            </div>
+            <div class="alert information">
+              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M10 9v4"></path><path d="M10 6.5h.01"></path></svg>
+              <div class="alert-body">
+                <div class="alert-title">Review before replaying</div>
+                <div class="alert-desc">Razorpay will replay matching events for the selected date range, event scope, payment filter, and webhook URL-event combinations.</div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="modal-replay-footer">
-          <button class="btn btn-secondary" @click="version === 'i3' && replayStep === 'preview' ? replayStep='setup' : drawerOpen=false" x-text="version === 'i3' && replayStep === 'preview' ? 'Back' : 'Cancel'"></button>
-          <button class="btn btn-primary" @click="version === 'i3' && replayStep === 'setup' ? goToReviewStep() : replayPreviewed()" :disabled="version === 'i3' && replayStep === 'setup' ? !canPreview() : !canReplay()">
+          <button class="btn btn-secondary" @click="secondaryModalAction()" x-text="secondaryModalLabel()"></button>
+          <button class="btn btn-primary" @click="primaryModalAction()" :disabled="primaryModalDisabled()">
             <template x-if="replayLoading"><span class="spinner"></span></template>
-            <span x-text="version === 'i3' && replayStep === 'setup' ? 'Next' : primaryReplayLabel()"></span>
+            <span x-text="primaryModalLabel()"></span>
           </button>
         </div>
       </div>
@@ -1517,6 +1881,15 @@
     <div class="vp-group">
       <div class="vp-group-title">Exploration 3</div>
       <div class="vp-seg">
+        <button :class="{active: version==='e3i4'}" @click="setVersion('e3i4')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h8v2H2z"/></svg> Iteration 4
+        </button>
+        <button :class="{active: version==='e3i3'}" @click="setVersion('e3i3')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h8v2H2z"/></svg> Iteration 3
+        </button>
+        <button :class="{active: version==='e3i2'}" @click="setVersion('e3i2')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 4h12v2H2zM2 7h12v2H2zM2 10h8v2H2z"/></svg> Iteration 2
+        </button>
         <button :class="{active: version==='e3i1'}" @click="setVersion('e3i1')">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h12v2H2z"/></svg> Iteration 1 - Ideation
         </button>
@@ -1552,7 +1925,7 @@
   <script>
     function webhookApp() {
       return {
-        version: 'e3i1',        // 'e3i1' (Exploration 3) | 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
+        version: 'e3i4',        // 'e3i4' (Exploration 3 Iteration 4) | 'e3i3' (Exploration 3 Iteration 3) | 'e3i2' (Exploration 3 Iteration 2) | 'e3i1' (Exploration 3 Iteration 1) | 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
         activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
         drawerOpen: false,
         replayStep: 'setup',
@@ -1593,6 +1966,16 @@
           { value: 'last6', label: 'Last 6 days' },
           { value: 'last7', label: 'Last 7 days' },
         ],
+        e3DatePreset: 'last7',
+        e3DateRangeOptions: [
+          { value: 'last7', label: 'Last 7 days' },
+          { value: 'last6', label: 'Last 6 days' },
+          { value: 'last5', label: 'Last 5 days' },
+          { value: 'last4', label: 'Last 4 days' },
+          { value: 'last3', label: 'Last 3 days' },
+          { value: 'last2', label: 'Last 2 days' },
+          { value: 'last1', label: 'Last 1 day' },
+        ],
         datePointOptions: [
           { value: '2026-06-09', label: 'Jun 9, 2026' },
           { value: '2026-06-10', label: 'Jun 10, 2026' },
@@ -1609,11 +1992,15 @@
         paymentFile: null,
         replayLoading: false,
         e3ReplayScope: 'unack',
-        e3EventStatus: 'unack',
+        e3EventStatus: 'all',
         e3DateOperator: 'is',
         e3DateFromPoint: '2026-06-09',
         e3DateToPoint: '2026-06-15',
         e3SpecificPaymentId: '',
+        showE3Filters: false,
+        e3Step: 'scope',
+        e3PaymentScope: 'all',
+        showE3PaymentUpload: false,
 
         // event selector
         eventSearch: '',
@@ -1702,27 +2089,65 @@
           if (this.version === 'v3') return 7;
           return 6;
         },
-        isExploration3() { return this.version === 'e3i1'; },
+        isExploration3() { return this.version === 'e3i1' || this.version === 'e3i2' || this.version === 'e3i3' || this.version === 'e3i4'; },
+        isExploration3Iteration1() { return this.version === 'e3i1'; },
+        isExploration3Iteration2() { return this.version === 'e3i2'; },
+        isExploration3Iteration3() { return this.version === 'e3i3'; },
+        isExploration3Iteration4() { return this.version === 'e3i4'; },
+        isExploration3StepFlow() { return this.isExploration3Iteration3() || this.isExploration3Iteration4(); },
         isUrlEventFlow() { return this.version === 'i2' || this.version === 'i3' || this.isExploration3(); },
         isPreviewSelectable() { return this.isUrlEventFlow() && !this.isExploration3(); },
         urlForPreviewRow(row) { return this.urlById(row.urlId) || this.webhookUrls[0]; },
         setReplayScope(scope) {
           this.e3ReplayScope = scope;
+          if (this.isExploration3Iteration1() && scope === 'specific' && this.e3EventStatus === 'all') this.e3EventStatus = 'unack';
+          if (this.isExploration3Iteration2() && scope === 'unack') this.e3EventStatus = 'all';
           this.selectedPreviewRowIds = [];
           this.showPreview = false;
         },
+        setE3PaymentScope(scope) {
+          this.e3PaymentScope = scope;
+          if (scope === 'all') {
+            this.paymentFile = null;
+            this.showE3PaymentUpload = false;
+          }
+          this.showPreview = false;
+        },
+        e3StepIndex() {
+          return { scope: 0, webhooks: 1, review: 2 }[this.e3Step] || 0;
+        },
         e3ReplayScopeHint() {
+          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'unack') return 'Replay only events your URLs never acknowledged.';
+          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'all') return 'Replay every matching event, including events already acknowledged.';
+          if (this.isExploration3Iteration2() && this.e3ReplayScope === 'unack') return 'Replay only events your URLs never acknowledged. Use filters to narrow the replay set.';
           if (this.e3ReplayScope === 'unack') return 'Replay events your URLs never acknowledged.';
           if (this.e3ReplayScope === 'all') return 'Replay every matching event, including events already acknowledged.';
           return 'Use filters to find a specific payment, payment list, status, URL, or event.';
         },
+        hasE3FiltersApplied() {
+          return !!this.paymentFile || (this.isExploration3Iteration2() && this.e3ReplayScope === 'all' && this.e3EventStatus !== 'all');
+        },
         e3TotalMatches() {
+          if (this.isExploration3StepFlow()) {
+            let total = this.e3ReplayScope === 'all' ? 100 : 42;
+            if (this.e3PaymentScope === 'payment_ids' && this.paymentFile) total = this.e3ReplayScope === 'all' ? 18 : 9;
+            return Math.max(this.previewResults().length, total);
+          }
+          if (this.isExploration3Iteration2()) {
+            let total = this.e3ReplayScope === 'all' ? 100 : 42;
+            if (this.paymentFile) total = this.e3ReplayScope === 'all' ? 18 : 9;
+            if (this.e3ReplayScope === 'all' && this.e3EventStatus !== 'all') total = Math.min(total, this.e3EventStatus === 'failed' ? 14 : 24);
+            return Math.max(this.previewResults().length, total);
+          }
           if (this.e3ReplayScope === 'all') return 100;
           if (this.e3ReplayScope === 'unack') return 42;
           if (this.e3SpecificPaymentId || this.paymentFile || this.e3EventStatus !== 'all') return Math.max(this.previewResults().length, 12);
           return 24;
         },
         urlEventSelectorSubtitle() {
+          if (this.isExploration3StepFlow()) {
+            return 'Configured webhook URLs and events are listed below. Select the ones that should receive replayed events.';
+          }
           if (this.isExploration3()) {
             return 'Select the URL-event combinations to include in this replay.';
           }
@@ -1731,7 +2156,22 @@
         e3FilteredEvents(rows) {
           let evs = [...rows];
           if (this.e3ReplayScope === 'unack') evs = evs.filter(e => !e.acked);
-          if (this.e3ReplayScope === 'specific') {
+          if (this.isExploration3StepFlow()) {
+            if (this.e3PaymentScope === 'payment_ids' && this.paymentFile) {
+              const uploadedIds = this.mockUploadedPaymentIds();
+              evs = evs.filter(e => uploadedIds.includes(e.payment));
+            }
+          } else if (this.isExploration3Iteration2()) {
+            if (this.paymentFile) {
+              const uploadedIds = this.mockUploadedPaymentIds();
+              evs = evs.filter(e => uploadedIds.includes(e.payment));
+            }
+            if (this.e3ReplayScope === 'all') {
+              if (this.e3EventStatus === 'unack') evs = evs.filter(e => !e.acked);
+              if (this.e3EventStatus === 'acked') evs = evs.filter(e => e.acked);
+              if (this.e3EventStatus === 'failed') evs = evs.filter(e => e.code >= 400);
+            }
+          } else if (this.e3ReplayScope === 'specific') {
             const payment = this.e3SpecificPaymentId.trim().toLowerCase();
             if (payment) evs = evs.filter(e => e.payment.toLowerCase().includes(payment));
             else if (this.paymentFile) {
@@ -1753,15 +2193,15 @@
           const dd = String(date.getDate()).padStart(2, '0');
           return `${yyyy}-${mm}-${dd}`;
         },
-        applyDatePreset() {
+        applyDatePresetValue(preset) {
           const demoToday = new Date('2026-06-15T00:00:00');
           let end = new Date(demoToday);
           let days = 1;
 
-          if (this.datePreset === 'yesterday') {
+          if (preset === 'yesterday') {
             end.setDate(end.getDate() - 1);
-          } else if (this.datePreset.startsWith('last')) {
-            days = Number(this.datePreset.replace('last', '')) || 1;
+          } else if (preset.startsWith('last')) {
+            days = Number(preset.replace('last', '')) || 1;
           }
 
           const start = new Date(end);
@@ -1771,6 +2211,15 @@
           this.showPreview = false;
           this.selectedPreviewRowIds = [];
           if (this.version === 'i3') this.replayStep = 'setup';
+        },
+        applyDatePreset() {
+          this.applyDatePresetValue(this.datePreset);
+        },
+        applyE3DatePreset() {
+          this.applyDatePresetValue(this.e3DatePreset);
+        },
+        e3DatePresetLabel() {
+          return this.e3DateRangeOptions.find(option => option.value === this.e3DatePreset)?.label || 'Last 7 days';
         },
         scopeValid() {
           if (this.isExploration3()) return true;
@@ -1936,6 +2385,16 @@
         selectedVisibleUrlEventCount() {
           return this.availableUrlEventKeys().filter(key => this.selectedUrlEventKeys.includes(key)).length;
         },
+        selectedUrlIdsForReview() {
+          return [...new Set(this.selectedUrlEventKeys.map(key => key.split('::')[0]))]
+            .filter(urlId => this.availableUrlEventKeys().some(key => key.startsWith(urlId + '::')));
+        },
+        selectedUrlCountForReview() {
+          return this.selectedUrlIdsForReview().length;
+        },
+        disabledSelectedUrlCount() {
+          return this.selectedUrlIdsForReview().filter(urlId => this.urlById(urlId)?.status === 'Disabled').length;
+        },
         selectedUrlEventLabel(url) {
           const selected = url.events.filter(ev => this.isUrlEventSelected(url.id, ev)).length;
           if (selected === url.events.length) return 'All ' + url.events.length + ' events selected';
@@ -2008,6 +2467,52 @@
           if (this.isUrlEventFlow()) return this.showPreview && this.selectedPreviewRowIds.length > 0;
           return this.canPreview();
         },
+        canContinueE3Step() {
+          if (!this.isExploration3StepFlow()) return true;
+          if (this.e3Step === 'scope') return this.e3PaymentScope === 'all' || !!this.paymentFile;
+          if (this.e3Step === 'webhooks') return this.canPreview();
+          return this.canReplay();
+        },
+        secondaryModalLabel() {
+          if (this.isExploration3StepFlow()) return this.e3Step === 'scope' ? 'Cancel' : 'Back';
+          if (this.version === 'i3' && this.replayStep === 'preview') return 'Back';
+          return 'Cancel';
+        },
+        secondaryModalAction() {
+          if (this.isExploration3StepFlow()) {
+            if (this.e3Step === 'review') { this.e3Step = 'webhooks'; return; }
+            if (this.e3Step === 'webhooks') { this.e3Step = 'scope'; return; }
+            this.drawerOpen = false;
+            return;
+          }
+          if (this.version === 'i3' && this.replayStep === 'preview') this.replayStep = 'setup';
+          else this.drawerOpen = false;
+        },
+        primaryModalLabel() {
+          if (this.replayLoading) return 'Replaying…';
+          if (this.isExploration3StepFlow()) {
+            if (this.e3Step === 'scope') return 'Next';
+            if (this.e3Step === 'webhooks') return 'Review replay';
+            return 'Replay events';
+          }
+          if (this.version === 'i3' && this.replayStep === 'setup') return 'Next';
+          return this.primaryReplayLabel();
+        },
+        primaryModalDisabled() {
+          if (this.isExploration3StepFlow()) return !this.canContinueE3Step();
+          if (this.version === 'i3' && this.replayStep === 'setup') return !this.canPreview();
+          return !this.canReplay();
+        },
+        primaryModalAction() {
+          if (this.isExploration3StepFlow()) {
+            if (this.e3Step === 'scope') { this.e3Step = 'webhooks'; return; }
+            if (this.e3Step === 'webhooks') { this.e3Step = 'review'; return; }
+            this.replayPreviewed();
+            return;
+          }
+          if (this.version === 'i3' && this.replayStep === 'setup') this.goToReviewStep();
+          else this.replayPreviewed();
+        },
         primaryReplayLabel() {
           if (this.replayLoading) return 'Replaying…';
           if (!this.isUrlEventFlow()) return 'Replay events';
@@ -2031,6 +2536,22 @@
           this.paymentFile = null;
           this.showPreview = false;
         },
+        removeE3Filters() {
+          this.paymentFile = null;
+          this.e3EventStatus = 'all';
+          this.showE3Filters = false;
+          this.showPreview = false;
+        },
+        downloadPaymentTemplate() {
+          const csv = 'payment_id\\npay_NK7xABCD56\\npay_NK7xEFGH78\\n';
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'webhook-replay-payment-template.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        },
 
         // success state
         showSuccess: false,
@@ -2039,23 +2560,60 @@
 
         init() {
           this.applyDatePreset();
+          this.applyE3DatePreset();
           this.selectedEvents = [...this.allEventNames()];
           this.expandedGroups = this.eventGroups.map(g => g.name);
           this.selectedUrls = this.webhookUrls.map(u => u.id);
           this.selectedUrlEventKeys = [...this.allUrlEventKeys()];
-          this.expandedUrlEventIds = this.webhookUrls.map(u => u.id);
+          this.expandedUrlEventIds = (this.isExploration3Iteration2() || this.isExploration3StepFlow()) ? [] : this.webhookUrls.map(u => u.id);
         },
 
         setVersion(v) {
           this.version = v;
+          if (v === 'e3i3' || v === 'e3i4') {
+            this.e3Step = 'scope';
+            this.e3ReplayScope = 'unack';
+            this.e3PaymentScope = 'all';
+            this.e3EventStatus = 'all';
+            this.e3DatePreset = 'last7';
+            this.showE3PaymentUpload = false;
+            this.showE3Filters = false;
+            this.paymentFile = null;
+            this.applyE3DatePreset();
+          }
+          if (v === 'e3i2') {
+            this.e3ReplayScope = 'unack';
+            this.e3EventStatus = 'all';
+            this.e3DatePreset = 'last7';
+            this.showE3Filters = false;
+            this.applyE3DatePreset();
+          }
+          if (v === 'e3i1' && this.e3ReplayScope !== 'specific') {
+            this.e3EventStatus = 'unack';
+          }
           this.drawerOpen = false;
           this.activeTab = 'urls';
           this.showPreview = false;
           this.selectedPreviewRowIds = [];
           this.replayStep = 'setup';
+          this.expandedUrlEventIds = (this.isExploration3Iteration2() || this.isExploration3StepFlow()) ? [] : this.webhookUrls.map(u => u.id);
         },
 
-        openDrawer() { this.drawerOpen = true; this.showPreview = false; this.selectedPreviewRowIds = []; this.replayStep = 'setup'; },
+        openDrawer() {
+          this.drawerOpen = true;
+          this.showPreview = false;
+          this.selectedPreviewRowIds = [];
+          this.replayStep = 'setup';
+          if (this.isExploration3StepFlow()) {
+            this.e3Step = 'scope';
+            this.showE3PaymentUpload = false;
+            this.expandedUrlEventIds = [];
+          }
+          if (this.isExploration3Iteration2()) {
+            this.showE3Filters = false;
+            this.expandedUrlEventIds = [];
+          }
+        },
 
         // Routes the "Replay missed" button per version: V1 → tab, V2 → drawer
         replayEntry() {
