@@ -506,6 +506,11 @@
     }
     .choice-card-title { display: block; color: var(--surface-text-primary); font-size: var(--text-body); font-weight: var(--fw-semibold); line-height: 1.35; }
     .choice-card-desc { display: block; color: var(--surface-text-secondary); font-size: var(--text-sm); line-height: 1.45; margin-top: var(--spacing-2); }
+    .date-range-card-width {
+      width: calc((100% - var(--spacing-4)) / 2);
+      max-width: none;
+      min-width: 320px;
+    }
 
     /* Checkbox card */
     .checkbox-card {
@@ -835,9 +840,120 @@
     .modal code {
       font-family: var(--modal-font-body);
     }
-    .payment-upload-simple { max-width: 520px; margin-top: var(--spacing-5); }
+    .payment-upload-simple { width: 100%; max-width: none; margin-top: var(--spacing-5); }
+    .payment-upload-simple .form-label { display: block; }
     .payment-upload-simple .file-upload { min-height: 86px; justify-content: center; text-align: center; }
     .payment-upload-simple .file-upload-main { justify-content: center; }
+    .file-upload-item {
+      width: 100%;
+      min-height: 72px;
+      border: 1px solid var(--surface-border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--surface-bg-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-5);
+      padding: var(--spacing-4) var(--spacing-5);
+    }
+    .file-upload-item-icon {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--surface-border-normal);
+      border-radius: var(--radius-sm);
+      color: var(--feedback-negative-default);
+      background: var(--surface-bg-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .file-upload-item-icon svg {
+      width: 30px;
+      height: 34px;
+    }
+    .file-upload-item-ext {
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      bottom: 6px;
+      height: 14px;
+      border-radius: 2px;
+      background: var(--feedback-negative-default);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      line-height: 12px;
+      font-weight: var(--fw-semibold);
+      text-transform: lowercase;
+    }
+    .file-upload-item-main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .file-upload-item-name-row {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+    }
+    .file-upload-item-name {
+      min-width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      color: var(--surface-text-primary);
+      font-size: var(--text-sm);
+      line-height: 20px;
+      font-weight: var(--fw-semibold);
+    }
+    .file-upload-item-success {
+      width: 18px;
+      height: 18px;
+      color: var(--feedback-positive-default);
+      flex-shrink: 0;
+    }
+    .file-upload-item-size {
+      color: var(--surface-text-tertiary);
+      font-size: var(--text-xs);
+      line-height: 18px;
+    }
+    .file-upload-item-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      color: var(--surface-text-tertiary);
+      flex-shrink: 0;
+    }
+    .file-upload-item-action {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .file-upload-item-action:hover {
+      background: var(--surface-bg-gray-subtle);
+      color: var(--surface-text-primary);
+    }
+    .file-upload-item-action.danger:hover {
+      color: var(--feedback-negative-default);
+    }
+    .file-upload-item-divider {
+      width: 1px;
+      height: 24px;
+      background: var(--surface-border-subtle);
+    }
     .confirm-question { font-family: var(--modal-font-heading); font-size: 18px; font-weight: 600; color: var(--surface-text-primary); margin-bottom: var(--spacing-5); line-height: 24px; letter-spacing: 0; }
     .modal.modal-confirm-replay { max-width: 520px; text-align: left; overflow: hidden; }
     .modal-confirm-replay .modal-head { padding: var(--spacing-6) var(--spacing-7); }
@@ -1103,9 +1219,9 @@
           <div class="alert negative" x-show="showDisableAlert" x-transition>
             <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"/><path d="M10 8v3.5"/><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"/></svg>
             <div class="alert-body">
-              <div class="alert-title">Some of your webhook URLs are auto-disabled</div>
+              <div class="alert-title">Webhook URLs auto-disabled</div>
               <div class="alert-desc">
-                A webhook URL was auto-disabled after 24 hours of failed delivery. Re-enable it, then replay the missed events.
+                3 webhook URLs were auto-disabled because deliveries failed for 24 hours. Replaying events will enable the URLs.
               </div>
               <div class="alert-actions">
                 <button class="btn btn-secondary btn-sm" @click="version==='v1' ? (activeTab='replay', showDisableAlert=false) : openDrawer()">Replay events</button>
@@ -1131,10 +1247,46 @@
                   <td class="wh-events">2 events</td>
                   <td class="wh-updated">01 Apr 2025, 03:55:29 pm</td>
                 </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://api.yourstore.com/webhooks/razorpay</a></td>
+                  <td><span class="badge badge-negative">Disabled</span></td>
+                  <td class="wh-events">6 events</td>
+                  <td class="wh-updated">07 Jun 2026, 02:16:08 am</td>
+                </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://api.yourstore.com/webhooks/rz-backup</a></td>
+                  <td><span class="badge-enabled">Enabled</span></td>
+                  <td class="wh-events">3 events</td>
+                  <td class="wh-updated">09 Jun 2026, 09:11:40 am</td>
+                </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://billing.yourstore.com/razorpay/webhook</a></td>
+                  <td><span class="badge-enabled">Enabled</span></td>
+                  <td class="wh-events">4 events</td>
+                  <td class="wh-updated">11 Jun 2026, 06:42:12 pm</td>
+                </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://orders.yourstore.com/api/rzp/webhooks</a></td>
+                  <td><span class="badge badge-negative">Disabled</span></td>
+                  <td class="wh-events">5 events</td>
+                  <td class="wh-updated">12 Jun 2026, 10:18:45 am</td>
+                </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://subscriptions.yourstore.com/webhooks/razorpay</a></td>
+                  <td><span class="badge-enabled">Enabled</span></td>
+                  <td class="wh-events">3 events</td>
+                  <td class="wh-updated">13 Jun 2026, 01:24:03 pm</td>
+                </tr>
+                <tr>
+                  <td><a class="wh-url" @click.prevent>https://fulfilment.yourstore.com/hooks/rz-payments</a></td>
+                  <td><span class="badge-enabled">Enabled</span></td>
+                  <td class="wh-events">2 events</td>
+                  <td class="wh-updated">14 Jun 2026, 08:05:19 pm</td>
+                </tr>
               </tbody>
             </table>
           </div>
-          <div class="wh-showing">Showing 1 - 1</div>
+          <div class="wh-showing">Showing 1 - 7</div>
         </div>
 
         <!-- V1 Replay panel — inline form under the "Replay Webhooks" tab -->
@@ -1353,7 +1505,7 @@
   <!-- ════════ V2/V3 REPLAY MODAL ════════ -->
   <template x-if="version !== 'v1' && drawerOpen">
     <div class="modal-overlay" @click.self="drawerOpen=false; confirmReplayOpen=false">
-      <div class="modal modal-replay modal-anim" :class="{'modal-replay-compact': isExploration3StepFlow() && !isExploration3Iteration5(), 'modal-replay-side': isExploration3Iteration5(), 'modal-replay-single': isExploration3Iteration6()}">
+      <div class="modal modal-replay modal-anim" :class="{'modal-replay-compact': isExploration3StepFlow() && !isExploration3SideFlow(), 'modal-replay-side': isExploration3SideFlow(), 'modal-replay-single': isExploration3Iteration6()}">
         <div class="modal-head">
           <div>
             <div class="modal-head-title" x-text="isExploration3() ? 'Replay webhook events' : (version === 'v3' ? 'Replay events to webhook URLs' : (isUrlEventFlow() ? 'Replay events by webhook URL' : 'Replay missed webhooks'))"></div>
@@ -1362,20 +1514,24 @@
           <button class="icon-btn" @click="drawerOpen=false; confirmReplayOpen=false">×</button>
         </div>
         <div class="modal-replay-body" x-effect="datePreset; e3DatePreset; dateFrom; dateTo; paymentId; paymentFile; unackOnly; recoveryMode; e3ReplayScope; e3PaymentScope; e3Step; e3EventStatus; e3DateOperator; e3DateFromPoint; e3DateToPoint; e3SpecificPaymentId; selectedEvents.length; selectedUrls.length; selectedUrlEventKeys.length; eventSearch; urlSearch; urlEventSearch; showPreview=false; if (version === 'i3') replayStep='setup'">
-          <div class="step-modal-layout" :class="{'step-modal-layout-side': isExploration3Iteration5()}">
-            <aside class="step-side-nav" x-show="isExploration3Iteration5()">
+          <div class="step-modal-layout" :class="{'step-modal-layout-side': isExploration3SideFlow()}">
+            <aside class="step-side-nav" x-show="isExploration3SideFlow()">
               <div class="step-side-item" :class="{active: e3Step==='scope', done: e3StepIndex() > 0}">
                 <span class="step-side-dot" x-text="e3StepIndex() > 0 ? '✓' : '1'"></span>
-                <span>Choose scope</span>
+                <span>Replay scope</span>
               </div>
-              <div class="step-side-item" :class="{active: e3Step==='webhooks', done: e3StepIndex() > 1}">
+              <div class="step-side-item" x-show="!isExploration3Iteration8()" :class="{active: e3Step==='webhooks', done: e3StepIndex() > 1}">
                 <span class="step-side-dot" x-text="e3StepIndex() > 1 ? '✓' : '2'"></span>
-                <span>Select events</span>
+                <span>Preview events</span>
+              </div>
+              <div class="step-side-item" :class="{active: e3Step==='review'}">
+                <span class="step-side-dot" x-text="isExploration3Iteration8() ? '2' : '3'"></span>
+                <span>Filter events</span>
               </div>
             </aside>
             <div class="step-modal-content">
           <div x-show="version !== 'i3' || replayStep === 'setup'">
-          <div class="stepper" x-show="isExploration3StepFlow() && !isExploration3Iteration5()">
+          <div class="stepper" x-show="isExploration3StepFlow() && !isExploration3SideFlow()">
             <div class="step-item" :class="{active: e3Step==='scope', done: e3StepIndex() > 0}">
               <span class="step-marker">Step 1/3</span>
             </div>
@@ -1434,10 +1590,13 @@
                 </label>
                 <label class="radio" :class="{selected: e3PaymentScope==='payment_ids'}" @click="setE3PaymentScope('payment_ids')">
                   <span class="radio-circle"></span>
-                  <span class="radio-label">Specific payment IDs</span>
+                  <span class="radio-label label-info-wrap">Specific payment IDs
+                    <span class="info-icon" data-tooltip="Use payment IDs to narrow the replay to events linked to specific payments." aria-label="Specific payment IDs help">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                    </span>
+                  </span>
                 </label>
               </div>
-              <div class="input-hint">Use payment IDs only when you want to narrow replay to a specific set of payments.</div>
             </div>
 
             <div class="filter-action-row" x-show="e3PaymentScope==='payment_ids' && !showE3PaymentUpload">
@@ -1466,12 +1625,30 @@
                 <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
               </label>
               <template x-if="paymentFile">
-                <div class="file-pill" style="margin-top:0">
-                  <div style="min-width:0">
-                    <div class="file-pill-name" x-text="paymentFile.name"></div>
-                    <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Filtering replay scope'"></div>
+                <div class="file-upload-item">
+                  <span class="file-upload-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 36" fill="none">
+                      <path d="M7 2.5h12l6 6v25H7v-31z" stroke="currentColor" stroke-width="1.6"></path>
+                      <path d="M19 2.5v7h6" stroke="currentColor" stroke-width="1.6"></path>
+                    </svg>
+                    <span class="file-upload-item-ext" x-text="paymentFileExtension()"></span>
+                  </span>
+                  <div class="file-upload-item-main">
+                    <div class="file-upload-item-name-row">
+                      <span class="file-upload-item-name" x-text="paymentFile.name"></span>
+                      <svg class="file-upload-item-success" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7.5a5.5 5.5 0 1 1-1.6-3.9"></path><path d="M5.8 7.8l1.6 1.6 4-4"></path></svg>
+                    </div>
+                    <div class="file-upload-item-size" x-text="paymentFile.sizeLabel"></div>
                   </div>
-                  <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                  <div class="file-upload-item-actions">
+                    <button class="file-upload-item-action" type="button" aria-label="Preview uploaded file" @click="previewPaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8s2.3-4 6.5-4 6.5 4 6.5 4-2.3 4-6.5 4-6.5-4-6.5-4z"></path><circle cx="8" cy="8" r="1.8"></circle></svg>
+                    </button>
+                    <span class="file-upload-item-divider" aria-hidden="true"></span>
+                    <button class="file-upload-item-action danger" type="button" aria-label="Remove uploaded file" @click="removePaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"></path><path d="M6.5 2.5h3L10 4H6l.5-1.5z"></path><path d="M5 6v6"></path><path d="M8 6v6"></path><path d="M11 6v6"></path><path d="M4 4l.6 10h6.8L12 4"></path></svg>
+                    </button>
+                  </div>
                 </div>
               </template>
               <div class="sample-template-row">
@@ -1484,7 +1661,7 @@
           </div>
 
           <div x-show="isExploration3Iteration4() && e3Step==='scope'">
-            <div class="form-group" style="max-width:360px;margin-bottom:var(--spacing-6)">
+            <div class="form-group date-range-card-width" style="margin-bottom:var(--spacing-6)">
               <label class="form-label label-info-wrap">
                 <span>Date range <span class="req">*</span></span>
                 <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
@@ -1553,8 +1730,8 @@
             </div>
           </div>
 
-          <div x-show="isExploration3Iteration5() && e3Step==='scope'">
-            <div class="form-group" style="max-width:360px;margin-bottom:var(--spacing-6)">
+          <div x-show="isExploration3SideFlow() && e3Step==='scope'">
+            <div class="form-group date-range-card-width" style="margin-bottom:var(--spacing-6)">
               <label class="form-label label-info-wrap">
                 <span>Date range <span class="req">*</span></span>
                 <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
@@ -1568,35 +1745,7 @@
               </select>
             </div>
 
-            <div class="form-group" style="margin-bottom:var(--spacing-7)">
-              <label class="form-label">Events to replay <span class="req">*</span></label>
-              <div class="choice-card-group">
-                <label class="choice-card" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
-                  <span class="radio-circle"></span>
-                  <span>
-                    <span class="choice-card-title">Unacknowledged events</span>
-                    <span class="choice-card-desc">Events that are not acknowledged by your URLs will be replayed.</span>
-                  </span>
-                </label>
-                <label class="choice-card" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
-                  <span class="radio-circle"></span>
-                  <span>
-                    <span class="choice-card-title">All events</span>
-                    <span class="choice-card-desc">All the events including events already acknowledged will be replayed.</span>
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div class="alert notice alert-compact" x-show="e3ReplayScope==='all'">
-              <svg class="alert-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
-              <div class="alert-body">
-                <div class="alert-title">All matching events will be re-triggered</div>
-                <div class="alert-desc">This includes events that were already acknowledged. Review carefully before replaying.</div>
-              </div>
-            </div>
-
-            <div class="form-group payment-filter-choice">
+            <div class="form-group payment-filter-choice" x-show="isExploration3Iteration8()" style="margin-bottom:var(--spacing-7)">
               <label class="form-label">Replay for <span class="req">*</span></label>
               <div class="radio-group">
                 <label class="radio" :class="{selected: e3PaymentScope==='all'}" @click="setE3PaymentScope('all')">
@@ -1605,13 +1754,20 @@
                 </label>
                 <label class="radio" :class="{selected: e3PaymentScope==='payment_ids'}" @click="setE3PaymentScope('payment_ids'); showE3PaymentUpload=true">
                   <span class="radio-circle"></span>
-                  <span class="radio-label">Specific payment IDs</span>
+                  <span class="radio-label label-info-wrap">Specific payment IDs
+                    <span class="info-icon" data-tooltip="Use payment IDs only when you want to replay a set of events for those payments." aria-label="Specific payment IDs help">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                    </span>
+                  </span>
                 </label>
               </div>
-              <div class="input-hint"><strong>Note:</strong> Use payment IDs only when you want to narrow replay to a specific set of payments.</div>
             </div>
 
-            <div class="payment-upload-simple" x-show="e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms>
+            <div class="payment-upload-simple" x-show="isExploration3Iteration8() && e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms style="margin-bottom:var(--spacing-7)">
+              <button class="btn btn-secondary btn-sm" @click="downloadPaymentTemplate()" style="margin-bottom:var(--spacing-4)">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.25 2h1.5v6.2l2.2-2.2L12 7l-4 4-4-4 1.05-1 2.2 2.2V2zM3 12.5h10V14H3v-1.5z"></path></svg>
+                Download sample template
+              </button>
               <label class="form-label">Upload payment IDs</label>
               <label class="file-upload" x-show="!paymentFile">
                 <span class="file-upload-main">
@@ -1620,24 +1776,126 @@
                 <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
               </label>
               <template x-if="paymentFile">
-                <div class="file-pill" style="margin-top:0">
-                  <div style="min-width:0">
-                    <div class="file-pill-name" x-text="paymentFile.name"></div>
-                    <div class="file-pill-meta" x-text="paymentFile.sizeLabel + ' · Filtering replay scope'"></div>
+                <div class="file-upload-item">
+                  <span class="file-upload-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 36" fill="none">
+                      <path d="M7 2.5h12l6 6v25H7v-31z" stroke="currentColor" stroke-width="1.6"></path>
+                      <path d="M19 2.5v7h6" stroke="currentColor" stroke-width="1.6"></path>
+                    </svg>
+                    <span class="file-upload-item-ext" x-text="paymentFileExtension()"></span>
+                  </span>
+                  <div class="file-upload-item-main">
+                    <div class="file-upload-item-name-row">
+                      <span class="file-upload-item-name" x-text="paymentFile.name"></span>
+                      <svg class="file-upload-item-success" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7.5a5.5 5.5 0 1 1-1.6-3.9"></path><path d="M5.8 7.8l1.6 1.6 4-4"></path></svg>
+                    </div>
+                    <div class="file-upload-item-size" x-text="paymentFile.sizeLabel"></div>
                   </div>
-                  <button class="file-remove" @click="removePaymentFile()">Remove</button>
+                  <div class="file-upload-item-actions">
+                    <button class="file-upload-item-action" type="button" aria-label="Preview uploaded file" @click="previewPaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8s2.3-4 6.5-4 6.5 4 6.5 4-2.3 4-6.5 4-6.5-4-6.5-4z"></path><circle cx="8" cy="8" r="1.8"></circle></svg>
+                    </button>
+                    <span class="file-upload-item-divider" aria-hidden="true"></span>
+                    <button class="file-upload-item-action danger" type="button" aria-label="Remove uploaded file" @click="removePaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"></path><path d="M6.5 2.5h3L10 4H6l.5-1.5z"></path><path d="M5 6v6"></path><path d="M8 6v6"></path><path d="M11 6v6"></path><path d="M4 4l.6 10h6.8L12 4"></path></svg>
+                    </button>
+                  </div>
                 </div>
               </template>
               <div class="input-hint" style="margin-top:var(--spacing-3)">You can upload only a .csv or .xlsx file, up to 5MB.</div>
-              <button class="btn btn-secondary btn-sm" @click="downloadPaymentTemplate()" style="margin-top:var(--spacing-4)">
+            </div>
+
+            <div class="form-group" style="margin-bottom:var(--spacing-7)">
+              <label class="form-label">Events to replay <span class="req">*</span></label>
+              <div class="choice-card-group">
+                <label class="choice-card" :class="{selected: e3ReplayScope==='unack'}" @click="setReplayScope('unack')">
+                  <span class="radio-circle"></span>
+                  <span>
+                    <span class="choice-card-title">Unacknowledged events</span>
+                    <span class="choice-card-desc" x-text="isExploration3Iteration7() || isExploration3Iteration8() ? 'Events that are not received at all from your URLs will be replayed.' : 'Replay events that your webhook URLs did not successfully acknowledge.'"></span>
+                  </span>
+                </label>
+                <label class="choice-card" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
+                  <span class="radio-circle"></span>
+                  <span>
+                    <span class="choice-card-title">All events</span>
+                    <span class="choice-card-desc" x-text="isExploration3Iteration7() || isExploration3Iteration8() ? 'All the events including events already received will be replayed.' : 'Replay every matching event, including events that were already acknowledged.'"></span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="alert notice alert-compact" x-show="e3ReplayScope==='all'">
+              <svg class="alert-icon" width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 18 16H2z"></path><path d="M10 8v3.5"></path><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none"></circle></svg>
+              <div class="alert-body">
+                <div class="alert-title" x-show="!(isExploration3Iteration7() || isExploration3Iteration8())">All matching events will be re-triggered</div>
+                <div class="alert-desc" x-text="isExploration3Iteration7() || isExploration3Iteration8() ? 'All matching events including the ones that are received by the URL will be replayed.' : 'This includes events that were already acknowledged. Review carefully before replaying.'"></div>
+              </div>
+            </div>
+
+            <div class="form-group payment-filter-choice" x-show="!isExploration3Iteration8()">
+              <label class="form-label">Replay for <span class="req">*</span></label>
+              <div class="radio-group">
+                <label class="radio" :class="{selected: e3PaymentScope==='all'}" @click="setE3PaymentScope('all')">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label">All payment IDs</span>
+                </label>
+                <label class="radio" :class="{selected: e3PaymentScope==='payment_ids'}" @click="setE3PaymentScope('payment_ids'); showE3PaymentUpload=true">
+                  <span class="radio-circle"></span>
+                  <span class="radio-label label-info-wrap">Specific payment IDs
+                    <span class="info-icon" data-tooltip="Use payment IDs only when you want to replay a set of events for those payments." aria-label="Specific payment IDs help">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="payment-upload-simple" x-show="!isExploration3Iteration8() && e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms>
+              <button class="btn btn-secondary btn-sm" @click="downloadPaymentTemplate()" style="margin-bottom:var(--spacing-4)">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M7.25 2h1.5v6.2l2.2-2.2L12 7l-4 4-4-4 1.05-1 2.2 2.2V2zM3 12.5h10V14H3v-1.5z"></path></svg>
                 Download sample template
               </button>
+              <label class="form-label">Upload payment IDs</label>
+              <label class="file-upload" x-show="!paymentFile">
+                <span class="file-upload-main">
+                  <span class="file-upload-title">Drag files here or <span style="color:var(--action-primary-default)">Upload</span></span>
+                </span>
+                <input type="file" accept=".csv,.xls,.xlsx" style="display:none" @change="handlePaymentFile($event)">
+              </label>
+              <template x-if="paymentFile">
+                <div class="file-upload-item">
+                  <span class="file-upload-item-icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 36" fill="none">
+                      <path d="M7 2.5h12l6 6v25H7v-31z" stroke="currentColor" stroke-width="1.6"></path>
+                      <path d="M19 2.5v7h6" stroke="currentColor" stroke-width="1.6"></path>
+                    </svg>
+                    <span class="file-upload-item-ext" x-text="paymentFileExtension()"></span>
+                  </span>
+                  <div class="file-upload-item-main">
+                    <div class="file-upload-item-name-row">
+                      <span class="file-upload-item-name" x-text="paymentFile.name"></span>
+                      <svg class="file-upload-item-success" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7.5a5.5 5.5 0 1 1-1.6-3.9"></path><path d="M5.8 7.8l1.6 1.6 4-4"></path></svg>
+                    </div>
+                    <div class="file-upload-item-size" x-text="paymentFile.sizeLabel"></div>
+                  </div>
+                  <div class="file-upload-item-actions">
+                    <button class="file-upload-item-action" type="button" aria-label="Preview uploaded file" @click="previewPaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 8s2.3-4 6.5-4 6.5 4 6.5 4-2.3 4-6.5 4-6.5-4-6.5-4z"></path><circle cx="8" cy="8" r="1.8"></circle></svg>
+                    </button>
+                    <span class="file-upload-item-divider" aria-hidden="true"></span>
+                    <button class="file-upload-item-action danger" type="button" aria-label="Remove uploaded file" @click="removePaymentFile()">
+                      <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 4h11"></path><path d="M6.5 2.5h3L10 4H6l.5-1.5z"></path><path d="M5 6v6"></path><path d="M8 6v6"></path><path d="M11 6v6"></path><path d="M4 4l.6 10h6.8L12 4"></path></svg>
+                    </button>
+                  </div>
+                </div>
+              </template>
+              <div class="input-hint" style="margin-top:var(--spacing-3)">You can upload only a .csv or .xlsx file, up to 5MB.</div>
             </div>
           </div>
 
           <div x-show="isExploration3Iteration6()">
-            <div class="form-group" style="max-width:360px;margin-bottom:var(--spacing-7)">
+            <div class="form-group date-range-card-width" style="margin-bottom:var(--spacing-7)">
               <label class="form-label label-info-wrap">
                 <span>Date range <span class="req">*</span></span>
                 <span class="info-icon" data-tooltip="Webhook events can be replayed only for the last 7 days." aria-label="7-day retention policy">
@@ -1658,14 +1916,14 @@
                   <span class="radio-circle"></span>
                   <span>
                     <span class="choice-card-title">Unacknowledged events</span>
-                    <span class="choice-card-desc">Events that are not acknowledged by your URLs will be replayed.</span>
+                    <span class="choice-card-desc">Replay events that your webhook URLs did not successfully acknowledge.</span>
                   </span>
                 </label>
                 <label class="choice-card" :class="{selected: e3ReplayScope==='all'}" @click="setReplayScope('all')">
                   <span class="radio-circle"></span>
                   <span>
                     <span class="choice-card-title">All events</span>
-                    <span class="choice-card-desc">All the events including events already acknowledged will be replayed.</span>
+                    <span class="choice-card-desc">Replay every matching event, including events that were already acknowledged.</span>
                   </span>
                 </label>
               </div>
@@ -1688,10 +1946,13 @@
                 </label>
                 <label class="radio" :class="{selected: e3PaymentScope==='payment_ids'}" @click="setE3PaymentScope('payment_ids'); showE3PaymentUpload=true">
                   <span class="radio-circle"></span>
-                  <span class="radio-label">Specific payment IDs</span>
+                  <span class="radio-label label-info-wrap">Specific payment IDs
+                    <span class="info-icon" data-tooltip="Use payment IDs to narrow the replay to events linked to specific payments." aria-label="Specific payment IDs help">
+                      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
+                    </span>
+                  </span>
                 </label>
               </div>
-              <div class="input-hint"><strong>Note:</strong> Use payment IDs only when you want to narrow replay to a specific set of payments.</div>
             </div>
 
             <div class="payment-upload-simple" x-show="e3PaymentScope==='payment_ids' && showE3PaymentUpload" x-collapse.duration.200ms style="margin-bottom:var(--spacing-7)">
@@ -2061,7 +2322,7 @@
                       <span class="url-select-text" x-text="url.url"></span>
                       <span class="badge-info-wrap">
                         <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
-                        <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="This webhook URL must be enabled before its events can be re-triggered." aria-label="Disabled URL replay note">
+                        <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="Webhook URL gets auto-enabled once when events are selected to replay." aria-label="Disabled URL replay note">
                           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
                         </span>
                       </span>
@@ -2074,11 +2335,41 @@
             </div>
           </div>
 
-          <!-- URL → Event selector (Exploration 2) -->
-          <div class="form-group events-section" :class="{'events-section-compact': isExploration3Iteration2() || isExploration3StepFlow()}" x-show="isUrlEventFlow() && (!isExploration3StepFlow() || e3Step==='webhooks')" style="margin-bottom:var(--spacing-6)">
+          <!-- Iteration 7: URL event preview table -->
+          <div class="form-group events-section events-section-compact" x-show="isExploration3Iteration7() && e3Step==='webhooks'" style="margin-bottom:var(--spacing-6)">
             <div class="events-section-head">
               <div>
-                <div class="events-section-title" x-text="isExploration3StepFlow() ? 'Select webhook URLs and events' : (isExploration3() ? 'Webhook URLs and events' : 'Events table')"></div>
+                <div class="events-section-title">Preview events</div>
+                <div class="events-section-subtitle">Review configured events and missed deliveries for each webhook URL.</div>
+              </div>
+            </div>
+            <div style="border:1px solid var(--surface-border-subtle);border-radius:var(--radius-md);overflow:hidden">
+              <table class="wh-table">
+                <thead>
+                  <tr>
+                    <th>Webhook URL</th>
+                    <th>Events configured in total</th>
+                    <th x-show="e3ReplayScope!=='all'">Unacknowledged events</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="url in webhookUrls" :key="'preview-' + url.id">
+                    <tr>
+                      <td><span class="preview-url-text" x-text="url.url"></span></td>
+                      <td class="wh-events" x-text="configuredEventCount(url)"></td>
+                      <td class="wh-events" x-show="e3ReplayScope!=='all'" x-text="urlUnacknowledgedCount(url)"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- URL → Event selector (Exploration 2) -->
+          <div class="form-group events-section" :class="{'events-section-compact': isExploration3Iteration2() || isExploration3StepFlow()}" x-show="isUrlEventFlow() && (!isExploration3StepFlow() || (e3Step==='webhooks' && !(isExploration3Iteration7() || isExploration3Iteration8())) || (e3Step==='review' && (isExploration3Iteration7() || isExploration3Iteration8())))" style="margin-bottom:var(--spacing-6)">
+            <div class="events-section-head">
+              <div>
+                <div class="events-section-title" x-text="isExploration3Iteration7() || isExploration3Iteration8() ? 'Filter events' : (isExploration3StepFlow() ? 'Select webhook URLs and events' : (isExploration3() ? 'Webhook URLs and events' : 'Events table'))"></div>
                 <div class="events-section-subtitle" x-text="urlEventSelectorSubtitle()"></div>
               </div>
               <div class="hsel-search events-section-search" x-show="!isExploration3()">
@@ -2097,12 +2388,6 @@
                 <button class="hsel-clear" @click="clearUrlEvents()">Clear all</button>
               </span>
             </div>
-            <div class="alert information" x-show="isExploration3StepFlow()" style="margin-bottom:var(--spacing-4)">
-              <svg class="alert-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"></circle><path d="M10 9v4"></path><path d="M10 6.5h.01"></path></svg>
-              <div class="alert-body">
-                <div class="alert-desc">This list shows all webhook URLs and events configured for your account. Only selected URL-event combinations will receive the replay.</div>
-              </div>
-            </div>
             <div class="hsel-tree url-event-tree">
               <template x-for="url in filteredUrlEventGroups()" :key="url.id">
                 <div>
@@ -2118,7 +2403,7 @@
                           <span class="url-select-text" x-text="url.url"></span>
                           <span class="badge-info-wrap">
                             <span class="badge" :class="url.status === 'Enabled' ? 'badge-enabled' : 'badge-negative'" x-text="url.status"></span>
-                            <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="This webhook URL must be enabled before its events can be re-triggered." aria-label="Disabled URL replay note">
+                            <span class="info-icon" x-show="url.status === 'Disabled'" data-tooltip="Webhook URL gets auto-enabled once when events are selected to replay." aria-label="Disabled URL replay note">
                               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"></circle><path d="M8 7.5v3.25"></path><path d="M8 5.25h.01"></path></svg>
                             </span>
                           </span>
@@ -2154,7 +2439,7 @@
           </div>
 
           <!-- Preview matching events (under event selection) -->
-          <button class="btn btn-secondary" x-show="version !== 'i3' && (!isExploration3StepFlow() || e3Step==='webhooks')" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
+          <button class="btn btn-secondary" x-show="version !== 'i3' && !(isExploration3Iteration7() || isExploration3Iteration8()) && (!isExploration3StepFlow() || e3Step==='webhooks')" @click="runPreview()" :disabled="!canPreview()" style="margin-bottom:var(--spacing-4)">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5C4.6 3.5 1.8 5.6 1 8c.8 2.4 3.6 4.5 7 4.5s6.2-2.1 7-4.5c-.8-2.4-3.6-4.5-7-4.5zm0 7.5a3 3 0 110-6 3 3 0 010 6zm0-1.6A1.4 1.4 0 108 6.6a1.4 1.4 0 000 2.8z"/></svg>
             Preview matching events
           </button>
@@ -2226,8 +2511,8 @@
               </table>
             </div>
           </div>
-          <div x-show="isExploration3StepFlow() && !isExploration3Iteration5() && e3Step==='review'" class="anim-in">
-            <div class="confirm-question" x-show="isExploration3Iteration5()">Are you sure you want to replay the events that you've selected?</div>
+          <div x-show="isExploration3StepFlow() && !isExploration3SideFlow() && e3Step==='review'" class="anim-in">
+            <div class="confirm-question" x-show="isExploration3SideFlow()">Are you sure you want to replay the events that you've selected?</div>
             <div class="review-summary-card">
               <div class="review-summary-head">
                 <div class="review-summary-title">Replay summary</div>
@@ -2346,6 +2631,17 @@
   <!-- ════════ FLOATING VERSION PILL ════════ -->
   <div class="version-pill">
     <div class="vp-group">
+      <div class="vp-group-title">Exploration 4</div>
+      <div class="vp-seg">
+        <button :class="{active: version==='e3i8'}" @click="setVersion('e3i8')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h8v2H2z"/></svg> Iteration 8 - 07.07.26
+        </button>
+        <button :class="{active: version==='e3i7'}" @click="setVersion('e3i7')">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h12v2H2zM2 11h8v2H2z"/></svg> Iteration 7 - 06.07.26
+        </button>
+      </div>
+    </div>
+    <div class="vp-group">
       <div class="vp-group-title">Exploration 3</div>
       <div class="vp-seg">
         <button :class="{active: version==='e3i6'}" @click="setVersion('e3i6')">
@@ -2418,7 +2714,7 @@
   <script>
     function webhookApp() {
       return {
-        version: 'e3i6',        // 'e3i6' (Exploration 3 Iteration 6) | 'e3i5' (Exploration 3 Iteration 5) | 'e3i4' (Exploration 3 Iteration 4) | 'e3i3' (Exploration 3 Iteration 3) | 'e3i2' (Exploration 3 Iteration 2) | 'e3i1' (Exploration 3 Iteration 1) | 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
+        version: 'e3i8',        // 'e3i8' (Exploration 4 Iteration 8) | 'e3i7' (Exploration 4 Iteration 7) | 'e3i6' (Exploration 3 Iteration 6) | 'e3i5' (Exploration 3 Iteration 5) | 'e3i4' (Exploration 3 Iteration 4) | 'e3i3' (Exploration 3 Iteration 3) | 'e3i2' (Exploration 3 Iteration 2) | 'e3i1' (Exploration 3 Iteration 1) | 'v1' (tab) | 'v2' (button + event selector) | 'v3' (button + URL selector) | 'i2' (Exploration 2 Iteration 1) | 'i3' (Exploration 2 Iteration 2)
         activeTab: 'urls',      // 'urls' | 'replay' | 'logs'
         drawerOpen: false,
         confirmReplayOpen: false,
@@ -2564,6 +2860,12 @@
           { id: 12, type: 'order.created',       payment: 'pay_NK7xPQRS78', entity: 'order_NK7xUVWX34', time: 'Jun 9, 12:41 PM', code: 401, acked: false, urlId: 'u3' },
           { id: 13, type: 'payment.failed',      payment: 'pay_NK7xTUVW90', entity: 'pay_NK7xTUVW90',   time: 'Jun 9, 01:08 PM', code: 500, acked: false, urlId: 'u1' },
           { id: 14, type: 'order.updated',       payment: 'pay_NK7xYZCD22', entity: 'order_NK7xYZCD22', time: 'Jun 9, 01:33 PM', code: 200, acked: true,  urlId: 'u2' },
+          { id: 15, type: 'invoice.paid',        payment: 'pay_NK7xBILL01', entity: 'inv_NK7xBILL01',   time: 'Jun 9, 02:05 PM', code: 401, acked: false, urlId: 'u4' },
+          { id: 16, type: 'payment.captured',    payment: 'pay_NK7xORDR02', entity: 'pay_NK7xORDR02',   time: 'Jun 9, 02:28 PM', code: 401, acked: false, urlId: 'u5' },
+          { id: 17, type: 'subscription.charged',payment: 'pay_NK7xSUBS03', entity: 'sub_NK7xSUBS03',   time: 'Jun 9, 03:14 PM', code: 200, acked: true,  urlId: 'u6' },
+          { id: 18, type: 'order.paid',          payment: 'pay_NK7xFULF04', entity: 'order_NK7xFULF04', time: 'Jun 9, 04:19 PM', code: 401, acked: false, urlId: 'u7' },
+          { id: 19, type: 'invoice.expired',     payment: 'pay_NK7xBILL05', entity: 'inv_NK7xBILL05',   time: 'Jun 9, 04:45 PM', code: 200, acked: true,  urlId: 'u4' },
+          { id: 20, type: 'refund.created',      payment: 'pay_NK7xORDR06', entity: 'rfnd_NK7xORDR06',  time: 'Jun 9, 05:01 PM', code: 500, acked: false, urlId: 'u5' },
         ],
         previewResults() {
           let evs = [...this.allPreviewEvents];
@@ -2584,15 +2886,18 @@
           if (this.version === 'v3') return 7;
           return 6;
         },
-        isExploration3() { return this.version === 'e3i1' || this.version === 'e3i2' || this.version === 'e3i3' || this.version === 'e3i4' || this.version === 'e3i5' || this.version === 'e3i6'; },
+        isExploration3() { return this.version === 'e3i1' || this.version === 'e3i2' || this.version === 'e3i3' || this.version === 'e3i4' || this.version === 'e3i5' || this.version === 'e3i6' || this.version === 'e3i7' || this.version === 'e3i8'; },
         isExploration3Iteration1() { return this.version === 'e3i1'; },
         isExploration3Iteration2() { return this.version === 'e3i2'; },
         isExploration3Iteration3() { return this.version === 'e3i3'; },
         isExploration3Iteration4() { return this.version === 'e3i4'; },
         isExploration3Iteration5() { return this.version === 'e3i5'; },
         isExploration3Iteration6() { return this.version === 'e3i6'; },
-        isExploration3StepFlow() { return this.isExploration3Iteration3() || this.isExploration3Iteration4() || this.isExploration3Iteration5(); },
-        shouldExpandUrlEventsByDefault() { return this.isExploration3Iteration5() || this.isExploration3Iteration6(); },
+        isExploration3Iteration7() { return this.version === 'e3i7'; },
+        isExploration3Iteration8() { return this.version === 'e3i8'; },
+        isExploration3SideFlow() { return this.isExploration3Iteration5() || this.isExploration3Iteration7() || this.isExploration3Iteration8(); },
+        isExploration3StepFlow() { return this.isExploration3Iteration3() || this.isExploration3Iteration4() || this.isExploration3Iteration5() || this.isExploration3Iteration7() || this.isExploration3Iteration8(); },
+        shouldExpandUrlEventsByDefault() { return this.isExploration3Iteration5() || this.isExploration3Iteration6() || this.isExploration3Iteration7() || this.isExploration3Iteration8(); },
         isUrlEventFlow() { return this.version === 'i2' || this.version === 'i3' || this.isExploration3(); },
         isPreviewSelectable() { return this.isUrlEventFlow() && !this.isExploration3(); },
         urlForPreviewRow(row) { return this.urlById(row.urlId) || this.webhookUrls[0]; },
@@ -2615,11 +2920,11 @@
           return { scope: 0, webhooks: 1, review: 2 }[this.e3Step] || 0;
         },
         e3ReplayScopeHint() {
-          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'unack') return 'Replay only events your URLs never acknowledged.';
-          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'all') return 'Replay every matching event, including events already acknowledged.';
-          if (this.isExploration3Iteration2() && this.e3ReplayScope === 'unack') return 'Replay only events your URLs never acknowledged. Use filters to narrow the replay set.';
-          if (this.e3ReplayScope === 'unack') return 'Replay events your URLs never acknowledged.';
-          if (this.e3ReplayScope === 'all') return 'Replay every matching event, including events already acknowledged.';
+          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'unack') return 'Replay events that your webhook URLs did not successfully acknowledge.';
+          if (this.isExploration3StepFlow() && this.e3ReplayScope === 'all') return 'Replay every matching event, including events that were already acknowledged.';
+          if (this.isExploration3Iteration2() && this.e3ReplayScope === 'unack') return 'Replay events that your webhook URLs did not successfully acknowledge. Use filters to narrow the replay set.';
+          if (this.e3ReplayScope === 'unack') return 'Replay events that your webhook URLs did not successfully acknowledge.';
+          if (this.e3ReplayScope === 'all') return 'Replay every matching event, including events that were already acknowledged.';
           return 'Use filters to find a specific payment, payment list, status, URL, or event.';
         },
         hasE3FiltersApplied() {
@@ -2648,6 +2953,11 @@
           return 24;
         },
         urlEventSelectorSubtitle() {
+          if (this.isExploration3Iteration7() || this.isExploration3Iteration8()) {
+            return this.e3ReplayScope === 'all'
+              ? 'Select the webhook URLs and configured events you want to replay. Disabled URLs will be enabled automatically when selected events are replayed.'
+              : 'Select the webhook URLs and unacknowledged events you want to replay. Disabled URLs will be enabled automatically when selected events are replayed.';
+          }
           if (this.isExploration3StepFlow()) {
             return 'Configured webhook URLs and events are listed below. Select the ones that should receive replayed events.';
           }
@@ -2757,31 +3067,71 @@
             id: 'u1',
             url: 'https://magentoshubham.share.zrok.io/magento247/pub/razorpay/payment/webhook',
             status: 'Enabled',
-            events: ['payment.authorized','payment.pending','payment.failed','payment.captured','refund.processed'],
             eventGroups: [
-              { name: 'Payments', events: ['payment.authorized','payment.pending','payment.failed','payment.captured'] },
-              { name: 'Refunds', events: ['refund.processed'] },
+              { name: 'Payment Events', events: ['payment.authorized','payment.pending','payment.failed','payment.captured','payment.dispute.created','payment.dispute.won','payment.dispute.lost'] },
+              { name: 'Refund Events', events: ['refund.processed','refund.failed','refund.created'] },
+              { name: 'Qr_code Events', events: ['qr_code.created','qr_code.credited','qr_code.closed'] },
             ],
           },
           {
             id: 'u2',
             url: 'https://api.yourstore.com/webhooks/razorpay',
             status: 'Disabled',
-            events: ['payment.captured','payment.failed','order.created','order.paid','order.updated','subscription.charged'],
             eventGroups: [
-              { name: 'Payments', events: ['payment.captured','payment.failed'] },
-              { name: 'Orders', events: ['order.created','order.paid','order.updated'] },
-              { name: 'Subscriptions', events: ['subscription.charged'] },
+              { name: 'Payment Events', events: ['payment.captured','payment.failed','payment.dispute.closed','payment.dispute.under_review','payment.dispute.action_required','payment.downtime.started','payment.downtime.updated','payment.downtime.resolved'] },
+              { name: 'Order Events', events: ['order.created','order.paid','order.updated','order.notification.delivered','order.notification.failed'] },
+              { name: 'Subscription Events', events: ['subscription.charged','subscription.halted','subscription.cancelled'] },
             ],
           },
           {
             id: 'u3',
             url: 'https://api.yourstore.com/webhooks/rz-backup',
             status: 'Enabled',
-            events: ['payment.authorized','order.created','order.paid'],
             eventGroups: [
-              { name: 'Payments', events: ['payment.authorized'] },
-              { name: 'Orders', events: ['order.created','order.paid'] },
+              { name: 'Payment Events', events: ['payment.authorized'] },
+              { name: 'Order Events', events: ['order.created','order.paid','order.notification.delivered','order.notification.failed'] },
+              { name: 'Invoice Events', events: ['invoice.paid','invoice.partially_paid','invoice.expired'] },
+              { name: 'Settlement Events', events: ['settlement.processed'] },
+            ],
+          },
+          {
+            id: 'u4',
+            url: 'https://billing.yourstore.com/razorpay/webhook',
+            status: 'Enabled',
+            eventGroups: [
+              { name: 'Invoice Events', events: ['invoice.paid','invoice.partially_paid','invoice.expired'] },
+              { name: 'Payment_link Events', events: ['payment_link.paid','payment_link.partially_paid','payment_link.expired','payment_link.cancelled'] },
+              { name: 'Fund_account Events', events: ['fund_account.validation.completed','fund_account.validation.failed'] },
+            ],
+          },
+          {
+            id: 'u5',
+            url: 'https://orders.yourstore.com/api/rzp/webhooks',
+            status: 'Disabled',
+            eventGroups: [
+              { name: 'Payment Events', events: ['payment.authorized','payment.captured','payment.failed'] },
+              { name: 'Refund Events', events: ['refund.speed_changed','refund.processed','refund.failed','refund.created'] },
+              { name: 'Transfer Events', events: ['transfer.processed','transfer.failed'] },
+            ],
+          },
+          {
+            id: 'u6',
+            url: 'https://subscriptions.yourstore.com/webhooks/razorpay',
+            status: 'Enabled',
+            eventGroups: [
+              { name: 'Subscription Events', events: ['subscription.authenticated','subscription.paused','subscription.resumed','subscription.activated','subscription.pending','subscription.halted','subscription.charged','subscription.cancelled','subscription.completed','subscription.updated'] },
+              { name: 'Account Events', events: ['account.instantly_activated','account.activated_kyc_pending','account.under_review','account.needs_clarification','account.activated','account.rejected','account.updated'] },
+            ],
+          },
+          {
+            id: 'u7',
+            url: 'https://fulfilment.yourstore.com/hooks/rz-payments',
+            status: 'Enabled',
+            eventGroups: [
+              { name: 'Order Events', events: ['order.paid'] },
+              { name: 'Virtual_account Events', events: ['virtual_account.created','virtual_account.credited','virtual_account.closed'] },
+              { name: 'Product Events', events: ['product.route.under_review','product.route.activated','product.route.needs_clarification','product.route.rejected'] },
+              { name: 'Engage Events', events: ['engage.rewards.disabled','engage.rewards.enabled','engage.rewards.denomination_disabled','engage.rewards.denomination_enabled','engage.rewards.denomination_updated','engage.rewards.discount_updated','engage.rewards.termsandconditions_updated','engage.rewards.instructions_updated','engage.inventory.low_stock','engage.balance.low_balance'] },
             ],
           },
         ],
@@ -2814,7 +3164,9 @@
         selectedUrlEventKeys: [],
         expandedUrlEventIds: [],
         urlEventKey(urlId, eventName) { return urlId + '::' + eventName; },
-        allUrlEventKeys() { return this.webhookUrls.flatMap(u => u.events.map(ev => this.urlEventKey(u.id, ev))); },
+        configuredEventsForUrl(url) { return url.eventGroups.flatMap(group => group.events); },
+        configuredEventCount(url) { return this.configuredEventsForUrl(url).length; },
+        allUrlEventKeys() { return this.webhookUrls.flatMap(u => this.configuredEventsForUrl(u).map(ev => this.urlEventKey(u.id, ev))); },
         isUrlEventExpanded(id) { return this.expandedUrlEventIds.includes(id); },
         toggleUrlEventExpand(id) {
           if (this.isUrlEventExpanded(id)) this.expandedUrlEventIds = this.expandedUrlEventIds.filter(x => x !== id);
@@ -2903,6 +3255,11 @@
         disabledSelectedUrlCount() {
           return this.selectedUrlIdsForReview().filter(urlId => this.urlById(urlId)?.status === 'Disabled').length;
         },
+        urlUnacknowledgedCount(url) {
+          const sampleCounts = { u1: 5, u2: 4, u3: 2 };
+          if (sampleCounts[url.id] !== undefined) return sampleCounts[url.id];
+          return this.allPreviewEvents.filter(row => row.urlId === url.id && !row.acked).length;
+        },
         selectedUrlEventLabel(url) {
           const selected = url.events.filter(ev => this.isUrlEventSelected(url.id, ev)).length;
           if (selected === url.events.length) return 'All ' + url.events.length + ' events selected';
@@ -2918,6 +3275,10 @@
         visibleWebhookUrls() {
           return this.webhookUrls
             .map(url => {
+              if (this.isExploration3Iteration8()) {
+                const eventGroups = url.eventGroups.map(group => ({ ...group, events: [...group.events] }));
+                return { ...url, eventGroups, events: eventGroups.flatMap(group => group.events) };
+              }
               const visibleNames = this.visibleEventNamesForUrl(url.id);
               const eventGroups = url.eventGroups
                 .map(group => ({ ...group, events: group.events.filter(ev => visibleNames.includes(ev)) }))
@@ -2932,8 +3293,11 @@
         filteredUrlEventGroups() {
           const q = this.urlEventSearch.trim().toLowerCase();
           const urls = this.isUrlEventFlow() ? this.visibleWebhookUrls() : this.webhookUrls;
-          if (!q) return urls;
-          return urls
+          const orderedUrls = this.isExploration3Iteration8()
+            ? [...urls].sort((a, b) => (a.status === 'Disabled' ? 0 : 1) - (b.status === 'Disabled' ? 0 : 1))
+            : urls;
+          if (!q) return orderedUrls;
+          return orderedUrls
             .map(url => {
               const urlMatches = url.url.toLowerCase().includes(q) || url.status.toLowerCase().includes(q);
               const eventGroups = url.eventGroups
@@ -2971,6 +3335,7 @@
           return this.previewResults().filter(row => this.selectedPreviewRowIds.includes(row.id));
         },
         canReplay() {
+          if (this.isExploration3Iteration8()) return this.canPreview();
           if (this.isExploration3()) return this.canPreview() && this.previewResults().length > 0;
           if (this.isUrlEventFlow()) return this.showPreview && this.selectedPreviewRowIds.length > 0;
           return this.canPreview();
@@ -2978,6 +3343,7 @@
         canContinueE3Step() {
           if (!this.isExploration3StepFlow()) return true;
           if (this.e3Step === 'scope') return this.e3PaymentScope === 'all' || !!this.paymentFile;
+          if (this.isExploration3Iteration7() && this.e3Step === 'webhooks') return true;
           if (this.e3Step === 'webhooks') return this.canPreview();
           return this.canReplay();
         },
@@ -2988,7 +3354,7 @@
         },
         secondaryModalAction() {
           if (this.isExploration3StepFlow()) {
-            if (this.e3Step === 'review') { this.e3Step = 'webhooks'; return; }
+            if (this.e3Step === 'review') { this.e3Step = this.isExploration3Iteration8() ? 'scope' : 'webhooks'; return; }
             if (this.e3Step === 'webhooks') { this.e3Step = 'scope'; return; }
             this.drawerOpen = false;
             return;
@@ -3014,9 +3380,10 @@
         },
         primaryModalAction() {
           if (this.isExploration3StepFlow()) {
-            if (this.e3Step === 'scope') { this.e3Step = 'webhooks'; return; }
+            if (this.e3Step === 'scope') { this.e3Step = this.isExploration3Iteration8() ? 'review' : 'webhooks'; return; }
             if (this.isExploration3Iteration5() && this.e3Step === 'webhooks') { this.confirmReplayOpen = true; return; }
             if (this.e3Step === 'webhooks') { this.e3Step = 'review'; return; }
+            if ((this.isExploration3Iteration7() || this.isExploration3Iteration8()) && this.e3Step === 'review') { this.confirmReplayOpen = true; return; }
             this.replayPreviewed();
             return;
           }
@@ -3041,6 +3408,17 @@
           this.paymentFile = { name: file.name, size: file.size, sizeLabel: this.formatFileSize(file.size) };
           event.target.value = '';
           this.showPreview = false;
+        },
+        paymentFileExtension() {
+          if (!this.paymentFile || !this.paymentFile.name.includes('.')) return '.file';
+          const ext = this.paymentFile.name.split('.').pop().toLowerCase();
+          return ext === 'xlsx' || ext === 'xls' ? '.xls' : '.' + ext;
+        },
+        previewPaymentFile() {
+          if (!this.paymentFile) return;
+          this.successTitle = 'Uploaded file';
+          this.successBody = this.paymentFile.name + ' is ready to filter the replay scope.';
+          this.showSuccess = true;
         },
         removePaymentFile() {
           this.paymentFile = null;
@@ -3083,7 +3461,7 @@
         },
 
         openSwitcherGroupForVersion(v) {
-          if (['e3i5', 'e3i6'].includes(v)) this.switcherOpen.e3Past = false;
+          if (['e3i5', 'e3i6', 'e3i7', 'e3i8'].includes(v)) this.switcherOpen.e3Past = false;
           if (['e3i1', 'e3i2', 'e3i3', 'e3i4'].includes(v)) this.switcherOpen.e3Past = true;
           if (['i2', 'i3'].includes(v)) this.switcherOpen.e2 = true;
           if (['v1', 'v2', 'v3'].includes(v)) this.switcherOpen.e1 = true;
@@ -3092,7 +3470,7 @@
         setVersion(v) {
           this.version = v;
           this.openSwitcherGroupForVersion(v);
-          if (v === 'e3i3' || v === 'e3i4' || v === 'e3i5' || v === 'e3i6') {
+          if (v === 'e3i3' || v === 'e3i4' || v === 'e3i5' || v === 'e3i6' || v === 'e3i7' || v === 'e3i8') {
             this.e3Step = 'scope';
             this.e3ReplayScope = 'unack';
             this.e3PaymentScope = 'all';
@@ -3131,7 +3509,7 @@
           if (this.isExploration3StepFlow()) {
             this.e3Step = 'scope';
             this.showE3PaymentUpload = false;
-            this.expandedUrlEventIds = this.isExploration3Iteration5() ? this.webhookUrls.map(u => u.id) : [];
+            this.expandedUrlEventIds = this.isExploration3SideFlow() ? this.webhookUrls.map(u => u.id) : [];
           }
           if (this.isExploration3Iteration6()) {
             this.e3ReplayScope = 'unack';
